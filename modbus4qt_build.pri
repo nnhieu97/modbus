@@ -34,16 +34,15 @@
 # qmake internal options
 ######################################################################
 
-CONFIG           += qt
-CONFIG           += warn_on
-CONFIG           += silent
+CONFIG += qt
+CONFIG += warn_on
+CONFIG += silent
 
-greaterThan(QT_MAJOR_VERSION, 4) {
-    QT += serialport
-}
-else {
-    CONFIG += serialport
-}
+# We use Qt5!
+#
+DEFINES += HAVE_QT5
+
+QT += network serialport
 
 ######################################################################
 # release/debug mode
@@ -54,24 +53,24 @@ win32 {
     # The designer is built in release mode. If you like to use it
     # you need a release version. For your own application development you
     # might need a debug version.
+
+    CONFIG += debug
+
     # Enable debug_and_release + build_all if you want to build both.
-
-    CONFIG           += debug_and_release
-    CONFIG           += build_all
-}
-else {
-
-    #CONFIG           += release
-    CONFIG           += debug
-
-    VER_MAJ           = $${MODBUS4QT_VER_MAJ}
-    VER_MIN           = $${MODBUS4QT_VER_MIN}
-    VER_PAT           = $${MODBUS4QT_VER_PAT}
-    VERSION           = $${MODBUS4QT_VERSION}
+    #
+    #CONFIG           += debug_and_release
+    #CONFIG           += build_all
 }
 
-linux-g++ {
-    # CONFIG           += separate_debug_info
+unix {
+
+    #CONFIG += release
+    CONFIG += debug
+
+    VER_MAJ = $${MODBUS4QT_VER_MAJ}
+    VER_MIN = $${MODBUS4QT_VER_MIN}
+    VER_PAT = $${MODBUS4QT_VER_PAT}
+    VERSION = $${MODBUS4QT_VERSION}
 }
 
 CONFIG(release){
@@ -80,7 +79,13 @@ CONFIG(release){
 
 CONFIG(debug){
     DEFINES -= QT_NO_DEBUG QT_NO_DEBUG_OUTPUT QT_NO_WARNING_OUTPUT
+    DEFINES += DEBUG
 }
+
+CONFIG += c++11
+
+DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_DISABLE_DEPRACATED_BEFORE=0x50000
 
 ######################################################################
 # paths for building modbus4qt
@@ -92,19 +97,21 @@ RCC_DIR      = resources
     OBJECTS_DIR       = obj
 }
 
-unix {
-
-    exists( $${QMAKE_LIBDIR_QT}/libmodbus4qt.* ) {
-
+# ???
+#
+#unix {
+#
+#   exists( $${QMAKE_LIBDIR_QT}/libmodbus4qt.* ) {
+#
         # On some Linux distributions the libraries are installed
         # in the same directory as the Qt libraries. Unfortunately
         # qmake always adds QMAKE_LIBDIR_QT at the beginning of the
         # linker path, so that the installed libraries will be
         # used instead of the local ones.
 
-        error( "local build will conflict with $${QMAKE_LIBDIR_QT}/libmodbus4qt.*" )
-    }
-}
+#        error( "local build will conflict with $${QMAKE_LIBDIR_QT}/libmodbus4qt.*" )
+#    }
+#}
 
 OTHER_FILES += \
     ../doc/modbus-ap-v1_1.dox \

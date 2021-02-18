@@ -33,22 +33,20 @@ include( $${MODBUS4QT_ROOT}/modbus4qt_build.pri )
 
 TEMPLATE = lib
 
-win32: {
-TARGET = $$qtLibraryTarget(modbus4qt)
-}
-else {
-    CONFIG(debug, debug|release) {
-    TARGET = modbus4qtd
-    }
-    else {
-    TARGET = modbus4qt
-    }
-}
+#win32: {
+    TARGET = $$qtLibraryTarget(modbus4qt)
+#    TARGET = $$modbus4qtLibraryTarget(modbus4qt)
+#}
+#else {
+#    CONFIG(debug, debug|release) {
+#        TARGET = modbus4qtd
+#    }
+#    else {
+#        TARGET = modbus4qt
+#    }
+#}
 
 DESTDIR = $${MODBUS4QT_ROOT}/lib
-
-QT += network
-CONFIG += serialport
 
 contains(MODBUS4QT_CONFIG, modbus4qt_dll) {
     CONFIG += dll

@@ -18,14 +18,14 @@ MODBUS4QT_OUT_ROOT = $${OUT_PWD}/../..
 
 TEMPLATE = app
 
-QT += network
+QT += widgets
 
-greaterThan(QT_MAJOR_VERSION, 4) {
-    QT += widgets serialport
-}
-else {
-    CONFIG += serialport
-}
+#greaterThan(QT_MAJOR_VERSION, 4) {
+#    QT += widgets serialport
+#}
+#else {
+#    CONFIG += serialport
+#}
 
 INCLUDEPATH += $${MODBUS4QT_ROOT}/src
 DEPENDPATH  += $${MODBUS4QT_ROOT}/src
