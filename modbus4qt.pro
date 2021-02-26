@@ -33,7 +33,7 @@
 include (modbus4qt_config.pri)
 
 TEMPLATE = subdirs
-CONFIG += ordered modbus4qt
+CONFIG += ordered
 
 SUBDIRS = \
     src
@@ -42,14 +42,7 @@ contains (MODBUS4QT_CONFIG, modbus4qt_demo) {
     SUBDIRS += demo
 }
 
-modbus4qtspec.files  = modbus4qt_config.pri modbus4qt.prf modbus4qt_functions.pri
+modbus4qtspec.files  = modbus4qt_config.pri modbus4qt_functions.pri modbus4qt.prf
 modbus4qtspec.path  = $${MODBUS4QT_INSTALL_FEATURES}
 
 INSTALLS += modbus4qtspec
-
-
-
-
-
-
-

@@ -28,25 +28,15 @@
 #------------------------------------------------------------------------------
 
 MODBUS4QT_ROOT = $${PWD}/..
-include( $${MODBUS4QT_ROOT}/modbus4qt_config.pri )
-include( $${MODBUS4QT_ROOT}/modbus4qt_build.pri )
+include($${MODBUS4QT_ROOT}/modbus4qt_config.pri)
+include($${MODBUS4QT_ROOT}/modbus4qt_build.pri)
+include($${MODBUS4QT_ROOT}/modbus4qt_functions.pri)
 
 TEMPLATE = lib
-
-#win32: {
-    TARGET = $$qtLibraryTarget(modbus4qt)
-#    TARGET = $$modbus4qtLibraryTarget(modbus4qt)
-#}
-#else {
-#    CONFIG(debug, debug|release) {
-#        TARGET = modbus4qtd
-#    }
-#    else {
-#        TARGET = modbus4qt
-#    }
-#}
-
+TARGET = $$modbus4qtLibraryTarget(modbus4qt)
 DESTDIR = $${MODBUS4QT_ROOT}/lib
+
+QT += network serialport
 
 contains(MODBUS4QT_CONFIG, modbus4qt_dll) {
     CONFIG += dll
@@ -55,6 +45,10 @@ contains(MODBUS4QT_CONFIG, modbus4qt_dll) {
 else {
     CONFIG += staticlib
 }
+
+#------------------------------------------------------------------------------
+# Source and header files
+#
 
 SOURCES += utils.cpp \
     tcp_client.cpp \
@@ -82,7 +76,9 @@ HEADERS += global.h \
     device.h \
     dummy_device.h
 
+#------------------------------------------------------------------------------
 # Install directives
+#
 
 target.path    = $${MODBUS4QT_INSTALL_LIBS}
 
@@ -95,5 +91,3 @@ INSTALLS       = target doc
 headers.files  = $${HEADERS}
 headers.path   = $${MODBUS4QT_INSTALL_HEADERS}
 INSTALLS += headers
-
-

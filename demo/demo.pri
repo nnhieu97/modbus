@@ -18,18 +18,11 @@ MODBUS4QT_OUT_ROOT = $${OUT_PWD}/../..
 
 TEMPLATE = app
 
-QT += widgets
-
-#greaterThan(QT_MAJOR_VERSION, 4) {
-#    QT += widgets serialport
-#}
-#else {
-#    CONFIG += serialport
-#}
+QT += network widgets serialport
 
 INCLUDEPATH += $${MODBUS4QT_ROOT}/src
 DEPENDPATH  += $${MODBUS4QT_ROOT}/src
-QMAKE_RPATHDIR += $${MODBUS4QT_ROOT}/lib
+#QMAKE_RPATHDIR += $${MODBUS4QT_ROOT}/lib
 
 !debug_and_release {
     DESTDIR      = $${MODBUS4QT_ROOT}/demo/bin
