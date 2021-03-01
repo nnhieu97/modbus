@@ -14,6 +14,6 @@ include( $${PWD}/../modbus4qt_config.pri )
 TEMPLATE = subdirs
 
     SUBDIRS += \
-        master-tcp \
         master-rtu \
-        modbus4qt-server
+        master-tcp
+        #modbus4qt-server

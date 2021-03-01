@@ -1,11 +1,8 @@
 #------------------------------------------------------------------------------
 #  modbus4qt Library
 #  Author: Leonid Kolesnik, l.kolesnik@m-i.ru
-#  Copyright (C) 2012-2015
-#  http://www.modbus4qt.ru
-#
-#  $Id: modbus4qt_build.pri 138 2015-09-12 17:00:04Z l.kolesnik $
-#  $URL: https://o.m-i.ru/svn/modbus4qt/branches/1.1/modbus4qt_build.pri $
+#  Copyright (C) 2012-2021
+#  https://mt11.net.ru
 #------------------------------------------------------------------------------
 #
 # This library is free software.
@@ -45,6 +42,7 @@ QT += serialport
 ######################################################################
 
 win32 {
+
     # On Windows you can't mix release and debug libraries.
     # The designer is built in release mode. If you like to use it
     # you need a release version. For your own application development you
@@ -55,8 +53,8 @@ win32 {
     CONFIG           += build_all
 }
 else {
-    #
-    # Use debug or release cofing according you needs
+
+    # Use debug or release config according you needs
     #
     # CONFIG           += release
     # CONFIG           += debug
@@ -85,27 +83,16 @@ CONFIG(debug){
 # paths for building modbus4qt
 ######################################################################
 
-MOC_DIR      = moc
-RCC_DIR      = resources
+MODBUS4QT_ROOT  = $${PWD}
+MODBUS4QT_BUILD = $${MODBUS4QT_ROOT}/build
 
-!debug_and_release {
-    OBJECTS_DIR       = obj
-}
+DESTDIR         = $${MODBUS4QT_BUILD}/bin
+MOC_DIR         = $${MODBUS4QT_BUILD}/moc
+OBJECTS_DIR     = $${MODBUS4QT_BUILD}/obj
+UI_DIR          = $${MODBUS4QT_BUILD}/ui
+RCC_DIR         = $${MODBUS4QT_BUILD}/resources
+QMAKE_RPATHDIR *= $${MODBUS4QT_BUILD}/lib
 
-#unix {
-
-#    exists( $${QMAKE_LIBDIR_QT}/libmodbus4qt.* ) {
-
-        # On some Linux distributions the libraries are installed
-        # in the same directory as the Qt libraries. Unfortunately
-        # qmake always adds QMAKE_LIBDIR_QT at the beginning of the
-        # linker path, so that the installed libraries will be
-        # used instead of the local ones.
-
-#        error( "local build will conflict with $${QMAKE_LIBDIR_QT}/libmodbus4qt.*" )
-#    }
-#}
-
-#OTHER_FILES += \
-#    ../doc/modbus-ap-v1_1.dox \
-#    ../doc/modbus4qt.dox
+INCLUDEPATH += $${MODBUS4QT_ROOT}/src
+DEPENDPATH  += $${MODBUS4QT_ROOT}/src
+LIBS           += -L$${MODBUS4QT_BUILD}/lib

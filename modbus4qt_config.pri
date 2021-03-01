@@ -1,11 +1,8 @@
 #------------------------------------------------------------------------------
 #  modbus4qt Library
 #  Author: Leonid Kolesnik, l.kolesnik@m-i.ru
-#  Copyright (C) 2012-2015
-#  http://www.modbus4qt.ru
-#
-#  $Id: modbus4qt_config.pri 186 2016-11-21 16:23:24Z l.kolesnik $
-#  $URL: https://o.m-i.ru/svn/modbus4qt/branches/1.1/modbus4qt_config.pri $
+#  Copyright (C) 2012-2021
+#  https://mt11.net.ru
 #------------------------------------------------------------------------------
 #
 # This library is free software.

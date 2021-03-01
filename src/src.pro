@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-#
 # modbus4qt Library
-# Copyright (C) 2012 MELZ-Invest JSC
-# http://www.m-i.ru/projects/modbus4qt
 # Author: Leonid Kolesnik, l.kolesnik@m-i.ru
+# Copyright (C) 2012-2021
+# https://mt11.net.ru
+#------------------------------------------------------------------------------
 #
 # This library is free software.
 #
@@ -28,13 +28,15 @@
 #------------------------------------------------------------------------------
 
 MODBUS4QT_ROOT = $${PWD}/..
-include($${MODBUS4QT_ROOT}/modbus4qt_config.pri)
-include($${MODBUS4QT_ROOT}/modbus4qt_build.pri)
-include($${MODBUS4QT_ROOT}/modbus4qt_functions.pri)
+include( $${MODBUS4QT_ROOT}/modbus4qt_config.pri )
+include( $${MODBUS4QT_ROOT}/modbus4qt_build.pri )
 
 TEMPLATE = lib
-TARGET = $$modbus4qtLibraryTarget(modbus4qt)
-DESTDIR = $${MODBUS4QT_ROOT}/lib
+TARGET = $$qtLibraryTarget(modbus4qt)
+
+DESTDIR = $${MODBUS4QT_BUILD}/lib
+MOC_DIR = $${MOC_DIR}/src
+OBJECTS_DIR = $${OBJECTS_DIR}/src
 
 QT += network serialport
 

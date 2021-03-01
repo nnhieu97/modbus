@@ -12,28 +12,12 @@
 MODBUS4QT_ROOT = $${PWD}/..
 include($${MODBUS4QT_ROOT}/modbus4qt_config.pri)
 include($${MODBUS4QT_ROOT}/modbus4qt_build.pri)
-include($${MODBUS4QT_ROOT}/modbus4qt_functions.pri)
-
-MODBUS4QT_OUT_ROOT = $${OUT_PWD}/../..
+#include($${MODBUS4QT_ROOT}/modbus4qt_functions.pri)
 
 TEMPLATE = app
 
 QT += network widgets serialport
 
-INCLUDEPATH += $${MODBUS4QT_ROOT}/src
-DEPENDPATH  += $${MODBUS4QT_ROOT}/src
-#QMAKE_RPATHDIR += $${MODBUS4QT_ROOT}/lib
+DESTDIR = $${MODBUS4QT_BUILD}/demo
 
-!debug_and_release {
-    DESTDIR      = $${MODBUS4QT_ROOT}/demo/bin
-}
-else {
-    CONFIG(debug, debug|release) {
-        DESTDIR = $${MODBUS4QT_ROOT}/demo/bin_debug
-    }
-    else {
-        DESTDIR = $${MODBUS4QT_ROOT}/demo/bin
-    }
-}
-
-modbus4qtAddLibrary($${MODBUS4QT_ROOT}/lib, modbus4qt)
+LIBS += -lmodbus4qt
