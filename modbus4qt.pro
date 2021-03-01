@@ -2,7 +2,7 @@
 #  modbus4qt Library
 #  Author: Leonid Kolesnik, l.kolesnik@m-i.ru
 #  Copyright (C) 2012-2021
-#  https://mt11.net.ru/
+#  https://mt11.net.ru/elvactech-lab/modbus4qt
 #-------------------------------------------------
 #
 # This library is free software.
