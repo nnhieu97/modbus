@@ -47,10 +47,17 @@ win32 {
     # The designer is built in release mode. If you like to use it
     # you need a release version. For your own application development you
     # might need a debug version.
+
     # Enable debug_and_release + build_all if you want to build both.
 
-    CONFIG           += debug_and_release
-    CONFIG           += build_all
+    # If enabled in windows we got warning about conflict in debug and release versions.
+    # Windows is not my favorite OS and I use it sometimes.
+    # So I decided switch it off and think about it later.
+
+    #CONFIG           += debug_and_release
+    #CONFIG           += build_all
+
+    CONFIG           += debug
 }
 else {
 
