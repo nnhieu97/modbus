@@ -2,6 +2,9 @@ include( $${PWD}/../demo.pri )
 
 TARGET = master-rtu
 
+MOC_DIR = $${MOC_DIR}/demo/master-rtu
+OBJECTS_DIR = $${OBJECTS_DIR}/demo/master-rtu
+
 SOURCES += \
     main.cpp\
     main_window.cpp\

@@ -1,9 +1,9 @@
 #------------------------------------------------------------------------------
-#
 # modbus4qt Library
-# Copyright (C) 2012 MELZ-Invest JSC
-# http://www.m-i.ru/projects/modbus4qt
 # Author: Leonid Kolesnik, l.kolesnik@m-i.ru
+# Copyright (C) 2012-2021
+# https://mt11.net.ru
+#------------------------------------------------------------------------------
 #
 # This library is free software.
 #
@@ -32,23 +32,13 @@ include( $${MODBUS4QT_ROOT}/modbus4qt_config.pri )
 include( $${MODBUS4QT_ROOT}/modbus4qt_build.pri )
 
 TEMPLATE = lib
-
-win32: {
 TARGET = $$qtLibraryTarget(modbus4qt)
-}
-else {
-    CONFIG(debug, debug|release) {
-    TARGET = modbus4qtd
-    }
-    else {
-    TARGET = modbus4qt
-    }
-}
 
-DESTDIR = $${MODBUS4QT_ROOT}/lib
+DESTDIR = $${MODBUS4QT_BUILD}/lib
+MOC_DIR = $${MOC_DIR}/src
+OBJECTS_DIR = $${OBJECTS_DIR}/src
 
-QT += network
-CONFIG += serialport
+QT += network serialport
 
 contains(MODBUS4QT_CONFIG, modbus4qt_dll) {
     CONFIG += dll
@@ -57,6 +47,10 @@ contains(MODBUS4QT_CONFIG, modbus4qt_dll) {
 else {
     CONFIG += staticlib
 }
+
+#------------------------------------------------------------------------------
+# Source and header files
+#
 
 SOURCES += utils.cpp \
     tcp_client.cpp \
@@ -84,7 +78,9 @@ HEADERS += global.h \
     device.h \
     dummy_device.h
 
+#------------------------------------------------------------------------------
 # Install directives
+#
 
 target.path    = $${MODBUS4QT_INSTALL_LIBS}
 
@@ -97,5 +93,3 @@ INSTALLS       = target doc
 headers.files  = $${HEADERS}
 headers.path   = $${MODBUS4QT_INSTALL_HEADERS}
 INSTALLS += headers
-
-

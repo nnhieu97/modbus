@@ -1,11 +1,8 @@
 #------------------------------------------------------------------------------
 #  modbus4qt Library
 #  Author: Leonid Kolesnik, l.kolesnik@m-i.ru
-#  Copyright (C) 2012-2015
-#  http://www.modbus4qt.ru
-#
-#  $Id: modbus4qt_build.pri 138 2015-09-12 17:00:04Z l.kolesnik $
-#  $URL: https://o.m-i.ru/svn/modbus4qt/branches/1.1/modbus4qt_build.pri $
+#  Copyright (C) 2012-2021
+#  https://mt11.net.ru
 #------------------------------------------------------------------------------
 #
 # This library is free software.
@@ -34,34 +31,41 @@
 # qmake internal options
 ######################################################################
 
-CONFIG           += qt
-CONFIG           += warn_on
-CONFIG           += silent
+CONFIG += qt
+CONFIG += warn_on
+CONFIG += silent
 
-greaterThan(QT_MAJOR_VERSION, 4) {
-    QT += serialport
-}
-else {
-    CONFIG += serialport
-}
+QT += serialport
 
 ######################################################################
 # release/debug mode
 ######################################################################
 
 win32 {
+
     # On Windows you can't mix release and debug libraries.
     # The designer is built in release mode. If you like to use it
     # you need a release version. For your own application development you
     # might need a debug version.
+
     # Enable debug_and_release + build_all if you want to build both.
 
-    CONFIG           += debug_and_release
-    CONFIG           += build_all
+    # If enabled in windows we got warning about conflict in debug and release versions.
+    # Windows is not my favorite OS and I use it sometimes.
+    # So I decided switch it off and think about it later.
+
+    #CONFIG           += debug_and_release
+    #CONFIG           += build_all
+
+    CONFIG           += debug
 }
 else {
 
-    #CONFIG           += release
+    # Use debug or release config according you needs
+    #
+    # CONFIG           += release
+    # CONFIG           += debug
+
     CONFIG           += debug
 
     VER_MAJ           = $${MODBUS4QT_VER_MAJ}
@@ -70,7 +74,7 @@ else {
     VERSION           = $${MODBUS4QT_VERSION}
 }
 
-linux-g++ {
+linux-g++ | linux-g++-64 {
     # CONFIG           += separate_debug_info
 }
 
@@ -86,26 +90,16 @@ CONFIG(debug){
 # paths for building modbus4qt
 ######################################################################
 
-MOC_DIR      = moc
-RCC_DIR      = resources
-!debug_and_release {
-    OBJECTS_DIR       = obj
-}
+MODBUS4QT_ROOT  = $${PWD}
+MODBUS4QT_BUILD = $${MODBUS4QT_ROOT}/build
 
-unix {
+DESTDIR         = $${MODBUS4QT_BUILD}/bin
+MOC_DIR         = $${MODBUS4QT_BUILD}/moc
+OBJECTS_DIR     = $${MODBUS4QT_BUILD}/obj
+UI_DIR          = $${MODBUS4QT_BUILD}/ui
+RCC_DIR         = $${MODBUS4QT_BUILD}/resources
+QMAKE_RPATHDIR *= $${MODBUS4QT_BUILD}/lib
 
-    exists( $${QMAKE_LIBDIR_QT}/libmodbus4qt.* ) {
-
-        # On some Linux distributions the libraries are installed
-        # in the same directory as the Qt libraries. Unfortunately
-        # qmake always adds QMAKE_LIBDIR_QT at the beginning of the
-        # linker path, so that the installed libraries will be
-        # used instead of the local ones.
-
-        error( "local build will conflict with $${QMAKE_LIBDIR_QT}/libmodbus4qt.*" )
-    }
-}
-
-OTHER_FILES += \
-    ../doc/modbus-ap-v1_1.dox \
-    ../doc/modbus4qt.dox
+INCLUDEPATH += $${MODBUS4QT_ROOT}/src
+DEPENDPATH  += $${MODBUS4QT_ROOT}/src
+LIBS           += -L$${MODBUS4QT_BUILD}/lib

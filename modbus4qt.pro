@@ -1,11 +1,8 @@
 #-------------------------------------------------
 #  modbus4qt Library
 #  Author: Leonid Kolesnik, l.kolesnik@m-i.ru
-#  Copyright (C) 2012-2015
-#  http://www.modbus4qt.ru
-#
-#  $Id: modbus4qt.pro 143 2015-09-15 07:33:42Z l.kolesnik $
-#  $URL: https://o.m-i.ru/svn/modbus4qt/branches/1.1/modbus4qt.pro $
+#  Copyright (C) 2012-2021
+#  https://mt11.net.ru/elvactech-lab/modbus4qt
 #-------------------------------------------------
 #
 # This library is free software.
@@ -33,7 +30,7 @@
 include (modbus4qt_config.pri)
 
 TEMPLATE = subdirs
-CONFIG += ordered modbus4qt
+CONFIG += ordered
 
 SUBDIRS = \
     src
@@ -42,14 +39,7 @@ contains (MODBUS4QT_CONFIG, modbus4qt_demo) {
     SUBDIRS += demo
 }
 
-modbus4qtspec.files  = modbus4qt_config.pri modbus4qt.prf modbus4qt_functions.pri
+modbus4qtspec.files  = modbus4qt_config.pri modbus4qt_functions.pri modbus4qt.prf
 modbus4qtspec.path  = $${MODBUS4QT_INSTALL_FEATURES}
 
 INSTALLS += modbus4qtspec
-
-
-
-
-
-
-

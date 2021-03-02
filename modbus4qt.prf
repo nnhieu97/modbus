@@ -1,34 +1,23 @@
 ################################################################
 #  modbus4qt Library
 #  Author: Leonid Kolesnik, l.kolesnik@m-i.ru
-#  Copyright (C) 2012-2015
-#  http://www.modbus4qt.ru
-#
-#  $Id: modbus4qt.prf 138 2015-09-12 17:00:04Z l.kolesnik $
+#  Copyright (C) 2012-2021
+#  https://mt11.net.ru
 #  $URL: https://o.m-i.ru/svn/modbus4qt/branches/1.1/modbus4qt.prf $
 ################################################################
 
 include (./modbus4qt_config.pri)
-include (./modbus4qt_functions.pri)
+#include (./modbus4qt_functions.pri)
 
 contains(MODBUS4QT_CONFIG, modbus4qt_dll) {
-
     DEFINES *= MODBUS4QT_DLL
 }
 
-QT *= network
-
-greaterThan(QT_MAJOR_VERSION, 4) {
-    QT += serialport
-}
-else {
-    CONFIG += serialport
-}
-
+QT += network serialport
 
 INCLUDEPATH *= $${MODBUS4QT_INSTALL_PREFIX}/include
 LIBS        *= -L$${MODBUS4QT_INSTALL_LIBS}
 
-INCLUDEPATH_MODBUS4QT = $${INCLUDEPATH}
+#INCLUDEPATH_MODBUS4QT = $${INCLUDEPATH} ???
 
 modbus4qtAddLibrary($${MODBUS4QT_INSTALL_LIBS}, modbus4qt)
