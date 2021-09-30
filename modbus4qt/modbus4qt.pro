@@ -32,11 +32,11 @@ include( $${MODBUS4QT_ROOT}/modbus4qt_config.pri )
 include( $${MODBUS4QT_ROOT}/modbus4qt_build.pri )
 
 TEMPLATE = lib
-TARGET = $$qtLibraryTarget(modbus4qt)
+TARGET   = $$qtLibraryTarget(modbus4qt)
 
-DESTDIR = $${MODBUS4QT_BUILD}/lib
-MOC_DIR = $${MOC_DIR}/src
-OBJECTS_DIR = $${OBJECTS_DIR}/src
+DESTDIR     = $${MODBUS4QT_BUILD}/lib
+MOC_DIR     = $${MOC_DIR}/modbus4qt
+OBJECTS_DIR = $${OBJECTS_DIR}/modbus4qt
 
 QT += network serialport
 
@@ -82,14 +82,15 @@ HEADERS += global.h \
 # Install directives
 #
 
-target.path    = $${MODBUS4QT_INSTALL_LIBS}
+target.path     = $${MODBUS4QT_INSTALL_LIBS}
 
-doc.files      = $${MODBUS4QT_ROOT}/doc/html
+doc.files       = $${MODBUS4QT_ROOT}/doc/html
 unix:doc.files += $${MODBUS4QT_ROOT}/doc/man
-doc.path       = $${MODBUS4QT_INSTALL_DOCS}
+doc.path        = $${MODBUS4QT_INSTALL_DOCS}
 
-INSTALLS       = target doc
+INSTALLS        = target doc
 
-headers.files  = $${HEADERS}
-headers.path   = $${MODBUS4QT_INSTALL_HEADERS}
-INSTALLS += headers
+headers.files   = $${HEADERS}
+headers.path    = $${MODBUS4QT_INSTALL_HEADERS}
+
+INSTALLS       += headers
