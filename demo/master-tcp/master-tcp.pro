@@ -1,4 +1,7 @@
-include( $${PWD}/../demo.pri )
+MODBUS4QT_ROOT = $${PWD}/../../
+
+include( $${MODBUS4QT_ROOT}/modbus4qt_depend.pri )
+include( $${MODBUS4QT_ROOT}/demo/demo.pri )
 
 TARGET = master-tcp
 
@@ -13,3 +16,6 @@ HEADERS  += \
     main_window.h \
     main.h
 
+target.path = $${MODBUS4QT_INSTALL_BIN}
+
+INSTALLS = target

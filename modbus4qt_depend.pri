@@ -12,6 +12,4 @@ include($${MODBUS4QT_ROOT}/modbus4qt_build.pri)
 
 QT += network widgets serialport
 
-DESTDIR = $${MODBUS4QT_BUILD}/demo
-
 LIBS += -lmodbus4qt
