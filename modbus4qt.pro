@@ -33,7 +33,7 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 SUBDIRS = \
-    src
+    modbus4qt
 
 contains (MODBUS4QT_CONFIG, modbus4qt_demo) {
     SUBDIRS += demo
