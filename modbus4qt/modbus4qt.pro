@@ -30,6 +30,7 @@
 MODBUS4QT_ROOT = $${PWD}/..
 include( $${MODBUS4QT_ROOT}/modbus4qt_config.pri )
 include( $${MODBUS4QT_ROOT}/modbus4qt_build.pri )
+include( $${MODBUS4QT_ROOT}/modbus4qt_paths.pri )
 
 TEMPLATE = lib
 TARGET   = $$qtLibraryTarget(modbus4qt)

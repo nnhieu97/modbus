@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "tcp_client.h"
+#include <modbus4qt/tcp_client.h>
 
 class QGroupBox;
 class QLineEdit;

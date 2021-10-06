@@ -6,10 +6,6 @@
 #
 ################################################################
 
-#MODBUS4QT_ROOT = $${PWD}/../
-
-#include( $${MODBUS4QT_ROOT}/modbus4qt_config.pri )
-
 TEMPLATE = subdirs
 
     SUBDIRS += \

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "rtu_client.h"
+#include <modbus4qt/rtu_client.h>
 
 class QGroupBox;
 class QLineEdit;
