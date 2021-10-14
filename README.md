@@ -1,44 +1,56 @@
-modbus4qt - библиотека, предоставляющая набор классов C++ для доступа к устройствам по протоколу MODBUS с использованием библиотеки Qt.
+# modbus4qt
 
-Библиотека написана с использованием Qt4.
+modbus4qt is a library containing set of classes to work with devices via MODBUS using Qt.
 
-В настоящее время полностью написан класс MODBUS/RTU клиента, осуществляющий подключение к серверу.
+The library works with Qt5. Early versions worked with Qt4, but this option is not tested for now as Qt4 is obsolete.
 
-Для проверки работоспособности и отладки написан пример главного приложения MODBUS (master-rtu).
+We have fully functional class of MODBUS/RTU client wich can communicate with a server.
 
-При разработке библиотеки использованы:
+Master-RTU program is also fully functional and can be used for testing and debugging.
 
-* Первоначально программный код, реализующий протокол MODBUS/TCP являлся переписанным на C++ кодом библиотеки delphimodbus. В настоящее время код полностью переписан "с нуля"
-* Функция расчета CRC взята из libmodbus
+Work on MODBUS/TCP is on progress.
 
-Официальные языки проекта - русский, английский.
+## Source code and project homepage
 
-Если вы готовы помочь в переводе документации на другие языки, сообщите нам.
+Project homepage is https://mt11.net.ru/elvactech-lab/modbus4qt/
 
-## Описание классов, предоставляемых библиотекой
+You can clone repository using https://mt11.net.ru/elvactech-lab/modbus4qt.git address.
 
-Описание классов, предоставляемых библиотекой, вы можете найти на нашем сайте.
+The repo is private for now. You you need access, please ask via e-mail l.kolesnik@m-i.ru
 
-## Получение исходного кода
+# How to use
 
-Исходный код библиотеки доступен для скачивания по адресу: https://www.modbus4qt.ru/svn/modbus4qt
+## Step 1
 
-Вы также можете просмотреть исходный код через браузер.
+To have modbus4qt in your project you should include modbus4qt_depend.pri file into your pro file.
 
-Проект хранит исходный код программы в репозитории subversion. Полную копию последней версии репозитория можно скачать, воспользовавшись командой:
+We recommend you use library aas git submodule in your project.
 
-svn co https://www.modbus4qt.ru/svn/modbus4qt
+After cloning the library you need add it into your project. An example is below. This is only example. You should update dir's and file's names in it for real using.
 
-Ежедневный снимок исходного кода основной ветки разработки доступен для скачивания в виде архива по адресу: https://www.modbus4qt.ru/download/modbus4qt/modbus4qt.tar.gz
+my_project.pro
+----------------------------------
+```
+TEMPLATE   = subdirs
+SUBDIRS   += \
+        modbus4qt \
+        application
 
-## Необходимые библиотеки
+application.depends = \
+    modbus4qt
 
-Само-собой необходимо иметь установленную библиотеку Qt.
+```
+----------------------------------
 
-Также для сборки и работы библиотеки и демонстрационных программ необходимо наличие библиотеки QSerialPort.
+application/application.pro
+----------------------------------
+```
+# Add something like this into your project file:
+#
+include (path/to/modbus4qt/modbus4qt_depend.pri)
+#
+# this will add modbus4qt root to include path and will link the library to your app.
+```
+----------------------------------
 
-В настоящее время QSerialPort включен Qt5. Если у вас установлен Qt без QSerialPort, то необходимо выполнить ручную установку данной библиотеки.
-
-Страница библиотеки QSerialPort: http://qt-project.org/wiki/QtSerialPort
-
-Если вы используете Gentoo Linux, то QSerialPort будет установлен автоматически при установке modbus4qt из нашего репозитория.
+After that you can use classes in your application.
