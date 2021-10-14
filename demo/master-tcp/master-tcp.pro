@@ -1,6 +1,5 @@
 MODBUS4QT_ROOT = $${PWD}/../../
 
-include( $${MODBUS4QT_ROOT}/modbus4qt_depend.pri )
 include( $${MODBUS4QT_ROOT}/demo/demo.pri )
 
 TARGET = master-tcp

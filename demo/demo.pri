@@ -6,4 +6,9 @@
 #
 ################################################################
 
+MODBUS4QT_ROOT = $${PWD}/../
+
+include( $${MODBUS4QT_ROOT}/modbus4qt_depend.pri )
+include( $${MODBUS4QT_ROOT}/modbus4qt_paths.pri )
+
 DESTDIR = $${MODBUS4QT_BUILD}/demo

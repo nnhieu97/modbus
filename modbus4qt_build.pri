@@ -85,21 +85,3 @@ CONFIG(release){
 CONFIG(debug){
     DEFINES -= QT_NO_DEBUG QT_NO_DEBUG_OUTPUT QT_NO_WARNING_OUTPUT
 }
-
-######################################################################
-# paths for building modbus4qt
-######################################################################
-
-MODBUS4QT_ROOT  = $${PWD}
-MODBUS4QT_BUILD = $${MODBUS4QT_ROOT}/build
-
-DESTDIR         = $${MODBUS4QT_BUILD}/bin
-MOC_DIR         = $${MODBUS4QT_BUILD}/moc
-OBJECTS_DIR     = $${MODBUS4QT_BUILD}/obj
-UI_DIR          = $${MODBUS4QT_BUILD}/ui
-RCC_DIR         = $${MODBUS4QT_BUILD}/rc
-QMAKE_RPATHDIR *= $${MODBUS4QT_BUILD}/lib
-
-INCLUDEPATH += $${MODBUS4QT_ROOT}/modbus4qt
-DEPENDPATH  += $${MODBUS4QT_ROOT}/modbus4qt
-LIBS        += -L$${MODBUS4QT_BUILD}/lib
