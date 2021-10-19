@@ -44,11 +44,9 @@ namespace modbus4qt
 //-----------------------------------------------------------------------------
 
 TcpClient::TcpClient(QObject *parent) :
-    Client(parent),
-    lastTransactionID_(0),
-    connectTimeOut_(15000)
-
-
+    Client(parent)
+    , connectTimeOut_(15000)
+    , lastTransactionID_(0)
 {
     autoConnect_		= true;
     port_				= DefaultTcpPort;
@@ -58,8 +56,8 @@ TcpClient::TcpClient(QObject *parent) :
     ioDevice_ = new QTcpSocket(this);
     tcpSocket_ = dynamic_cast<QTcpSocket*>(ioDevice_);
 
-    // onResponseError = NULL;
-    // onResponseMismatch = NULL;
+//    onResponseError = nullptr;
+//    onResponseMismatch = nullptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -74,6 +72,14 @@ TcpClient::connectToServer(int timeout /* = IdTimeoutDefault*/ )
     lastTransactionID_ = 0;
 }
 
+//-----------------------------------------------------------------------------
+
+void
+TcpClient::disconnectFromServer()
+{
+    tcpSocket_->disconnectFromHost();
+}
+
 ////-----------------------------------------------------------------------------
 
 //void
@@ -81,28 +87,95 @@ TcpClient::connectToServer(int timeout /* = IdTimeoutDefault*/ )
 //{
 //}
 
-////-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 //void
 //TcpClient::doResponseMismatch_(quint8 requestFunctionCode, quint8 responseFunctionCode, const ResponseBuffer& responseBuffer)
 //{
 //}
 
+//-----------------------------------------------------------------------------
+
+quint16
+TcpClient::getNewTransactionID_()
+{
+    if (lastTransactionID_ == 0xFFFF)
+        lastTransactionID_ = 0;
+    else
+        ++lastTransactionID_;
+
+    return lastTransactionID_;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+TcpClient::isAutoConnect() const
+{
+    return autoConnect_;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+TcpClient::isConnected() const
+{
+    return (tcpSocket_->state() == QAbstractSocket::ConnectedState);
+}
+
+//-----------------------------------------------------------------------------
+
 QByteArray
-modbus4qt::TcpClient::prepareADU_(const ProtocolDataUnit& pdu, int pduSize)
+TcpClient::prepareADU_(const ProtocolDataUnit& pdu, int pduSize)
 {
 }
+
+//-----------------------------------------------------------------------------
 
 ProtocolDataUnit
-modbus4qt::TcpClient::processADU_(const QByteArray& buf)
+TcpClient::processADU_(const QByteArray& buf)
 {
 }
+
+//-----------------------------------------------------------------------------
 
 QByteArray
-modbus4qt::TcpClient::readResponse_()
+TcpClient::readResponse_()
 {
 }
 
+//-----------------------------------------------------------------------------
+
+QHostAddress
+TcpClient::getServerAddress() const
+{
+    return serverAddress_;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+TcpClient::setAutoConnect(bool autoConnect)
+{
+    autoConnect_ = autoConnect;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+TcpClient::setServerAddress(const QHostAddress& serverAddress)
+{
+    if (serverAddress != serverAddress_)
+    {
+        if (isConnected()) disconnectFromServer();
+        serverAddress_ = serverAddress;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 } // namespace modbus4qt
+
+// EOF
 
 

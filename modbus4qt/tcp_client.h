@@ -98,15 +98,7 @@ class MODBUS4QT_EXPORT TcpClient : public Client
             Готовность: полностью готова <br>
             Исходное объявление: function GetNewTransactionID: Word;
         */
-        quint16 getNewTransactionID_()
-        {
-            if (lastTransactionID_ == 0xFFFF)
-                lastTransactionID_ = 0;
-            else
-                ++lastTransactionID_;
-
-            return lastTransactionID_;
-        }
+        quint16 getNewTransactionID_();
 
     public: // Открытые методы класса
 
@@ -125,50 +117,28 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         virtual void connectToServer(int timeout /* = IdTimeoutDefault*/ );
 
         //! Отключается от сервера
-        virtual void disconnectFromServer()
-        {
-            tcpSocket_->disconnectFromHost();
-        }
+        virtual void disconnectFromServer();
 
         //! Возвращает значение режима автоматического подключения к серверу
-        bool isAutoConnect() const
-        {
-            return autoConnect_;
-        }
+        bool isAutoConnect() const;
 
         //! Проверяет наличие подключения к серверу
         /**
             Возвращает true, если клиент подключен к серверу. false - в противном случае.
         */
-        virtual bool isConnected() const
-        {
-            return (tcpSocket_->state() == QAbstractSocket::ConnectedState);
-        }
+        virtual bool isConnected() const;
 
         //! Возвращает текущее значение адреса сервера
-        QHostAddress serverAddress() const
-        {
-            return serverAddress_;
-        }
+        QHostAddress getServerAddress() const;
 
         //! Устанавливает режим автоматического подключения к серверу
-        void setAutoConnect(bool autoConnect = true)
-        {
-            autoConnect_ = autoConnect;
-        }
+        void setAutoConnect(bool autoConnect = true);
 
         //! Устанавливает адрес сервера для подключения
         /**
             Если ранее было установлено соединение с другим сервером, то соединение будет закрыто.
         */
-        void setServerAddress(const QHostAddress& serverAddress)
-        {
-            if (serverAddress != serverAddress_)
-            {
-                if (isConnected()) disconnectFromServer();
-                serverAddress_ = serverAddress;
-            }
-        }
+        void setServerAddress(const QHostAddress& getServerAddress);
 
     public slots:
 
