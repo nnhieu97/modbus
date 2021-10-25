@@ -128,6 +128,27 @@ TcpClient::isConnected() const
 QByteArray
 TcpClient::prepareADU_(const ProtocolDataUnit& pdu, int pduSize)
 {
+    QByteArray result;
+
+    result.append(hi(lastTransactionID_));
+    result.append(lo(lastTransactionID_));
+
+    result.append('\x0');
+    result.append('\x0');
+
+    QString size;
+    size = QString::number(pduSize+1,16);
+    QByteArray sz = QByteArray::fromHex(size.toUtf8());
+    result.append(sz);
+
+    result.append(unitID_);
+
+    result.insert(7, (char*)&pdu, pduSize);
+
+    qDebug() << "ADU: " << result.toHex();
+    qDebug() << "ADU size: " << result.size();
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------
