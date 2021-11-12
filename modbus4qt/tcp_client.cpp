@@ -130,16 +130,13 @@ TcpClient::prepareADU_(const ProtocolDataUnit& pdu, int pduSize)
 {
     QByteArray result;
 
-    result.append(hi(lastTransactionID_));
-    result.append(lo(lastTransactionID_));
+    result.append((char*)&lastTransactionID_, 2);
 
     result.append('\x0');
     result.append('\x0');
 
-    QString size;
-    size = QString::number(pduSize+1,16);
-    QByteArray sz = QByteArray::fromHex(size.toUtf8());
-    result.append(sz);
+    result[4] = ((pduSize+1) >> 8) & 0xFF;
+    result[5] = (pduSize+1) & 0xFF;
 
     result.append(unitID_);
 
@@ -156,6 +153,76 @@ TcpClient::prepareADU_(const ProtocolDataUnit& pdu, int pduSize)
 ProtocolDataUnit
 TcpClient::processADU_(const QByteArray& buf)
 {
+    qDebug() << "ADU: " << buf.toHex();
+    qDebug() << "ADU size: " << buf.size();
+
+    QByteArray tempBuf(buf);
+
+    // For any case we should check size of recieved data to protect memory
+    //
+    // На всякий случай проверяем размер полученных данных, чтобы не ничего не испортить
+    //
+    if (tempBuf.size() > int(sizeof(TcpDataHeader)+sizeof(TCPApplicationDataUnit)))
+        tempBuf.resize(sizeof(TcpDataHeader)+sizeof(TCPApplicationDataUnit));
+
+    int tempBufSize = tempBuf.size();
+
+    // Minimum ADU size can be 9 bytes: 2 byte for Transaction ID, 2 bytes for Protocol ID,
+    // 2 byte for Length, 1 byte for address, 2 byte for minimum PDU
+    //
+    // Минимальный размер ADU может быть 9 байт: 2 байт транзакция ИД, 2 байт Протокол ИД,
+    // 2 байт длина, 1 байт адрес и 2 байта PDU
+    //
+    if (tempBufSize < 9)
+    {
+        emit errorMessage(unitID_, tr("Wrong application data unit recieved!"));
+        tempBuf.resize(9);
+        tempBufSize = 9;
+    }
+
+    TcpDataHeader header;
+
+    WordRec headerTID;
+    headerTID.bytes[0] = tempBuf[0];
+    headerTID.bytes[1] = tempBuf[1];
+
+    header.transactionId = headerTID.word;
+
+    WordRec headerPID;
+    headerPID.bytes[0] = tempBuf[2];
+    headerPID.bytes[1] = tempBuf[3];
+
+    header.protocolId = headerPID.word;
+
+    WordRec headerLength;
+    headerLength.bytes[0] = tempBuf[4];
+    headerLength.bytes[1] = tempBuf[5];
+
+    header.recLength = headerLength.word;
+
+    header.unitId = tempBuf[6];
+
+    TCPApplicationDataUnit adu;
+
+    adu.unitId = tempBuf[6];
+    adu.pdu.functionCode = tempBuf[7];
+
+    for (int i = 8; i < tempBufSize; ++i)
+        adu.pdu.data[i - 8] = tempBuf[i];
+
+#ifndef QT_NO_DEBUG
+    // If we want to print PDU into log file we should remove first 7 byte
+    // After that we have pdu in tempBuf
+    //
+    // Чтобы вывести в лог PDU, удаляем первые 7 байтов
+    // Теперь в tempBuf остался только pdu
+    //
+    tempBuf.remove(0, 7);
+    qDebug() << "PDU: " << tempBuf.toHex();
+    qDebug() << "PDU size: " << tempBuf.size();
+#endif
+
+    return adu.pdu;
 }
 
 //-----------------------------------------------------------------------------
@@ -163,6 +230,13 @@ TcpClient::processADU_(const QByteArray& buf)
 QByteArray
 TcpClient::readResponse_()
 {
+    QByteArray inArray;
+    inArray.append(ioDevice_->readAll());
+    while (ioDevice_->bytesAvailable() || ioDevice_->waitForReadyRead(connectTimeOut_))
+    {
+        inArray.append(ioDevice_->readAll());
+    }
+    return inArray;
 }
 
 //-----------------------------------------------------------------------------
