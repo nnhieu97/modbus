@@ -130,6 +130,8 @@ TcpClient::prepareADU_(const ProtocolDataUnit& pdu, int pduSize)
 {
     QByteArray result;
 
+    getNewTransactionID_();
+
     result.append((char*)&lastTransactionID_, 2);
 
     result.append('\x0');
