@@ -58,7 +58,7 @@ class MODBUS4QT_EXPORT TcpClient : public Client
 
         //! Максимальное время ожидания подключения к серверу в милисекундах
         /**
-          Значение по умолчанию 15000 мс (15 сек).
+          Значение по умолчанию CONNECTION_TIMEOUT 3000 ms (3 сек).
         */
         int connectTimeOut_;
 
@@ -100,7 +100,9 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         */
         quint16 getNewTransactionID_();
 
-    public: // Открытые методы класса
+        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
+
+    public:
 
         //! Конструктор по умолчанию
         /**
@@ -114,7 +116,7 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         explicit TcpClient(QObject *parent = 0);
 
         //! Выполняет подключение к серверу
-        virtual void connectToServer(int timeout /* = IdTimeoutDefault*/ );
+        virtual bool connectToServer(int timeout = CONNECTION_TIMEOUT);
 
         //! Отключается от сервера
         virtual void disconnectFromServer();
@@ -140,14 +142,14 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         */
         void setServerAddress(const QHostAddress& getServerAddress);
 
-    public slots:
-
-
         // Client interface
     protected:
-        virtual QByteArray prepareADU_(const ProtocolDataUnit& pdu, int pduSize);
-        virtual ProtocolDataUnit processADU_(const QByteArray& buf);
-        virtual QByteArray readResponse_();
+
+        virtual QByteArray prepareADU_(const ProtocolDataUnit& pdu, int pduSize) override;
+
+        virtual ProtocolDataUnit processADU_(const QByteArray& buf) override;
+
+        virtual QByteArray readResponse_() override;
 };
 
 } // namespace modbus

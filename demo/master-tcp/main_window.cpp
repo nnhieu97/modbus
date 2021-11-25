@@ -47,10 +47,10 @@ MainWindow::MainWindow(QWidget *parent)
     statusBar();
     setWindowTitle(ApplicationName);
 
-    tcpClient = new modbus4qt::TcpClient(this);
-    tcpClient->setAutoConnect();
+    tcpClient_ = new modbus4qt::TcpClient(this);
+    tcpClient_->setAutoConnect();
 
-    connect(tcpClient, SIGNAL(errorMessage(QString)), this, SLOT(errorMessage(QString)));
+    connect(tcpClient_, SIGNAL(errorMessage(QString)), this, SLOT(errorMessage(QString)));
 }
 
 //-----------------------------------------------------------------------------
@@ -325,11 +325,11 @@ MainWindow::infoMessage(const QString& msg)
 void
 MainWindow::readCoils()
 {
-    tcpClient->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
 
     QVector<bool> data(coilQty_->value());
 
-    bool result = tcpClient->readCoils(coilStart_->value(), coilQty_->value(), data);
+    bool result = tcpClient_->readCoils(coilStart_->value(), coilQty_->value(), data);
     if (!result) errorMessage(tr("Cannot read coil(s)!"));
 
     QString msgText = tr("Reg # : Value\n");
@@ -351,11 +351,11 @@ MainWindow::readCoils()
 
 void MainWindow::readDiscreteInputs()
 {
-    tcpClient->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
 
     QVector<bool> data(dInQty_->value());
 
-    bool result = tcpClient->readDescreteInputs(dInStart_->value(), dInQty_->value(), data);
+    bool result = tcpClient_->readDescreteInputs(dInStart_->value(), dInQty_->value(), data);
     if (!result) errorMessage(tr("Cannot read discrete input(s)!"));
 
     QString msgText = tr("Reg # : Value\n");
@@ -377,11 +377,11 @@ void MainWindow::readDiscreteInputs()
 
 void MainWindow::readInputRegistres()
 {
-    tcpClient->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
 
     QVector<quint16> data(inRegQty_->value());
 
-    bool result = tcpClient->readInputRegisters(inRegStart_->value(), inRegQty_->value(), data);
+    bool result = tcpClient_->readInputRegisters(inRegStart_->value(), inRegQty_->value(), data);
     if (!result) errorMessage(tr("Cannot read input register(s)!"));
 
     QString msgText = tr("Reg # : Value\n");
@@ -403,12 +403,15 @@ void MainWindow::readInputRegistres()
 
 void MainWindow::readHoldingRegisters()
 {
-    tcpClient->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
 
     QVector<quint16> data(holdRegQty_->value());
 
-    bool result = tcpClient->readHoldingRegisters(holdRegStart_->value(), holdRegQty_->value(), data);
-    if (!result) errorMessage(tr("Cannot read holding register(s)!"));
+    bool result = tcpClient_->readHoldingRegisters(holdRegStart_->value(), holdRegQty_->value(), data);
+    if (!result)
+    {
+        errorMessage(tr("Cannot read holding register(s)!"));
+    }
 
     QString msgText = tr("Reg # : Value\n");
     int curReg = holdRegStart_->value();
@@ -430,12 +433,12 @@ void MainWindow::readHoldingRegisters()
 void
 MainWindow::writeCoils()
 {
-    tcpClient->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
 
     QVector<bool> data(coilQty_->value());
     data.fill(coilValue_->value() == 1);
 
-    bool result = tcpClient->writeCoils(coilStart_->value(), data);
+    bool result = tcpClient_->writeCoils(coilStart_->value(), data);
     if (!result)
         errorMessage(tr("Cannot write holding register(s)!"));
     else
@@ -447,12 +450,12 @@ MainWindow::writeCoils()
 void
 MainWindow::writeHoldingRegisters()
 {
-    tcpClient->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
 
     QVector<quint16> data(holdRegQty_->value());
     data.fill(holdRegValue_->value());
 
-    bool result = tcpClient->writeHoldingRegisters(holdRegStart_->value(), data);
+    bool result = tcpClient_->writeHoldingRegisters(holdRegStart_->value(), data);
     if (!result)
         errorMessage(tr("Cannot write holding register(s)!"));
     else

@@ -159,7 +159,7 @@ class MODBUS4QT_EXPORT RtuClient : public Client
          * @en Prepared application data unit
          * @ru Сформированный блок данных реализации (Application Data Unit) по спецификации MODBUS/RTU
          */
-        virtual QByteArray prepareADU_(const ProtocolDataUnit &pdu, int pduSize);
+        virtual QByteArray prepareADU_(const ProtocolDataUnit &pdu, int pduSize) override;
 
         /**
          * @brief
@@ -174,7 +174,7 @@ class MODBUS4QT_EXPORT RtuClient : public Client
          * @en Protocol data unit
          * @ru Блок даных протокола
          */
-        virtual ProtocolDataUnit processADU_(const QByteArray &buf);
+        virtual ProtocolDataUnit processADU_(const QByteArray &buf) override;
 
         /**
          * @brief
@@ -186,9 +186,9 @@ class MODBUS4QT_EXPORT RtuClient : public Client
          * @ru Массив прочитанных данных
          *
          */
-        virtual QByteArray readResponse_();
+        virtual QByteArray readResponse_() override;
 
-        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU);
+        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
 
         /**
          * @brief
@@ -204,21 +204,14 @@ class MODBUS4QT_EXPORT RtuClient : public Client
          * @en Start silence time
          * @ru Начинает период тишины
          */
-        inline void startSilence_()
-        {
-            inSilenceState_ = true;
-            silenceTimer_.singleShot(silenceTime_, this, SLOT(stopSilence_()));
-        }
+        void startSilence_();
 
         /**
          * @brief
          * @en Finish silence time
          * @ru Завершает период тишины
          */
-        inline void stopSilence_()
-        {
-            inSilenceState_ = false;
-        }
+        void stopSilence_();
 
     public:
 
@@ -491,10 +484,7 @@ class MODBUS4QT_EXPORT RtuClient : public Client
          * @en Current port name
          * @ru Текущее имя порта для обмена данными
          */
-        QString portName() const
-        {
-            return portName_;
-        }
+        QString portName() const;
 
     signals:
 

@@ -45,7 +45,7 @@ namespace modbus4qt
 
 TcpClient::TcpClient(QObject *parent) :
     Client(parent)
-    , connectTimeOut_(15000)
+    , connectTimeOut_(CONNECTION_TIMEOUT)
     , lastTransactionID_(0)
 {
     autoConnect_		= true;
@@ -62,14 +62,20 @@ TcpClient::TcpClient(QObject *parent) :
 
 //-----------------------------------------------------------------------------
 
-void
-TcpClient::connectToServer(int timeout /* = IdTimeoutDefault*/ )
+bool
+TcpClient::connectToServer(int timeout)
 {
     tcpSocket_->connectToHost(serverAddress_, port_);
+
     if (!tcpSocket_->waitForConnected(timeout))
+    {
         emit errorMessage(tcpSocket_->errorString());
+        return false;
+    }
 
     lastTransactionID_ = 0;
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -100,11 +106,23 @@ quint16
 TcpClient::getNewTransactionID_()
 {
     if (lastTransactionID_ == 0xFFFF)
+    {
         lastTransactionID_ = 0;
+    }
     else
+    {
         ++lastTransactionID_;
+    }
 
     return lastTransactionID_;
+}
+
+//-----------------------------------------------------------------------------
+
+QHostAddress
+TcpClient::getServerAddress() const
+{
+    return serverAddress_;
 }
 
 //-----------------------------------------------------------------------------
@@ -234,19 +252,32 @@ TcpClient::readResponse_()
 {
     QByteArray inArray;
     inArray.append(ioDevice_->readAll());
+
     while (ioDevice_->bytesAvailable() || ioDevice_->waitForReadyRead(connectTimeOut_))
     {
         inArray.append(ioDevice_->readAll());
     }
+
     return inArray;
 }
 
 //-----------------------------------------------------------------------------
 
-QHostAddress
-TcpClient::getServerAddress() const
+bool
+TcpClient::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
 {
-    return serverAddress_;
+    if (autoConnect_ && !isConnected())
+    {
+        if (!connectToServer())
+        {
+            emit infoMessage(tr("Cannot connect to server!"));
+
+            return false;
+        }
+    }
+
+    bool result = Client::sendRequestToServer_(requestPDU, requestPDUSize, responsePDU);
+    return  result;
 }
 
 //-----------------------------------------------------------------------------
@@ -264,7 +295,11 @@ TcpClient::setServerAddress(const QHostAddress& serverAddress)
 {
     if (serverAddress != serverAddress_)
     {
-        if (isConnected()) disconnectFromServer();
+        if (isConnected())
+        {
+            disconnectFromServer();
+        }
+
         serverAddress_ = serverAddress;
     }
 }
