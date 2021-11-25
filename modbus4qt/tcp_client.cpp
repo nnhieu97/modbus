@@ -306,6 +306,22 @@ TcpClient::setServerAddress(const QHostAddress& serverAddress)
 
 //-----------------------------------------------------------------------------
 
+void
+TcpClient::setServerPort(const int& port)
+{
+    if (port != port_)
+    {
+        if (isConnected())
+        {
+            disconnectFromServer();
+        }
+
+        port_ = port;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 } // namespace modbus4qt
 
 // EOF

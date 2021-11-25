@@ -326,6 +326,7 @@ void
 MainWindow::readCoils()
 {
     tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerPort(serverPort_->value());
 
     QVector<bool> data(coilQty_->value());
 
@@ -352,6 +353,7 @@ MainWindow::readCoils()
 void MainWindow::readDiscreteInputs()
 {
     tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerPort(serverPort_->value());
 
     QVector<bool> data(dInQty_->value());
 
@@ -378,6 +380,7 @@ void MainWindow::readDiscreteInputs()
 void MainWindow::readInputRegistres()
 {
     tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerPort(serverPort_->value());
 
     QVector<quint16> data(inRegQty_->value());
 
@@ -404,6 +407,7 @@ void MainWindow::readInputRegistres()
 void MainWindow::readHoldingRegisters()
 {
     tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerPort(serverPort_->value());
 
     QVector<quint16> data(holdRegQty_->value());
 
@@ -434,6 +438,7 @@ void
 MainWindow::writeCoils()
 {
     tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerPort(serverPort_->value());
 
     QVector<bool> data(coilQty_->value());
     data.fill(coilValue_->value() == 1);
@@ -451,6 +456,7 @@ void
 MainWindow::writeHoldingRegisters()
 {
     tcpClient_->setServerAddress(QHostAddress(serverAddress_->text()));
+    tcpClient_->setServerPort(serverPort_->value());
 
     QVector<quint16> data(holdRegQty_->value());
     data.fill(holdRegValue_->value());

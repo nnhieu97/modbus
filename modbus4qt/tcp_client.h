@@ -136,11 +136,13 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         //! Устанавливает режим автоматического подключения к серверу
         void setAutoConnect(bool autoConnect = true);
 
-        //! Устанавливает адрес сервера для подключения
+        //! Устанавливает адрес и порт сервера для подключения
         /**
             Если ранее было установлено соединение с другим сервером, то соединение будет закрыто.
         */
         void setServerAddress(const QHostAddress& getServerAddress);
+
+        void setServerPort(const int& port);
 
         // Client interface
     protected:
