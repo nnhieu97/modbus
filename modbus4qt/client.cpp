@@ -43,8 +43,8 @@ namespace modbus4qt
 Client::Client(QObject *parent) :
     QObject(parent),
     ioDevice_(NULL),
-    readTimeout_(5000),
-    writeTimeout_(5000),
+    readTimeout_(DEFAULT_TIMEOUT),
+    writeTimeout_(DEFAULT_TIMEOUT),
     unitID_(0)
 {
 }
@@ -218,11 +218,12 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
 
     if (regQty > MaxRegistersForRead)
     {
-        //emit infoMessage(tr("Maxixmum registers quantity for reading exceeded. Only allowed quantity will be readed!"));
+        emit infoMessage(tr("Maxixmum registers quantity (125 items) for reading exceeded. Only allowed quantity will be readed!"));
         regQty = MaxRegistersForRead;
     }
 
     // Quantity of registers
+    //
     requestPDU.data[2] = hi(regQty);
     requestPDU.data[3] = lo(regQty);
 
@@ -235,13 +236,16 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
     if (isOk)
     {
         // Quantity of readed bytes, not registers!
+        //
         int bytesReaded = responsePDU.data[0];
 
         // Copy data from pdu to buffer for process
+        //
         QByteArray registersBuffer((const char*)responsePDU.data + 1, bytesReaded);
         qDebug() << "Registers buffer: " << registersBuffer.toHex();
 
         // Process buffer and read registers values from it
+        //
         values = getRegistersFromBuffer(registersBuffer, regQty);
     }
 
@@ -295,13 +299,16 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
     if (isOk)
     {
         // Quantity of readed bytes, not registers!
+        //
         int bytesReaded = responsePDU.data[0];
 
         // Copy data from pdu to buffer for process
+        //
         QByteArray registersBuffer((const char*)responsePDU.data + 1, bytesReaded);
         qDebug() << "Registers buffer: " << registersBuffer.toHex();
 
         // Process buffer and read registers values from it
+        //
         values = getRegistersFromBuffer(registersBuffer, regQty);
     }
 

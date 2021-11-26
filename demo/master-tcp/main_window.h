@@ -14,7 +14,28 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    private:
+    public:
+
+        MainWindow(QWidget *parent = 0);
+        ~MainWindow();
+
+    public slots:
+
+        void about();
+
+        void errorMessage(const QString& msg);
+        void infoMessage(const QString& msg);
+
+        void readCoils();
+        void readDiscreteInputs();
+        void readInputRegistres();
+        void readHoldingRegisters();
+
+        void writeCoils();
+        void writeHoldingRegisters();
+
+    private: // fields
+
         QAction* exitAction_;
         QAction* aboutAction_;
         QAction* aboutQtAction_;
@@ -47,27 +68,10 @@ class MainWindow : public QMainWindow
 
         QSpinBox* serverPort_;
 
-        modbus4qt::TcpClient* tcpClient;
+        modbus4qt::TcpClient* tcpClient_;
 
-    public:
-        MainWindow(QWidget *parent = 0);
-        ~MainWindow();
+    private: // methods
 
-    public slots:
-        void about();
-
-        void errorMessage(const QString& msg);
-        void infoMessage(const QString& msg);
-
-        void readCoils();
-        void readDiscreteInputs();
-        void readInputRegistres();
-        void readHoldingRegisters();
-
-        void writeCoils();
-        void writeHoldingRegisters();
-
-    private:
         void createActions_();
 
         void createCoilsGroupBox_();

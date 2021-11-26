@@ -58,7 +58,7 @@ class MODBUS4QT_EXPORT TcpClient : public Client
 
         //! Максимальное время ожидания подключения к серверу в милисекундах
         /**
-          Значение по умолчанию 15000 мс (15 сек).
+          Значение по умолчанию CONNECTION_TIMEOUT 3000 ms (3 сек).
         */
         int connectTimeOut_;
 
@@ -98,17 +98,11 @@ class MODBUS4QT_EXPORT TcpClient : public Client
             Готовность: полностью готова <br>
             Исходное объявление: function GetNewTransactionID: Word;
         */
-        quint16 getNewTransactionID_()
-        {
-            if (lastTransactionID_ == 0xFFFF)
-                lastTransactionID_ = 0;
-            else
-                ++lastTransactionID_;
+        quint16 getNewTransactionID_();
 
-            return lastTransactionID_;
-        }
+        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
 
-    public: // Открытые методы класса
+    public:
 
         //! Конструктор по умолчанию
         /**
@@ -122,62 +116,42 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         explicit TcpClient(QObject *parent = 0);
 
         //! Выполняет подключение к серверу
-        virtual void connectToServer(int timeout /* = IdTimeoutDefault*/ );
+        virtual bool connectToServer(int timeout = CONNECTION_TIMEOUT);
 
         //! Отключается от сервера
-        virtual void disconnectFromServer()
-        {
-            tcpSocket_->disconnectFromHost();
-        }
+        virtual void disconnectFromServer();
 
         //! Возвращает значение режима автоматического подключения к серверу
-        bool isAutoConnect() const
-        {
-            return autoConnect_;
-        }
+        bool isAutoConnect() const;
 
         //! Проверяет наличие подключения к серверу
         /**
             Возвращает true, если клиент подключен к серверу. false - в противном случае.
         */
-        virtual bool isConnected() const
-        {
-            return (tcpSocket_->state() == QAbstractSocket::ConnectedState);
-        }
+        virtual bool isConnected() const;
 
         //! Возвращает текущее значение адреса сервера
-        QHostAddress serverAddress() const
-        {
-            return serverAddress_;
-        }
+        QHostAddress getServerAddress() const;
 
         //! Устанавливает режим автоматического подключения к серверу
-        void setAutoConnect(bool autoConnect = true)
-        {
-            autoConnect_ = autoConnect;
-        }
+        void setAutoConnect(bool autoConnect = true);
 
-        //! Устанавливает адрес сервера для подключения
+        //! Устанавливает адрес и порт сервера для подключения
         /**
             Если ранее было установлено соединение с другим сервером, то соединение будет закрыто.
         */
-        void setServerAddress(const QHostAddress& serverAddress)
-        {
-            if (serverAddress != serverAddress_)
-            {
-                if (isConnected()) disconnectFromServer();
-                serverAddress_ = serverAddress;
-            }
-        }
+        void setServerAddress(const QHostAddress& getServerAddress);
 
-    public slots:
-
+        void setServerPort(const int& port);
 
         // Client interface
     protected:
-        virtual QByteArray prepareADU_(const ProtocolDataUnit& pdu, int pduSize);
-        virtual ProtocolDataUnit processADU_(const QByteArray& buf);
-        virtual QByteArray readResponse_();
+
+        virtual QByteArray prepareADU_(const ProtocolDataUnit& pdu, int pduSize) override;
+
+        virtual ProtocolDataUnit processADU_(const QByteArray& buf) override;
+
+        virtual QByteArray readResponse_() override;
 };
 
 } // namespace modbus

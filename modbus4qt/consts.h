@@ -83,6 +83,11 @@
 namespace modbus4qt
 {
 
+//!
+//! \brief Default read/write timeout, 3000 ms
+//!
+const int DEFAULT_TIMEOUT = 3000;
+
 /**
  * @brief
  * @en Max size of protocol data unit, bytes
@@ -157,6 +162,11 @@ const int MaxRegistersForRead = 125;
  * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 30
  */
 const int MaxRegistersForWrite = 23;
+
+//!
+//! \brief Default timeout connection, ms
+//!
+const int CONNECTION_TIMEOUT = 3000;
 
 /**
  * @brief

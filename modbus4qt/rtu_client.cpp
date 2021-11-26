@@ -406,7 +406,10 @@ RtuClient::sendRequestToServer_(const ProtocolDataUnit &requestPDU, int requestP
 #endif
     }
 
-    if (!serialPort_->isOpen() && !openPort()) return false;
+    if (!serialPort_->isOpen() && !openPort())
+    {
+        return false;
+    }
 
     bool result = Client::sendRequestToServer_(requestPDU, requestPDUSize, responsePDU);
 
@@ -468,6 +471,14 @@ RtuClient::setPortName(const QString& portName)
 
 //-----------------------------------------------------------------------------
 
+QString
+RtuClient::portName() const
+{
+    return portName_;
+}
+
+//-----------------------------------------------------------------------------
+
 void RtuClient::setSilenceTime_()
 {
     if (baudRate_ > QSerialPort::Baud19200)
@@ -484,6 +495,23 @@ void RtuClient::setSilenceTime_()
 
     qDebug() << QString("Silence time: %1 ms").arg(silenceTime_);
     emit infoMessage(tr("Silence time: %1 ms").arg(silenceTime_));
+}
+
+//-----------------------------------------------------------------------------
+
+void
+RtuClient::startSilence_()
+{
+    inSilenceState_ = true;
+    silenceTimer_.singleShot(silenceTime_, this, SLOT(stopSilence_()));
+}
+
+//-----------------------------------------------------------------------------
+
+void
+RtuClient::stopSilence_()
+{
+    inSilenceState_ = false;
 }
 
 //-----------------------------------------------------------------------------
