@@ -15,6 +15,6 @@ HEADERS  += \
     main_window.h \
     main.h
 
-target.path = $${MODBUS4QT_INSTALL_BIN}
+#target.path = $${MODBUS4QT_INSTALL_BIN}
 
-INSTALLS = target
+#INSTALLS = target

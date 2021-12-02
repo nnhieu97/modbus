@@ -39,7 +39,7 @@ contains (MODBUS4QT_CONFIG, modbus4qt_demo) {
     SUBDIRS += demo
 }
 
-modbus4qtspec.files  = modbus4qt_config.pri modbus4qt_functions.pri modbus4qt.prf
-modbus4qtspec.path  = $${MODBUS4QT_INSTALL_FEATURES}
+#modbus4qtspec.files  = modbus4qt_config.pri modbus4qt_functions.pri modbus4qt.prf
+#modbus4qtspec.path  = $${MODBUS4QT_INSTALL_FEATURES}
 
-INSTALLS += modbus4qtspec
+#INSTALLS += modbus4qtspec
