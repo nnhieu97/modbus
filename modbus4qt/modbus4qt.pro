@@ -28,12 +28,31 @@
 #------------------------------------------------------------------------------
 
 MODBUS4QT_ROOT = $${PWD}/..
+
 include( $${MODBUS4QT_ROOT}/modbus4qt_config.pri )
 include( $${MODBUS4QT_ROOT}/modbus4qt_build.pri )
 include( $${MODBUS4QT_ROOT}/modbus4qt_paths.pri )
 
 TEMPLATE = lib
 TARGET   = $$qtLibraryTarget(modbus4qt)
+
+# The following define makes your compiler emit warnings if you use
+# any feature of Qt which has been marked as deprecated (the exact warnings
+# depend on your compiler). Please consult the documentation of the
+# deprecated API in order to know how to port your code away from it.
+#
+DEFINES += QT_DEPRECATED_WARNINGS
+
+
+# You can also make your code fail to compile if you use deprecated APIs.
+# In order to do so, uncomment the following line.
+# You can also select to disable deprecated APIs only up to a certain version of Qt.
+#
+# disables all the APIs deprecated before Qt 5.0.0
+#
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050000
+
+CONFIG += c++11
 
 DESTDIR     = $${MODBUS4QT_BUILD}/lib
 MOC_DIR     = $${MOC_DIR}/modbus4qt
@@ -59,9 +78,9 @@ SOURCES += utils.cpp \
     client.cpp \
     rtu_client.cpp \
     server.cpp \
-#    tcp_server.cpp \
-    rtu_server.cpp \
     tcp_server.cpp \
+    rtu_server.cpp \
+#    tcp_server.cpp \
     device.cpp \
     dummy_device.cpp
 
@@ -73,9 +92,9 @@ HEADERS += global.h \
     client.h \
     rtu_client.h \
     server.h \
-#    tcp_server.h \
-    rtu_server.h \
     tcp_server.h \
+    rtu_server.h \
+#    tcp_server.h \
     device.h \
     dummy_device.h
 
@@ -83,15 +102,15 @@ HEADERS += global.h \
 # Install directives
 #
 
-target.path     = $${MODBUS4QT_INSTALL_LIBS}
+#target.path     = $${MODBUS4QT_INSTALL_LIBS}
 
-doc.files       = $${MODBUS4QT_ROOT}/doc/html
-unix:doc.files += $${MODBUS4QT_ROOT}/doc/man
-doc.path        = $${MODBUS4QT_INSTALL_DOCS}
+#doc.files       = $${MODBUS4QT_ROOT}/doc/html
+#unix:doc.files += $${MODBUS4QT_ROOT}/doc/man
+#doc.path        = $${MODBUS4QT_INSTALL_DOCS}
 
-INSTALLS        = target doc
+#INSTALLS        = target doc
 
-headers.files   = $${HEADERS}
-headers.path    = $${MODBUS4QT_INSTALL_HEADERS}
+#headers.files   = $${HEADERS}
+#headers.path    = $${MODBUS4QT_INSTALL_HEADERS}
 
-INSTALLS       += headers
+#INSTALLS       += headers

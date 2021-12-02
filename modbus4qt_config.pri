@@ -27,29 +27,29 @@
 #
 #------------------------------------------------------------------------------
 
-MODBUS4QT_VER_MAJ = 1
-MODBUS4QT_VER_MIN = 0
-MODBUS4QT_VER_PAT = 0
-MODBUS4QT_VERSION = $${MODBUS4QT_VER_MAJ}.$${MODBUS4QT_VER_MIN}.$${MODBUS4QT_VER_PAT}
+#MODBUS4QT_VER_MAJ = 1
+#MODBUS4QT_VER_MIN = 0
+#MODBUS4QT_VER_PAT = 0
+#MODBUS4QT_VERSION = $${MODBUS4QT_VER_MAJ}.$${MODBUS4QT_VER_MIN}.$${MODBUS4QT_VER_PAT}
 
 #------------------------------------------------------------------------------
 # Install paths
 #------------------------------------------------------------------------------
 
-MODBUS4QT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
+#MODBUS4QT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
 
-unix {
-    MODBUS4QT_INSTALL_PREFIX    = /usr/local
-}
+#unix {
+#    MODBUS4QT_INSTALL_PREFIX    = /usr/local
+#}
 
-win32 {
-    MODBUS4QT_INSTALL_PREFIX = c:/lib/modbus4qt-$$MODBUS4QT_VERSION
-}
+#win32 {
+#    MODBUS4QT_INSTALL_PREFIX = c:/lib/modbus4qt-$$MODBUS4QT_VERSION
+#}
 
-MODBUS4QT_INSTALL_BIN       = $${MODBUS4QT_INSTALL_PREFIX}/bin
-MODBUS4QT_INSTALL_DOCS      = $${MODBUS4QT_INSTALL_PREFIX}/doc/modbus4qt
-MODBUS4QT_INSTALL_HEADERS   = $${MODBUS4QT_INSTALL_PREFIX}/include/modbus4qt
-MODBUS4QT_INSTALL_LIBS      = $${MODBUS4QT_INSTALL_PREFIX}/lib
+#MODBUS4QT_INSTALL_BIN       = $${MODBUS4QT_INSTALL_PREFIX}/bin
+#MODBUS4QT_INSTALL_DOCS      = $${MODBUS4QT_INSTALL_PREFIX}/doc/modbus4qt
+#MODBUS4QT_INSTALL_HEADERS   = $${MODBUS4QT_INSTALL_PREFIX}/include/modbus4qt
+#MODBUS4QT_INSTALL_LIBS      = $${MODBUS4QT_INSTALL_PREFIX}/lib
 
 #------------------------------------------------------------------------------
 # Features
@@ -63,7 +63,7 @@ MODBUS4QT_INSTALL_LIBS      = $${MODBUS4QT_INSTALL_PREFIX}/lib
 # Qt features, because you will have to reinstall the modbus4qt features,
 # with every Qt upgrade.
 
-MODBUS4QT_INSTALL_FEATURES  = $${MODBUS4QT_INSTALL_PREFIX}/features
+#MODBUS4QT_INSTALL_FEATURES  = $${MODBUS4QT_INSTALL_PREFIX}/features
 
 #------------------------------------------------------------------------------
 # Build the static/shared libraries

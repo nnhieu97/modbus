@@ -12,7 +12,7 @@ MODBUS4QT_BUILD = $${MODBUS4QT_ROOT}/build
 include($${MODBUS4QT_ROOT}/modbus4qt_config.pri)
 include($${MODBUS4QT_ROOT}/modbus4qt_build.pri)
 
-QT += network widgets serialport
+QT += network serialport
 
 INCLUDEPATH += $${MODBUS4QT_ROOT}
 LIBS += -L$${MODBUS4QT_BUILD}/lib -lmodbus4qt
