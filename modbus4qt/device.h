@@ -27,6 +27,7 @@
 #define DEVICE_H
 
 #include <QObject>
+#include <QIODevice>
 
 #include "types.h"
 

@@ -82,7 +82,8 @@ SOURCES += utils.cpp \
     rtu_server.cpp \
 #    tcp_server.cpp \
     device.cpp \
-    dummy_device.cpp
+    dummy_device.cpp \
+    types.cpp
 
 HEADERS += global.h \
     consts.h \
