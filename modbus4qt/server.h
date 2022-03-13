@@ -39,108 +39,76 @@ namespace modbus4qt
 
 class Device;
 
-/**
-* @brief
-* @en Abtract modbus server
-* @ru Абстрактный сервер протокола modbus
- */
+//!
+//! \brief Abtract modbus server
+//!
 class Server : public QObject
 {
     Q_OBJECT
 
     private:
-        /**
-         * @brief
-         * @en device_
-         * @ru Исполнительное устройство
-         */
-        Device *device_;
 
-        /**
-         * @brief
-         * @en IO device for data exchange with client
-         * @ru Устройство ввода-вывода, через которое идет обмен данными с клиентом
-         */
+        //!
+        //! \brief device_
+        //!
+        Device* device_;
+
+        //!
+        //! \brief en IO device for data exchange with client (master)
+        //!
         QIODevice* ioDevice_;
 
-        /**
-         * @brief
-         * @en Maximum allowed timeout for reading data
-         * @ru Максимальное время ожидания чтения данных
-         *
-         * @en Default value 5000 ms (5 sec).
-         * @ru Значение по умолчанию 5000 мс (5 с).
-         */
+        //!
+        //! \brief Maximum allowed timeout for reading data
+        //!
+        //! Default value 5000 ms (5 sec).
+        //!
         int readTimeout_;
 
-        /**
-         * @brief
-         * @en Maximum allowed timeout for sending data
-         * @ru Максимальное время ожидания записи данных
-         *
-         * @en Default value 5000 ms (5 sec).
-         * @ru Значение по умолчанию 5000 мс (5 с).
-         */
+        //!
+        //! \brief Maximum allowed timeout for sending data
+        //!
+        //! Default value 5000 ms (5 sec).
+        //!
         int writeTimeout_;
 
-        /**
-         * @brief
-         * @en Identifier number of server
-         * @ru Идентификатор сервера
-         */
+        //!
+        //! \brief Identifier number of server
+        //!
         quint8 unitID_;
 
     public:
 
-        /**
-         * @brief
-         * @en Default constructor
-         * @ru Конструктор по умолчанию
-         *
-         * @param
-         * @en parent - parent object
-         * @ru parent - указатель на объект-родитель.
-         */
+        //!
+        //! \brief Default constructor
+        //! \param parent - parent object
+        //!
         explicit Server(QObject *parent = 0);
 
     signals:
 
-        /**
-         * @brief
-         * @en Signal for debuggin info
-         * @ru Сигнал для вывода отладочного сообщения
-         *
-         * @param
-         * @en msg - Debug message
-         * @ru msg - Строка с отладочным сообщение
-         */
+        //!
+        //! \brief Signal for debuggin info
+        //! \param msg - Debug message
+        //!
         void debugMessage(const QString& msg);
 
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
-         *
-         * @param
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
+        //!
+        //! \brief Signal for informing about error occured
+        //! \param msg - Message with error description
+        //!
         void errorMessage(const QString& msg);
 
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
-         *
-         * @param
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
+        //!
+        //! \brief Signal for informing about other events
+        //! \param msg - Message with event description
+        //!
         void infoMessage(const QString& msg);
 };
 
 } // namespace modbus4qt
 
-
-
 #endif // SERVER_H
+
+//-----------------------------------------------------------------------------
+// EOF
