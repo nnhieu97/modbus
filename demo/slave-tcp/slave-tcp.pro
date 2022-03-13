@@ -1,3 +1,5 @@
+slave-tcp.pro
+
 #*****************************************************************************
 # modbus4qt Library
 # Author: Leonid Kolesnik, l.kolesnik@m-i.ru
@@ -23,10 +25,23 @@
 # If not, see <https://www.gnu.org/licenses/>.
 #****************************************************************************/
 
-TEMPLATE = subdirs
+MODBUS4QT_ROOT = $${PWD}/../../
 
-    SUBDIRS += \
-        master-rtu \
-        master-tcp \
-    slave-tcp
-        #modbus4qt-server
+include( $${MODBUS4QT_ROOT}/demo/demo.pri )
+
+TARGET = slave-tcp
+
+MOC_DIR = $${MOC_DIR}/demo/slave-tcp
+OBJECTS_DIR = $${OBJECTS_DIR}/demo/slave-tcp
+
+SOURCES += \
+    main.cpp \
+    main_window.cpp
+
+HEADERS  += \
+    main.h \
+    main_window.h
+
+#target.path = $${MODBUS4QT_INSTALL_BIN}
+
+#INSTALLS = target
