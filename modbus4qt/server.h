@@ -46,6 +46,34 @@ class Server : public QObject
 {
     Q_OBJECT
 
+    public:
+
+        //!
+        //! \brief Default constructor
+        //! \param parent - parent object
+        //!
+        explicit Server(QObject *parent = 0);
+
+    signals:
+
+        //!
+        //! \brief Signal for debuggin info
+        //! \param msg - Debug message
+        //!
+        void debugMessage(const QString& msg);
+
+        //!
+        //! \brief Signal for informing about error occured
+        //! \param msg - Message with error description
+        //!
+        void errorMessage(const QString& msg);
+
+        //!
+        //! \brief Signal for informing about other events
+        //! \param msg - Message with event description
+        //!
+        void infoMessage(const QString& msg);
+
     private:
 
         //!
@@ -77,33 +105,6 @@ class Server : public QObject
         //!
         quint8 unitID_;
 
-    public:
-
-        //!
-        //! \brief Default constructor
-        //! \param parent - parent object
-        //!
-        explicit Server(QObject *parent = 0);
-
-    signals:
-
-        //!
-        //! \brief Signal for debuggin info
-        //! \param msg - Debug message
-        //!
-        void debugMessage(const QString& msg);
-
-        //!
-        //! \brief Signal for informing about error occured
-        //! \param msg - Message with error description
-        //!
-        void errorMessage(const QString& msg);
-
-        //!
-        //! \brief Signal for informing about other events
-        //! \param msg - Message with event description
-        //!
-        void infoMessage(const QString& msg);
 };
 
 } // namespace modbus4qt
