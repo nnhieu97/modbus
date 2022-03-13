@@ -33,7 +33,7 @@ Server::Server(QObject *parent)
 {
 }
 
-void Server::processRequest()
+void Server::processIncomingRequest()
 {
 
 }
