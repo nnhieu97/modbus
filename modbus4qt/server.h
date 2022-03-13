@@ -54,6 +54,25 @@ class Server : public QObject
         //!
         explicit Server(QObject *parent = 0);
 
+        ///
+
+        void addCoil();
+
+        void addDescreteInput();
+
+        void addInputRegister();
+
+        void addHoldingRegister();
+
+        virtual void readCoilData() = 0;
+
+        ///
+
+        //!
+        //! \brief process incoming modbus request
+        //!
+        void processIncomingRequest();
+
     signals:
 
         //!
@@ -77,26 +96,27 @@ class Server : public QObject
     private:
 
         //!
-        //! \brief device_
+        //! \brief Read device to read data from
+        //!
+        //! User can use it if we need to make modbus interface to equipment connected to PC.
+        //! PC will be modbus server in this case.
+        //!
+        //! \todo I do not know if we really need it here! 2022-03-13
         //!
         Device* device_;
 
         //!
-        //! \brief en IO device for data exchange with client (master)
+        //! \brief IO device for data exchange with client (master)
         //!
         QIODevice* ioDevice_;
 
         //!
         //! \brief Maximum allowed timeout for reading data
         //!
-        //! Default value 5000 ms (5 sec).
-        //!
         int readTimeout_;
 
         //!
         //! \brief Maximum allowed timeout for sending data
-        //!
-        //! Default value 5000 ms (5 sec).
         //!
         int writeTimeout_;
 
@@ -105,6 +125,9 @@ class Server : public QObject
         //!
         quint8 unitID_;
 
+    // internal modbus data...
+
+        QVector<bool> coils;
 };
 
 } // namespace modbus4qt

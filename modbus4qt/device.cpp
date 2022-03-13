@@ -25,6 +25,8 @@
 
 #include "device.h"
 
+#include <QIODevice>
+
 namespace modbus4qt
 {
 

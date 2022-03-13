@@ -27,9 +27,10 @@
 #define DEVICE_H
 
 #include <QObject>
-#include <QIODevice>
 
 #include "types.h"
+
+class QIODevice;
 
 namespace modbus4qt
 {

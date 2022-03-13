@@ -33,4 +33,9 @@ Server::Server(QObject *parent)
 {
 }
 
+void Server::processRequest()
+{
+
+}
+
 } // namespace modbus4qt
