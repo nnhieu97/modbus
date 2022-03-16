@@ -291,79 +291,26 @@ RtuClient::prepareADU_(const ProtocolDataUnit &pdu, int pduSize)
 ProtocolDataUnit
 RtuClient::processADU_(const QByteArray &buf)
 {
-    qDebug() << "ADU: " << buf.toHex();
-    qDebug() << "ADU size: " << buf.size();
+    ProtocolDataUnit pdu;
 
-    QByteArray tempBuf(buf);
+    ErrorCodes errorCode;
 
-    // For any case we should check size of recieved data to protect memory
-    //
-    // На всякий случай проверяем размер полученных данных, чтобы не ничего не испортить
-    //
-    if (tempBuf.size() > int(sizeof(RTUApplicationDataUnit)))
-        tempBuf.resize(sizeof(RTUApplicationDataUnit));
-
-    int tempBufSize = tempBuf.size();
-
-    // Minimum ADU size can be 5 bytes: 1 byte for address, 2 bytes for minimum PDU, 2 bytes for CRC
-    //
-    // Минимальный размер ADU может быть 5 байт: 1 байт адрес, 2 байта PDU и 2 байта CRC
-    //
-    if (tempBufSize < 5)
+    if (!getPDUForRTU(buf, pdu, errorCode))
     {
-        emit errorMessage(unitID_, tr("Wrong application data unit recieved!"));
-        tempBuf.resize(5);
-        tempBufSize = 5;
+        switch (errorCode)
+        {
+            case TOO_SHORT_ADU :
+                emit errorMessage(unitID_, tr("Application data unit recieved less then 5 bytes!"));
+            break;
+
+            case CRC_MISMATCH :
+                emit errorMessage(unitID_, tr("CRC mismatch!"));
+            break;
+            default: ; // default is empty
+        }
     }
 
-    RTUApplicationDataUnit adu;
-
-    adu.unitId = tempBuf[0];
-    adu.pdu.functionCode = tempBuf[1];
-
-    for (int i = 2; i < tempBufSize - 2; ++i)
-        adu.pdu.data[i - 2] = tempBuf[i];
-
-    WordRec aduCrc;
-    aduCrc.bytes[0] = tempBuf[tempBufSize - 2];
-    aduCrc.bytes[1] = tempBuf[tempBufSize - 1];
-
-    adu.crc = aduCrc.word;
-
-    quint16 crc = net2host(adu.crc);
-
-    qDebug() << QString("recievied crc: %1").arg(crc, 4, 16);
-
-    // Calculate CRC for recived packet
-    // At first we should delete last 2 bytes, which is the CRC
-    //
-    // Высчитываем контрольную сумму для полученного пакета
-    // Сначала для этого удаляем последние 2 байта, которые и содержат контрольную сумму
-    //
-    tempBuf.resize(tempBuf.size() - 2);
-    quint16 crcCalc = crc16(tempBuf);
-
-    qDebug() << QString("calculated crc: %1").arg(crcCalc, 4, 16);
-
-    // In case of mismatch emit error message
-    //
-    // Если она не сходится, выдаем сообщение об ошибке
-    //
-    if (crc != crcCalc) emit errorMessage(unitID_, tr("CRC mismatch!"));
-
-#ifndef QT_NO_DEBUG
-    // If we want to print PDU into log file we should remove 1st byte
-    // After that we have pdu in tempBuf as CRC was deleted before
-    //
-    // Чтобы вывести в лог PDU, удаляем 1-й байт
-    // Теперь в tempBuf остался только pdu, так как CRC удалили ранее
-    //
-    tempBuf.remove(0, 1);
-    qDebug() << "PDU: " << tempBuf.toHex();
-    qDebug() << "PDU size: " << tempBuf.size();
-#endif
-
-    return adu.pdu;
+    return pdu;
 }
 
 //-----------------------------------------------------------------------------

@@ -28,6 +28,9 @@
 
 #include <QObject>
 
+#include <QMap>
+#include <QSet>
+
 #include "global.h"
 #include "consts.h"
 #include "types.h"
@@ -37,7 +40,7 @@ class QIODevice;
 namespace modbus4qt
 {
 
-class Device;
+//class Device;
 
 //!
 //! \brief Abtract modbus server
@@ -54,19 +57,32 @@ class Server : public QObject
         //!
         explicit Server(QObject *parent = 0);
 
-        ///
+        //!
+        //! \brief Add coil into server memory structure and init it with false value
+        //! \param index - new coil index
+        //!
+        //! If coil with index is already exist do nothing.
+        //!
+        void addCoil(quint16 index);
 
-        void addCoil();
+        //!
+        //! \brief Add coil into server memory structure and init them with false value
+        //! \param startIndex - start index for adding coils
+        //! \param endIndex - and index for addign coils
+        //!
+        //! If some of adding coils with index is already exist skip.
+        //!
+        void addCoils(quint16 startIndex, quint16 endIndex);
 
-        void addDescreteInput();
+//        void addDescreteInput();
 
-        void addInputRegister();
+//        void addInputRegister();
 
-        void addHoldingRegister();
+//        void addHoldingRegister();
 
-        virtual void readCoilData() = 0;
+//        virtual void readCoilData() = 0;
 
-        ///
+    public slots :
 
         //!
         //! \brief process incoming modbus request
@@ -93,6 +109,10 @@ class Server : public QObject
         //!
         void infoMessage(const QString& msg);
 
+    protected:
+
+        virtual ProtocolDataUnit processADU_(const QByteArray& buf) = 0;
+
     private:
 
         //!
@@ -103,7 +123,7 @@ class Server : public QObject
         //!
         //! \todo I do not know if we really need it here! 2022-03-13
         //!
-        Device* device_;
+        //Device* device_;
 
         //!
         //! \brief IO device for data exchange with client (master)
@@ -125,9 +145,17 @@ class Server : public QObject
         //!
         quint8 unitID_;
 
-    // internal modbus data...
+        // indexes of modbus data...
 
-        QVector<bool> coils;
+        //!
+        //! \brief Set of coils indexes in server memory
+        //!
+        QSet<quint16> coilsIndexes_;
+
+        //!
+        //! \brief Values of coils in server memory
+        //!
+        QMap<quint16, bool> coilsData_;
 };
 
 } // namespace modbus4qt

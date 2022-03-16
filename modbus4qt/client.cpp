@@ -36,14 +36,13 @@ namespace modbus4qt
 {
 
 Client::Client(QObject *parent) :
-    QObject(parent),
+    AbstractDevice(parent),
     ioDevice_(NULL),
     readTimeout_(DEFAULT_TIMEOUT),
     writeTimeout_(DEFAULT_TIMEOUT),
     unitID_(0)
 {
 }
-
 
 //-----------------------------------------------------------------------------
 

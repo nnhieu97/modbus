@@ -31,25 +31,18 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#include "types.h"
+
 namespace modbus4qt
 {
 
-/**
- * @brief
- * @en Calculate the checksum of the data buffer for the crc16 algorithm
- * @ru Расчитывает контрольную сумму буфера данных по алгоритму crc16
- *
- * @param
- * @en buf - buffer to calculate crc
- * @ru buf - буфер, для которого производится расчет
- *
- * @return
- * @en CRC calculated
- * @ru расчитанная контрольная сумма
- *
- * @en The code of this function was taken from из <a href="http://www.libmodbus.org">libmodbus</a>
- * @ru Код этой функции заимствован из <a href="http://www.libmodbus.org">libmodbus</a>
- */
+//!
+//! \brief Calculate the checksum of the data buffer for the crc16 algorithm
+//! \param buf - buffer to calculate crc
+//! \return CRC calculated
+//!
+//! The code of this function was taken from из <a href="http://www.libmodbus.org">libmodbus</a>
+//!
 quint16 crc16(const QByteArray& buf);
 
 /**
@@ -133,16 +126,7 @@ void putRegistersIntoBuffer(quint8* buffer, const QVector<quint16>& data);
   * @en Hi byte of word
   * @ru Старший байт двухбайтного целого числа
   */
-inline quint8 hi(quint16 word)
-{
-    quint8* bytes = (quint8*)&word;
-
-    quint16 test = 1; // * 0x0001 *
-    if (*((quint8*)&test) == 0)
-        return bytes[0];	// big endian (network/motorolla)
-    else
-        return bytes[1];	// little endian (intel)
-}
+quint8 hi(quint16 word);
 
 /**
   * @brief
@@ -157,16 +141,7 @@ inline quint8 hi(quint16 word)
   * @en Low byte of word
   * @ru Младший байт двухбайтного целого числа
   */
-inline quint8 lo(quint16 word)
-{
-    quint8* bytes = (quint8*)&word;
-
-    quint16 test = 1; // * 0x0001 *
-    if (*((quint8*)&test) == 0)
-        return bytes[1];	// big endian (network/motorolla)
-    else
-        return bytes[0];	// little endian (intel)
-}
+quint8 lo(quint16 word);
 
 /**
   * @brief
@@ -181,14 +156,7 @@ inline quint8 lo(quint16 word)
   * @en Word with swapped bytes
   * @ru Слово с переставленными байтами
   */
-inline quint16 swap(quint16 word)
-{
-    quint16 result = lo(word);
-    result = result << 8;
-    result += hi(word);
-
-    return result;
-}
+quint16 swap(quint16 word);
 
 /**
   * @brief
@@ -203,14 +171,7 @@ inline quint16 swap(quint16 word)
   * @en Two bytes word with net byte order
   * @ru Двухбайтное слово с сетевым порядком байт
   */
-inline quint16 host2net(quint16 word)
-{
-    quint16 test = 1; // * 0x0001 *
-    if (*((quint8*)&test) == 0)
-        return word;		// big endian (network/motorolla)
-    else
-        return swap(word);	// little endian (intel)
-}
+quint16 host2net(quint16 word);
 
 /**
   * @brief
@@ -225,14 +186,7 @@ inline quint16 host2net(quint16 word)
   * @en Two bytes word with local byte order
   * @ru Двухбайтное слово с локальным порядком байт
   */
-inline quint16 net2host(quint16 word)
-{
-    quint16 test = 1; // * 0x0001 *
-    if (*((quint8*)&test) == 0)
-        return word;		// big endian (network/motorolla)
-    else
-        return swap(word);	// little endian (intel)
-}
+quint16 net2host(quint16 word);
 
 /**
   * @brief
@@ -243,14 +197,7 @@ inline quint16 net2host(quint16 word)
   * @en time - pause time, milliseconds
   * @ru time - время задержки в миллисекундах
   */
-inline void wait(int time)
-{
-    QMutex mutex;
-    mutex.lock();
-
-    QWaitCondition pause;
-    pause.wait(&mutex, time);
-}
+void wait(int time);
 
 } // namespace modbus
 
