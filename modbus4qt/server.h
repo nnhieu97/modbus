@@ -51,26 +51,6 @@ class Server : public AbstractDevice
 {
     Q_OBJECT
 
-    signals:
-
-        //!
-        //! \brief Signal for debugging info
-        //! \param msg - Debug message
-        //!
-        void debugMessage(const QString& msg);
-
-        //!
-        //! \brief Signal for informing about error occured
-        //! \param msg - Message with error description
-        //!
-        void errorMessage(const QString& msg);
-
-        //!
-        //! \brief Signal for informing about other events
-        //! \param msg - Message with event description
-        //!
-        void infoMessage(const QString& msg);
-
     public:
 
         //!
