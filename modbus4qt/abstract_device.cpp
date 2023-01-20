@@ -35,7 +35,8 @@ namespace modbus4qt
 
 //-----------------------------------------------------------------------------
 
-AbstractDevice::AbstractDevice(QObject *parent) : QObject(parent)
+AbstractDevice::AbstractDevice(QObject *parent)
+    : QObject(parent)
 {
 
 }
@@ -43,7 +44,7 @@ AbstractDevice::AbstractDevice(QObject *parent) : QObject(parent)
 //-----------------------------------------------------------------------------
 
 bool
-AbstractDevice::getPDUForRTU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& errorCode)
+AbstractDevice::preparePDUForRTU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& errorCode)
 {
     errorCode = NO_ERROR;
 

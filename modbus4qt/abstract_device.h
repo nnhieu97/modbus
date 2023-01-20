@@ -49,7 +49,10 @@ class AbstractDevice : public QObject
         };
         Q_ENUM(ErrorCodes)
 
-
+        //!
+        //! \brief AbstractDevice - default constructor
+        //! \param parent
+        //!
         explicit AbstractDevice(QObject* parent = nullptr);
 
         //!
@@ -57,7 +60,8 @@ class AbstractDevice : public QObject
         //! \param buf - array with data readed, should contain ADU record
         //! \return Protocol data unit
         //!
-        static bool getPDUForRTU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& errorCode);
+        static bool preparePDUForRTU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& errorCode);
+
     signals:
 
         //!

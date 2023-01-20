@@ -35,6 +35,8 @@
 #include "consts.h"
 #include "types.h"
 
+#include "abstract_device.h"
+
 class QIODevice;
 
 namespace modbus4qt
@@ -45,9 +47,29 @@ namespace modbus4qt
 //!
 //! \brief Abtract modbus server
 //!
-class Server : public QObject
+class Server : public AbstractDevice
 {
     Q_OBJECT
+
+    signals:
+
+        //!
+        //! \brief Signal for debugging info
+        //! \param msg - Debug message
+        //!
+        void debugMessage(const QString& msg);
+
+        //!
+        //! \brief Signal for informing about error occured
+        //! \param msg - Message with error description
+        //!
+        void errorMessage(const QString& msg);
+
+        //!
+        //! \brief Signal for informing about other events
+        //! \param msg - Message with event description
+        //!
+        void infoMessage(const QString& msg);
 
     public:
 
@@ -66,7 +88,7 @@ class Server : public QObject
         void addCoil(quint16 index);
 
         //!
-        //! \brief Add coil into server memory structure and init them with false value
+        //! \brief Add coils into server memory structure and init them with false value
         //! \param startIndex - start index for adding coils
         //! \param endIndex - and index for addign coils
         //!
@@ -74,11 +96,56 @@ class Server : public QObject
         //!
         void addCoils(quint16 startIndex, quint16 endIndex);
 
-//        void addDescreteInput();
+        //!
+        //! \brief Add descrete input into server memory structure and init it with false value
+        //! \param index - new descerte input index
+        //!
+        //! If descrete input with index is already exist do nothing.
+        //!
+        void addDescreteInput(quint16 index);
 
-//        void addInputRegister();
+        //!
+        //! \brief Add descrete inputs into server memory structure and init them with false value
+        //! \param startIndex - start index for adding descrete inputs
+        //! \param endIndex - and index for addign descrete inputs
+        //!
+        //! If some of adding descrete input with index is already exist skip.
+        //!
+        void addDescreteInputs(quint16 startIndex, quint16 endIndex);
 
-//        void addHoldingRegister();
+        //!
+        //! \brief Add holding register into server memory structure and init it with zero
+        //! \param index - new holding register index
+        //!
+        //! If holding register with index is already exist do nothing.
+        //!
+        void addHoldingRegister(quint16 index);
+
+        //!
+        //! \brief Add holding registers into server memory structure and init them with zero
+        //! \param startIndex - start index for adding holding registers
+        //! \param endIndex - and index for addign holding registers
+        //!
+        //! If some of adding holding registers with index is already exist skip.
+        //!
+        void addHoldingRegisters(quint16 startIndex, quint16 endIndex);
+
+        //!
+        //! \brief Add input register into server memory structure and init it with zero
+        //! \param index - new input register index
+        //!
+        //! If input register with index is already exist do nothing.
+        //!
+        void addInputRegister(quint16 index);
+
+        //!
+        //! \brief Add input registers into server memory structure and init them with zero
+        //! \param startIndex - start index for adding input registers
+        //! \param endIndex - and index for addign input registers
+        //!
+        //! If some of adding input registers with index is already exist skip.
+        //!
+        void addInputRegisters(quint16 startIndex, quint16 endIndex);
 
 //        virtual void readCoilData() = 0;
 
@@ -88,26 +155,6 @@ class Server : public QObject
         //! \brief process incoming modbus request
         //!
         void processIncomingRequest();
-
-    signals:
-
-        //!
-        //! \brief Signal for debuggin info
-        //! \param msg - Debug message
-        //!
-        void debugMessage(const QString& msg);
-
-        //!
-        //! \brief Signal for informing about error occured
-        //! \param msg - Message with error description
-        //!
-        void errorMessage(const QString& msg);
-
-        //!
-        //! \brief Signal for informing about other events
-        //! \param msg - Message with event description
-        //!
-        void infoMessage(const QString& msg);
 
     protected:
 
@@ -145,17 +192,25 @@ class Server : public QObject
         //!
         quint8 unitID_;
 
-        // indexes of modbus data...
-
-        //!
-        //! \brief Set of coils indexes in server memory
-        //!
-        QSet<quint16> coilsIndexes_;
-
         //!
         //! \brief Values of coils in server memory
         //!
-        QMap<quint16, bool> coilsData_;
+        QMap<quint16, bool> coils_;
+
+        //!
+        //! \brief Values of descrete inputs in server memory
+        //!
+        QMap<quint16, bool> descreteInputs_;
+
+        //!
+        //! \brief Values of holding registers in server memory
+        //!
+        QMap<quint16, quint16> holdingRegisters_;
+
+        //!
+        //! \brief Values of input registers in server memory
+        //!
+        QMap<quint16, quint16> inputRegisters_;
 };
 
 } // namespace modbus4qt
