@@ -23,8 +23,9 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "main_window.h"
 #include "main.h"
+#include "add_cells_dialog.h"
+#include "main_window.h"
 
 #include <QtGui>
 #include <QAction>
@@ -84,6 +85,18 @@ MainWindow::about()
     msgBox.setInformativeText(QString("Copyright \nhttp://www.") + OrganizationDomain);
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.exec();
+}
+
+//-----------------------------------------------------------------------------
+
+void
+MainWindow::addCoils()
+{
+    AddCellsDialog addCellsDialog;
+    if (addCellsDialog.exec() == QDialog::Accepted)
+    {
+
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -169,6 +182,8 @@ MainWindow::createCoilsGroupBox_()
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     QPushButton* addButton = new QPushButton();
     addButton->setText(tr("Add..."));
+    connect(addButton, SIGNAL(clicked()), this, SLOT(addCoils()));
+
     buttonLayout->addWidget(addButton);
     buttonLayout->addStretch();
 

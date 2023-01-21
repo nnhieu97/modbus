@@ -49,6 +49,8 @@ class MainWindow : public QMainWindow
 
         void about();
 
+        void addCoils();
+
     private: // fields
 
         QAction* exitAction_;

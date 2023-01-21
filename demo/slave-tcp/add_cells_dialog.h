@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+class QSpinBox;
+
 class AddCellsDialog : public QDialog
 {
     Q_OBJECT
@@ -11,8 +13,20 @@ class AddCellsDialog : public QDialog
 
         explicit AddCellsDialog(QWidget* parent = nullptr);
 
+        int startAddress() const;
+
+        int cellQuantity() const;
+
     signals:
 
+    protected:
+
+        QSpinBox* startAddressEdit_;
+
+        QSpinBox* cellsQuanityEdit_;
+
+    protected slots:
+        void setMaximumCellsQuantity(int startAddress);
 };
 
 #endif // ADDCELLSDIALOG_H
