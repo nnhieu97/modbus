@@ -28,6 +28,7 @@
 
 #include <QtGui>
 #include <QAction>
+#include <QCheckBox>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -36,43 +37,34 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QTableWidget>
 #include <QVBoxLayout>
-#include <QCheckBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     QWidget* centralWidget = new QWidget();
 
-    QVBoxLayout* mainLayout = new QVBoxLayout;
-    QHBoxLayout* registersLayout = new QHBoxLayout;
+    QVBoxLayout* mainLayout = new QVBoxLayout();
 
-    createServerGroupBox_();
+    QGridLayout* registersLayout = new QGridLayout();
+    registersLayout->addWidget(createCoilsGroupBox_(), 0, 0);
+    registersLayout->addWidget(createHoldingRegistersGroupBox_(), 0, 1);
+    registersLayout->addWidget(createDiscreteInputsGroupBox_(), 1, 0);
+    registersLayout->addWidget(createInputRegistersGroupBox_(), 1, 1);
 
-    createCoilsGroupBox_();
-    createDiscreteInputsGroupBox_();
-    createInputRegistersGroupBox_();
-    createHoldingRegistersGroupBox_();
-
-    registersLayout->addWidget(coilsGroupBox_);
-    registersLayout->addWidget(discreteInputsGroupBox_);
-    registersLayout->addWidget(inputRegistersGroupBox_);
-    registersLayout->addWidget(holdingRegistersGroupBox_);
-
-    mainLayout->addWidget(serverGroupBox_);
-    mainLayout->addStretch();
+    mainLayout->addWidget(createServerGroupBox_());
     mainLayout->addLayout(registersLayout);
-    mainLayout->addStretch();
-    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     centralWidget->setLayout(mainLayout);
 
     setCentralWidget(centralWidget);
 
     createActions_();
     createMenus_();
-    statusBar();
-    setWindowTitle(ApplicationName);
 
+    statusBar();
+
+    setWindowTitle(ApplicationName);
 }
 
 //-----------------------------------------------------------------------------
@@ -129,10 +121,10 @@ MainWindow::createMenus_()
 
 //-----------------------------------------------------------------------------
 
-void
+QGroupBox*
 MainWindow::createServerGroupBox_()
 {
-    serverGroupBox_ = new QGroupBox(tr("MODBUS TCP Server"));
+    QGroupBox* serverGroupBox = new QGroupBox(tr("MODBUS TCP Server"));
     QHBoxLayout *layout = new QHBoxLayout;
 
     QLabel* serverAddressLabel = new QLabel(tr("Server address:"));
@@ -141,130 +133,132 @@ MainWindow::createServerGroupBox_()
     layout->addWidget(serverAddressLabel);
     layout->addWidget(serverAddress_);
 
-    layout->addStretch();
-
     QLabel* serverPortLabel = new QLabel(tr("Server port:"));
     serverPort_ = new QSpinBox();
     serverPort_->setRange(1, 65535);
     serverPort_->setValue(502);
 
+    listenButton_ = new QPushButton();
+    listenButton_->setText(tr("Listen"));
+    listenButton_->setCheckable(true);
+
     layout->addWidget(serverPortLabel);
     layout->addWidget(serverPort_);
+    layout->addWidget(listenButton_);
 
-    serverGroupBox_->setLayout(layout);
+    layout->addStretch();
+
+    serverGroupBox->setLayout(layout);
+
+    return serverGroupBox;
 }
 
 //-----------------------------------------------------------------------------
 
-void
-MainWindow::createCoilsGroupBox_() // r/w
+QGroupBox*
+MainWindow::createCoilsGroupBox_()
 {
-    coilsGroupBox_ = new QGroupBox(tr("Coils"));
-    QVBoxLayout* layout = new QVBoxLayout;
+    QGroupBox* coilsGroupBox = new QGroupBox(tr("Coils"));
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QCheckBox* coil1_ = new QCheckBox("1");
-    QCheckBox* coil2_ = new QCheckBox("2");
-    QCheckBox* coil3_ = new QCheckBox("3");
-    QCheckBox* coil4_ = new QCheckBox("4");
-    QCheckBox* coil5_ = new QCheckBox("5");
+    coilsTable_ = new QTableWidget(0, 2);
+    coilsTable_->setHorizontalHeaderLabels(QStringList()
+                                           << tr("Address")
+                                           << tr("Value"));
 
-    layout->addWidget(coil1_);
-    layout->addWidget(coil2_);
-    layout->addWidget(coil3_);
-    layout->addWidget(coil4_);
-    layout->addWidget(coil5_);
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    QPushButton* addButton = new QPushButton();
+    addButton->setText(tr("Add..."));
+    buttonLayout->addWidget(addButton);
+    buttonLayout->addStretch();
 
-    coilsGroupBox_->setLayout(layout);
+    layout->addWidget(coilsTable_);
+    layout->addLayout(buttonLayout);
+
+    coilsGroupBox->setLayout(layout);
+
+    return coilsGroupBox;
 }
 
 //-----------------------------------------------------------------------------
 
-void
+QGroupBox*
 MainWindow::createDiscreteInputsGroupBox_()
 {
-    discreteInputsGroupBox_ = new QGroupBox(tr("DisInput"));
-    QVBoxLayout* layout = new QVBoxLayout;
+    QGroupBox* discreteInputsGroupBox = new QGroupBox(tr("Discrete inputs"));
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QCheckBox* dIn1_ = new QCheckBox("1");
-    QCheckBox* dIn2_ = new QCheckBox("2");
-    QCheckBox* dIn3_ = new QCheckBox("3");
-    QCheckBox* dIn4_ = new QCheckBox("4");
-    QCheckBox* dIn5_ = new QCheckBox("5");
+    discreteInputsTable_ = new QTableWidget(0, 2);
+    discreteInputsTable_->setHorizontalHeaderLabels(QStringList()
+                                           << tr("Address")
+                                           << tr("Value"));
 
-    layout->addWidget(dIn1_);
-    layout->addWidget(dIn2_);
-    layout->addWidget(dIn3_);
-    layout->addWidget(dIn4_);
-    layout->addWidget(dIn5_);
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    QPushButton* addButton = new QPushButton();
+    addButton->setText(tr("Add..."));
+    buttonLayout->addWidget(addButton);
+    buttonLayout->addStretch();
 
-    discreteInputsGroupBox_->setLayout(layout);
+    layout->addWidget(discreteInputsTable_);
+    layout->addLayout(buttonLayout);
+
+    discreteInputsGroupBox->setLayout(layout);
+
+    return discreteInputsGroupBox;
 }
 
 //-----------------------------------------------------------------------------
 
-void
+QGroupBox*
 MainWindow::createInputRegistersGroupBox_()
 {
-    inputRegistersGroupBox_ = new QGroupBox(tr("Input Registers"));
-    QGridLayout* layout = new QGridLayout;
+    QGroupBox* inputRegistersGroupBox = new QGroupBox(tr("Input Registers"));
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QLineEdit* inReg1_ = new QLineEdit;
-    QLabel* inRegLabel1 = new QLabel("1");
-    QLineEdit* inReg2_ = new QLineEdit;
-    QLabel* inRegLabel2 = new QLabel("2");
-    QLineEdit* inReg3_ = new QLineEdit;
-    QLabel* inRegLabel3 = new QLabel("3");
-    QLineEdit* inReg4_ = new QLineEdit;
-    QLabel* inRegLabel4 = new QLabel("4");
-    QLineEdit* inReg5_ = new QLineEdit;
-    QLabel* inRegLabel5 = new QLabel("5");
+    inputRegistersTable_ = new QTableWidget(0, 2);
+    inputRegistersTable_->setHorizontalHeaderLabels(QStringList()
+                                           << tr("Address")
+                                           << tr("Value"));
 
-    layout->addWidget(inReg1_, 0, 0);
-    layout->addWidget(inRegLabel1, 0, 1);
-    layout->addWidget(inReg2_, 1, 0);
-    layout->addWidget(inRegLabel2, 1, 1);
-    layout->addWidget(inReg3_, 2, 0);
-    layout->addWidget(inRegLabel3, 2, 1);
-    layout->addWidget(inReg4_, 3, 0);
-    layout->addWidget(inRegLabel4, 3, 1);
-    layout->addWidget(inReg5_, 4, 0);
-    layout->addWidget(inRegLabel5, 4, 1);
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    QPushButton* addButton = new QPushButton();
+    addButton->setText(tr("Add..."));
+    buttonLayout->addWidget(addButton);
+    buttonLayout->addStretch();
 
-    inputRegistersGroupBox_->setLayout(layout);
+    layout->addWidget(inputRegistersTable_);
+    layout->addLayout(buttonLayout);
+
+    inputRegistersGroupBox->setLayout(layout);
+
+    return inputRegistersGroupBox;
 }
 
 //-----------------------------------------------------------------------------
 
-void
-MainWindow::createHoldingRegistersGroupBox_() // r/w
+QGroupBox*
+MainWindow::createHoldingRegistersGroupBox_()
 {
-    holdingRegistersGroupBox_ = new QGroupBox(tr("Holding Registers"));
-    QGridLayout* layout = new QGridLayout;
+    QGroupBox* holdingRegistersGroupBox = new QGroupBox(tr("Holding Registers"));
+    QVBoxLayout* layout = new QVBoxLayout();
 
-    QLineEdit* holdReg1_ = new QLineEdit;
-    QLabel* holdRegLabel1 = new QLabel("1");
-    QLineEdit* holdReg2_ = new QLineEdit;
-    QLabel* holdRegLabel2 = new QLabel("2");
-    QLineEdit* holdReg3_ = new QLineEdit;
-    QLabel* holdRegLabel3 = new QLabel("3");
-    QLineEdit* holdReg4_ = new QLineEdit;
-    QLabel* holdRegLabel4 = new QLabel("4");
-    QLineEdit* holdReg5_ = new QLineEdit;
-    QLabel* holdRegLabel5 = new QLabel("5");
+    holdingRegistersTable_ = new QTableWidget(0, 2);
+    holdingRegistersTable_->setHorizontalHeaderLabels(QStringList()
+                                           << tr("Address")
+                                           << tr("Value"));
 
-    layout->addWidget(holdReg1_, 0, 0);
-    layout->addWidget(holdRegLabel1, 0, 1);
-    layout->addWidget(holdReg2_, 1, 0);
-    layout->addWidget(holdRegLabel2, 1, 1);
-    layout->addWidget(holdReg3_, 2, 0);
-    layout->addWidget(holdRegLabel3, 2, 1);
-    layout->addWidget(holdReg4_, 3, 0);
-    layout->addWidget(holdRegLabel4, 3, 1);
-    layout->addWidget(holdReg5_, 4, 0);
-    layout->addWidget(holdRegLabel5, 4, 1);
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    QPushButton* addButton = new QPushButton();
+    addButton->setText(tr("Add..."));
+    buttonLayout->addWidget(addButton);
+    buttonLayout->addStretch();
 
-    holdingRegistersGroupBox_->setLayout(layout);
+    layout->addWidget(holdingRegistersTable_);
+    layout->addLayout(buttonLayout);
 
+    holdingRegistersGroupBox->setLayout(layout);
+
+    return holdingRegistersGroupBox;
 }
 
 //-----------------------------------------------------------------------------

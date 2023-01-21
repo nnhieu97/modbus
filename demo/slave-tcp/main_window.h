@@ -32,8 +32,10 @@
 
 class QGroupBox;
 class QLineEdit;
-class QSpinBox;
 class QMenu;
+class QPushButton;
+class QSpinBox;
+class QTableWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -56,14 +58,14 @@ class MainWindow : public QMainWindow
         QMenu* fileMenu_;
         QMenu* helpMenu_;
 
-        QGroupBox* serverGroupBox_;
         QLineEdit* serverAddress_;
         QSpinBox* serverPort_;
+        QPushButton* listenButton_;
 
-        QGroupBox* coilsGroupBox_;
-        QGroupBox* discreteInputsGroupBox_;
-        QGroupBox* inputRegistersGroupBox_;
-        QGroupBox* holdingRegistersGroupBox_;
+        QTableWidget* coilsTable_;
+        QTableWidget* discreteInputsTable_;
+        QTableWidget* inputRegistersTable_;
+        QTableWidget* holdingRegistersTable_;
 
     private: // methods
 
@@ -71,12 +73,12 @@ class MainWindow : public QMainWindow
 
         void createMenus_();
 
-        void createServerGroupBox_();
+        QGroupBox* createServerGroupBox_();
 
-        void createCoilsGroupBox_();
-        void createDiscreteInputsGroupBox_();
-        void createInputRegistersGroupBox_();
-        void createHoldingRegistersGroupBox_();
+        QGroupBox* createCoilsGroupBox_();
+        QGroupBox* createDiscreteInputsGroupBox_();
+        QGroupBox* createInputRegistersGroupBox_();
+        QGroupBox* createHoldingRegistersGroupBox_();
 };
 
 #endif // MAINWINDOW_H
