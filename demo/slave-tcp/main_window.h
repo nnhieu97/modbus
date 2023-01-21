@@ -69,6 +69,8 @@ class MainWindow : public QMainWindow
         QTableWidget* inputRegistersTable_;
         QTableWidget* holdingRegistersTable_;
 
+        modbus4qt::ServerInternalData* serverInternalData_;
+
     private: // methods
 
         void createActions_();

@@ -42,7 +42,7 @@ AddCellsDialog::AddCellsDialog(QWidget *parent)
 //------------------------------------------------------------------------------
 
 int
-AddCellsDialog::cellQuantity() const
+AddCellsDialog::cellsQuantity() const
 {
     return cellsQuanityEdit_->value();
 }

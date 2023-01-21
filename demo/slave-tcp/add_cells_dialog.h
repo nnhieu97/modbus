@@ -15,7 +15,7 @@ class AddCellsDialog : public QDialog
 
         int startAddress() const;
 
-        int cellQuantity() const;
+        int cellsQuantity() const;
 
     signals:
 

@@ -23,9 +23,11 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
+#include <QIODevice>
+
+#include "server_internal_data.h"
 #include "server.h"
 
-#include <QIODevice>
 
 namespace modbus4qt
 {
@@ -39,99 +41,10 @@ Server::Server(QObject *parent)
 
 //-----------------------------------------------------------------------------
 
-void
-Server::addCoil(quint16 index)
+Server::Server(ServerInternalData* internalData, QObject* parent)
+    : AbstractDevice(parent),
+      internalData_(internalData)
 {
-    if (coils_.contains(index))
-    {
-        return;
-    }
-
-    coils_[index] = false;
-}
-
-//-----------------------------------------------------------------------------
-
-void
-Server::addCoils(quint16 startIndex, quint16 endIndex)
-{
-    for (quint16 i = startIndex; i <= endIndex; i++)
-    {
-        addCoil(i);
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-void
-Server::addDescreteInput(quint16 index)
-{
-    if (descreteInputs_.contains(index))
-    {
-        return;
-    }
-
-    descreteInputs_[index] = false;
-}
-
-//-----------------------------------------------------------------------------
-
-void
-Server::addDescreteInputs(quint16 startIndex, quint16 endIndex)
-{
-    for (quint16 i = startIndex; i <= endIndex; i++)
-    {
-        addDescreteInput(i);
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-void
-Server::addHoldingRegister(quint16 index)
-{
-    if (holdingRegisters_.contains(index))
-    {
-        return;
-    }
-
-    holdingRegisters_[index] = 0;
-}
-
-//-----------------------------------------------------------------------------
-
-void
-Server::addHoldingRegisters(quint16 startIndex, quint16 endIndex)
-{
-    for (quint16 i = startIndex; i <= endIndex; i++)
-    {
-        addHoldingRegister(i);
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-void
-Server::addInputRegister(quint16 index)
-{
-    if (inputRegisters_.contains(index))
-    {
-        return;
-    }
-
-    inputRegisters_[index] = 0;
-}
-
-//-----------------------------------------------------------------------------
-
-void
-Server::addInputRegisters(quint16 startIndex, quint16 endIndex)
-{
-    for (quint16 i = startIndex; i <= endIndex; i++)
-    {
-        addInputRegister(i);
-    }
-
 }
 
 //-----------------------------------------------------------------------------
@@ -160,6 +73,14 @@ Server::processIncomingRequest()
     // Execute MB function.  If not valid ExceptionCode = 4, 5, 6; Send modbus exception response.
 
     // Send modbus response
+}
+
+//-----------------------------------------------------------------------------
+
+void
+Server::setInternalData(ServerInternalData* internalData)
+{
+    internalData_ = internalData;
 }
 
 //-----------------------------------------------------------------------------

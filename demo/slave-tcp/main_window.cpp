@@ -23,10 +23,6 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "main.h"
-#include "add_cells_dialog.h"
-#include "main_window.h"
-
 #include <QtGui>
 #include <QAction>
 #include <QCheckBox>
@@ -41,9 +37,16 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 
+#include "main.h"
+#include "modbus4qt/server_internal_data.h"
+#include "add_cells_dialog.h"
+#include "main_window.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    serverInternalData_ = new modbus4qt::ServerInternalData();
+
     QWidget* centralWidget = new QWidget();
 
     QVBoxLayout* mainLayout = new QVBoxLayout();
@@ -95,7 +98,7 @@ MainWindow::addCoils()
     AddCellsDialog addCellsDialog;
     if (addCellsDialog.exec() == QDialog::Accepted)
     {
-
+        serverInternalData_->addCoils(addCellsDialog.startAddress(), addCellsDialog.cellsQuantity());
     }
 }
 
