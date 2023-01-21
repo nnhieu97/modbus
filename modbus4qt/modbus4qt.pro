@@ -74,6 +74,7 @@ else {
 
 SOURCES += utils.cpp \
     abstract_device.cpp \
+    server_internal_data.cpp \
     tcp_client.cpp \
     consts.cpp \
     client.cpp \
@@ -89,6 +90,7 @@ SOURCES += utils.cpp \
 HEADERS += global.h \
     abstract_device.h \
     consts.h \
+    server_internal_data.h \
     types.h \
     utils.h \
     tcp_client.h \
