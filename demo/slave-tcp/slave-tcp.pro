@@ -36,11 +36,13 @@ OBJECTS_DIR = $${OBJECTS_DIR}/demo/slave-tcp
 
 SOURCES += \
     add_cells_dialog.cpp \
+    coils_table_model.cpp \
     main.cpp \
     main_window.cpp
 
 HEADERS  += \
     add_cells_dialog.h \
+    coils_table_model.h \
     main.h \
     main_window.h
 
