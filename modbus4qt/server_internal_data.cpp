@@ -108,6 +108,14 @@ ServerInternalData::addInputRegisters(quint16 startIndex, quint16 endIndex)
 
 //-----------------------------------------------------------------------------
 
+QMap<quint16, bool>*
+ServerInternalData::coils()
+{
+    return &coils_;
+}
+
+//-----------------------------------------------------------------------------
+
 } // namespace modbus4qt
 
 //-----------------------------------------------------------------------------

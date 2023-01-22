@@ -2,12 +2,13 @@
 #define COILSTABLEMODEL_H
 
 #include <QAbstractTableModel>
+#include <QMap>
 
 class CoilsTableModel : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        explicit CoilsTableModel(QObject *parent = nullptr);
+        explicit CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent = nullptr);
 
         int columnCount(const QModelIndex& parent) const override;
 
@@ -20,6 +21,10 @@ class CoilsTableModel : public QAbstractTableModel
         int rowCount(const QModelIndex& parent) const override;
 
         bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+    protected:
+
+        QMap<quint16, bool>* coilsData_;
 };
 
 #endif // COILSTABLEMODEL_H

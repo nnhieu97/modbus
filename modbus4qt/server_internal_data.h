@@ -92,7 +92,7 @@ class ServerInternalData : public QObject
         //!
         void addInputRegisters(quint16 startIndex, quint16 endIndex);
 
-        QMap<quint16, bool>& coils();
+        QMap<quint16, bool>* coils();
 
     signals:
 

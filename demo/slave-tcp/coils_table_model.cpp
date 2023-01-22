@@ -2,8 +2,9 @@
 
 //------------------------------------------------------------------------------
 
-CoilsTableModel::CoilsTableModel(QObject *parent)
-    : QAbstractTableModel{parent}
+CoilsTableModel::CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent)
+    : QAbstractTableModel{parent},
+      coilsData_(coilsData)
 {
 }
 
@@ -12,8 +13,8 @@ CoilsTableModel::CoilsTableModel(QObject *parent)
 int
 CoilsTableModel::columnCount(const QModelIndex& parent) const
 {
-
-}
+    return 2;
+};
 
 //------------------------------------------------------------------------------
 

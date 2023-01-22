@@ -35,7 +35,10 @@ class QLineEdit;
 class QMenu;
 class QPushButton;
 class QSpinBox;
+class QTableView;
 class QTableWidget;
+
+class CoilsTableModel;
 
 class MainWindow : public QMainWindow
 {
@@ -64,7 +67,9 @@ class MainWindow : public QMainWindow
         QSpinBox* serverPort_;
         QPushButton* listenButton_;
 
-        QTableWidget* coilsTable_;
+        //QTableView* coilsTableView_;
+        CoilsTableModel* coilsTableModel_;
+
         QTableWidget* discreteInputsTable_;
         QTableWidget* inputRegistersTable_;
         QTableWidget* holdingRegistersTable_;

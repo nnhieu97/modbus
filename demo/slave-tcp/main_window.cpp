@@ -34,40 +34,58 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QTableView>
 #include <QTableWidget>
 #include <QVBoxLayout>
 
 #include "main.h"
 #include "modbus4qt/server_internal_data.h"
 #include "add_cells_dialog.h"
+#include "coils_table_model.h"
 #include "main_window.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    // Create internal server data
+    //
     serverInternalData_ = new modbus4qt::ServerInternalData();
 
-    QWidget* centralWidget = new QWidget();
+    // Create table models for server data
+    //
+    coilsTableModel_ = new CoilsTableModel(serverInternalData_->coils());
 
-    QVBoxLayout* mainLayout = new QVBoxLayout();
-
+    // Create layout for coils & registers
+    //
     QGridLayout* registersLayout = new QGridLayout();
     registersLayout->addWidget(createCoilsGroupBox_(), 0, 0);
     registersLayout->addWidget(createHoldingRegistersGroupBox_(), 0, 1);
     registersLayout->addWidget(createDiscreteInputsGroupBox_(), 1, 0);
     registersLayout->addWidget(createInputRegistersGroupBox_(), 1, 1);
 
+    // Create main layout
+    //
+    QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->addWidget(createServerGroupBox_());
     mainLayout->addLayout(registersLayout);
-    centralWidget->setLayout(mainLayout);
 
+    // Create central widget
+    //
+    QWidget* centralWidget = new QWidget();
+    centralWidget->setLayout(mainLayout);
     setCentralWidget(centralWidget);
 
+    // Create actions & menus
+    //
     createActions_();
     createMenus_();
 
+    // Create status bar
+    //
     statusBar();
 
+    // Tweak app window
+    //
     setWindowTitle(ApplicationName);
 }
 
@@ -138,49 +156,13 @@ MainWindow::createMenus_()
 //-----------------------------------------------------------------------------
 
 QGroupBox*
-MainWindow::createServerGroupBox_()
-{
-    QGroupBox* serverGroupBox = new QGroupBox(tr("MODBUS TCP Server"));
-    QHBoxLayout *layout = new QHBoxLayout;
-
-    QLabel* serverAddressLabel = new QLabel(tr("Server address:"));
-    serverAddress_ = new QLineEdit("127.0.0.1");
-
-    layout->addWidget(serverAddressLabel);
-    layout->addWidget(serverAddress_);
-
-    QLabel* serverPortLabel = new QLabel(tr("Server port:"));
-    serverPort_ = new QSpinBox();
-    serverPort_->setRange(1, 65535);
-    serverPort_->setValue(502);
-
-    listenButton_ = new QPushButton();
-    listenButton_->setText(tr("Listen"));
-    listenButton_->setCheckable(true);
-
-    layout->addWidget(serverPortLabel);
-    layout->addWidget(serverPort_);
-    layout->addWidget(listenButton_);
-
-    layout->addStretch();
-
-    serverGroupBox->setLayout(layout);
-
-    return serverGroupBox;
-}
-
-//-----------------------------------------------------------------------------
-
-QGroupBox*
 MainWindow::createCoilsGroupBox_()
 {
     QGroupBox* coilsGroupBox = new QGroupBox(tr("Coils"));
     QVBoxLayout* layout = new QVBoxLayout();
 
-    coilsTable_ = new QTableWidget(0, 2);
-    coilsTable_->setHorizontalHeaderLabels(QStringList()
-                                           << tr("Address")
-                                           << tr("Value"));
+    QTableView* coilsTableView_ = new QTableView();
+    coilsTableView_->setModel(coilsTableModel_);
 
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     QPushButton* addButton = new QPushButton();
@@ -190,7 +172,7 @@ MainWindow::createCoilsGroupBox_()
     buttonLayout->addWidget(addButton);
     buttonLayout->addStretch();
 
-    layout->addWidget(coilsTable_);
+    layout->addWidget(coilsTableView_);
     layout->addLayout(buttonLayout);
 
     coilsGroupBox->setLayout(layout);
@@ -228,33 +210,6 @@ MainWindow::createDiscreteInputsGroupBox_()
 //-----------------------------------------------------------------------------
 
 QGroupBox*
-MainWindow::createInputRegistersGroupBox_()
-{
-    QGroupBox* inputRegistersGroupBox = new QGroupBox(tr("Input Registers"));
-    QVBoxLayout* layout = new QVBoxLayout();
-
-    inputRegistersTable_ = new QTableWidget(0, 2);
-    inputRegistersTable_->setHorizontalHeaderLabels(QStringList()
-                                           << tr("Address")
-                                           << tr("Value"));
-
-    QHBoxLayout* buttonLayout = new QHBoxLayout();
-    QPushButton* addButton = new QPushButton();
-    addButton->setText(tr("Add..."));
-    buttonLayout->addWidget(addButton);
-    buttonLayout->addStretch();
-
-    layout->addWidget(inputRegistersTable_);
-    layout->addLayout(buttonLayout);
-
-    inputRegistersGroupBox->setLayout(layout);
-
-    return inputRegistersGroupBox;
-}
-
-//-----------------------------------------------------------------------------
-
-QGroupBox*
 MainWindow::createHoldingRegistersGroupBox_()
 {
     QGroupBox* holdingRegistersGroupBox = new QGroupBox(tr("Holding Registers"));
@@ -280,3 +235,64 @@ MainWindow::createHoldingRegistersGroupBox_()
 }
 
 //-----------------------------------------------------------------------------
+
+QGroupBox*
+MainWindow::createInputRegistersGroupBox_()
+{
+    QGroupBox* inputRegistersGroupBox = new QGroupBox(tr("Input Registers"));
+    QVBoxLayout* layout = new QVBoxLayout();
+
+    inputRegistersTable_ = new QTableWidget(0, 2);
+    inputRegistersTable_->setHorizontalHeaderLabels(QStringList()
+                                           << tr("Address")
+                                           << tr("Value"));
+
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    QPushButton* addButton = new QPushButton();
+    addButton->setText(tr("Add..."));
+    buttonLayout->addWidget(addButton);
+    buttonLayout->addStretch();
+
+    layout->addWidget(inputRegistersTable_);
+    layout->addLayout(buttonLayout);
+
+    inputRegistersGroupBox->setLayout(layout);
+
+    return inputRegistersGroupBox;
+}
+//-----------------------------------------------------------------------------
+
+QGroupBox*
+MainWindow::createServerGroupBox_()
+{
+    QGroupBox* serverGroupBox = new QGroupBox(tr("MODBUS TCP Server"));
+    QHBoxLayout *layout = new QHBoxLayout;
+
+    QLabel* serverAddressLabel = new QLabel(tr("Server address:"));
+    serverAddress_ = new QLineEdit("127.0.0.1");
+
+    layout->addWidget(serverAddressLabel);
+    layout->addWidget(serverAddress_);
+
+    QLabel* serverPortLabel = new QLabel(tr("Server port:"));
+    serverPort_ = new QSpinBox();
+    serverPort_->setRange(1, 65535);
+    serverPort_->setValue(502);
+
+    listenButton_ = new QPushButton();
+    listenButton_->setText(tr("Listen"));
+    listenButton_->setCheckable(true);
+
+    layout->addWidget(serverPortLabel);
+    layout->addWidget(serverPort_);
+    layout->addWidget(listenButton_);
+
+    layout->addStretch();
+
+    serverGroupBox->setLayout(layout);
+
+    return serverGroupBox;
+}
+
+//-----------------------------------------------------------------------------
+// EOF
