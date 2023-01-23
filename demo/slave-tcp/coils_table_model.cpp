@@ -11,7 +11,7 @@ CoilsTableModel::CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent
 //------------------------------------------------------------------------------
 
 int
-CoilsTableModel::columnCount(const QModelIndex& parent) const
+CoilsTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 2;
 };
@@ -21,7 +21,22 @@ CoilsTableModel::columnCount(const QModelIndex& parent) const
 QVariant
 CoilsTableModel::data(const QModelIndex& index, int role) const
 {
+    if (!index.isValid())
+    {
+        return QVariant();
+    }
 
+    switch (role)
+    {
+        case Qt::TextAlignmentRole :
+            return int(Qt::AlignRight | Qt::AlignVCenter);
+        break;
+        case Qt::DisplayRole :
+            //if coilsData_.contains()
+        break;
+    }
+
+    return QVariant();
 }
 
 //------------------------------------------------------------------------------
@@ -64,7 +79,7 @@ CoilsTableModel::flags(const QModelIndex& index) const
 
 int CoilsTableModel::rowCount(const QModelIndex& parent) const
 {
-
+    return coilsData_->count();
 }
 
 //------------------------------------------------------------------------------

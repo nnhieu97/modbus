@@ -10,7 +10,7 @@ class CoilsTableModel : public QAbstractTableModel
     public:
         explicit CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent = nullptr);
 
-        int columnCount(const QModelIndex& parent) const override;
+        int columnCount(const QModelIndex&) const override;
 
         QVariant data(const QModelIndex& index, int role) const override;
 
