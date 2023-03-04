@@ -30,26 +30,19 @@
 
 #include "types.h"
 
+class QIODevice;
+
 namespace modbus4qt
 {
 
 /**
- * @brief
- * @en Base class for MODBUS device
- * @ru Базовый класс подключения к сети MODBUS произвольного устройства
+ * \brief Base class for MODBUS device
  *
- * @en
- * Descendant class must realize abstract methods for reading and writing data from equipment.
- * Also it is important to initialize ioDevice_ field with address of real object responsible
- * for data exchange.
+ * Descendant class must realize abstract methods for reading and writing data from real equipment.
  *
- * @ru
- * Класс используется для подключения в сеть MODBUS внешнего устройства, которое не имеет такого функционала.
- * Может быть использован для реализации сервера MODBUS, работающего с устройствами, не поддерживающими протокол.
+ * We use ioDevice_ field with address of real object responsible for data exchange.
  *
- * Класс-потомок должен релизовать абстрактные методы обмена данными с оборудованием, а также правильно инициализировать
- * указатель ioDevice_, присвоив его значение указателю на экземпляр реального объекта, отвечающего
- * за обмен данными.
+ * If you want realize standalone server without extgernal equipment connected use DauumyDeviceClass.
  */
 class Device : public QObject
 {

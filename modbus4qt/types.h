@@ -26,132 +26,103 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <QtGlobal>
-#include <QDebug>
-
-#include <algorithm>
-
 #include "consts.h"
 
 namespace modbus4qt
 {
 
-/**
-    @en Union for addressing bytes of word.
-    @ru Стурктура для обращения к отдельным байтам двухбайтного слова.
-*/
+//-----------------------------------------------------------------------------
+
+//!
+//! \brief Union for addressing bytes of word
+//!
 union WordRec
 {
-    quint16 word;
-    quint8 bytes[2];
+    uint16_t word;
+    uint8_t bytes[2];
 };
 
-/**
-* @brief
-* @en Protocol Data Unit.
-* @ru Блок данных протокола MODBUS.
-*
-* @en Protocol data unit is used in all types of communication lines.
-* @ru Используется вне зависимости от способа передачи данных.
-*
-* @en See: Modbus Protocol Specification v1.1b3, page 5
-* @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 5
-*/
-#pragma pack(1)
+//-----------------------------------------------------------------------------
+
+#pragma pack(push, 1)
+
+//!
+//! \brief Protocol Data Unit is used in all types of communication lines.
+//!
+//! See: Modbus Protocol Specification v1.1b3, page 5
+//!
 struct ProtocolDataUnit
 {
-    /**
-     * @brief
-     * @en modbus function code
-     * @ru Код функции modbus.
-     */
-    quint8 functionCode;
+    //!
+    //! \brief modbus function code
+    //!
+    uint8_t functionCode;
 
-    /**
-     * @brief
-     * @en Data to send
-     * @ru Передаваемые данные
-     */
-    quint8 data[PDUDataMaxSize];
+    //!
+    //! \brief Data to send
+    //!
+    uint8_t data[PDUDataMaxSize];
 
-    /**
-     * @brief
-     * @en Default constructor. Fills data array with zeros.
-     * @ru Конструктор по умолчанию. Заполняет массив данных нулями.
-     */
-    ProtocolDataUnit()
-        : functionCode(0)
-    {
-        std::fill(data, data + PDUDataMaxSize, 0);
-    }
+    //!
+    //! \brief Default constructor
+    //!
+    //! Fill data with zeros.
+    //!
+    ProtocolDataUnit();
 
-    /**
-     * @brief
-     * @en Copying constructor. Copies data array from rhv.
-     * @ru Конструктор копирования. Копирует данные из rhv.
-     *
-     * @param rhv
-     */
-    ProtocolDataUnit(const ProtocolDataUnit& rhv)
-        : functionCode(rhv.functionCode)
-    {
-        std::copy(rhv.data, rhv.data + PDUDataMaxSize, data);
-    }
+    //!
+    //! \brief Copying constructor
+    //! \param rhv - right hand value
+    //!
+    //! Copy data array from rhv.
+    //!
+    ProtocolDataUnit(const ProtocolDataUnit& rhv);
 
-    /**
-     * @brief
-     * @en operator =. Copies data array from rhv.
-     * @ru Оператор копирования. Копирует данные из rhv.
-     *
-     * @param rhv
-     *
-     * @return
-     * @en Reference to copy result
-     * @ru Ссылка на результат копирования
-     */
-    ProtocolDataUnit& operator=(const ProtocolDataUnit& rhv)
-    {
-        functionCode = rhv.functionCode;
-        std::copy(rhv.data, rhv.data + PDUDataMaxSize, data);
-
-        return *this;
-    }
+    //!
+    //! \brief Copy data array from rhv
+    //! \param rhv - right hand value
+    //! \return Copied entity
+    //!
+    ProtocolDataUnit& operator=(const ProtocolDataUnit& rhv);
 };
-#pragma pack()
+#pragma pack(pop)
 
-/**
- * @brief
- * @en Application data unit for MODBUS over serial line.
- * @ru Блок данных протокола для протокола, использующего для передачи последовательную линии связи.
- */
-#pragma pack(1)
+//-----------------------------------------------------------------------------
+
+#pragma pack(push, 1)
+
+//!
+//! \brief Application data unit for MODBUS over serial line
+//!
 struct RTUApplicationDataUnit
 {
-    /**
-     * @brief
-     * @en Address of slave device. Should be from 1 to 247. Range 248-255 is reserved.
-     * @ru Иденитификатор устройства получателя. Должен быть лежать в диапазоне от 1 до 247. Значения 248-255 зарезервированы спецификацией протокола.
-     */
-    quint8 unitId;
+    //!
+    //! \brief Address of device
+    //!
+    //! Should be from 1 to 247. Range 248-255 is reserved by protocol specification.
+    //!
+    uint8_t unitId;
 
-    /**
-     * @brief
-     * @en Protocol data unit.
-     * @ru Блок данных протокола.
-     *
-     * @sa ProtocolDataUnit
-     */
+    //!
+    //! \brief Protocol data unit
+    //!
+    //! \sa ProtocolDataUnit
+    //!
     ProtocolDataUnit pdu;
 
-    /**
-     * @brief
-     * @en Error checking field is the result of a "Redundancy Checking" calculation that is performed on the message contents.
-     * @ru Поле контроля целостности пакета. Расчитывается по алгоритму crc16.
-     */
-    quint16 crc;
+    //!
+    //! \brief Error checking field is the result of a "Redundancy Checking"
+    //!
+    //! CRC calculation is performed on the message content.
+    //!
+    uint16_t crc;
 };
-#pragma pack()
+#pragma pack(pop)
 
+//-----------------------------------------------------------------------------
+//
+// All code below should be rechecked and rewrited!
+//
 // TCP subsystem is not ready and should be rechecked!
 
 /**

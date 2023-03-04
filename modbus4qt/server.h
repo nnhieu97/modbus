@@ -28,119 +28,91 @@
 
 #include <QObject>
 
+#include <QMap>
+#include <QSet>
+
 #include "global.h"
 #include "consts.h"
 #include "types.h"
+
+#include "abstract_device.h"
 
 class QIODevice;
 
 namespace modbus4qt
 {
 
-class Device;
+class ServerInternalData;
 
-/**
-* @brief
-* @en Abtract modbus server
-* @ru Абстрактный сервер протокола modbus
- */
-class Server : public QObject
+//!
+//! \brief Abtract modbus server
+//!
+class Server : public AbstractDevice
 {
     Q_OBJECT
 
-    private:
-        /**
-         * @brief
-         * @en device_
-         * @ru Исполнительное устройство
-         */
-        Device *device_;
-
-        /**
-         * @brief
-         * @en IO device for data exchange with client
-         * @ru Устройство ввода-вывода, через которое идет обмен данными с клиентом
-         */
-        QIODevice* ioDevice_;
-
-        /**
-         * @brief
-         * @en Maximum allowed timeout for reading data
-         * @ru Максимальное время ожидания чтения данных
-         *
-         * @en Default value 5000 ms (5 sec).
-         * @ru Значение по умолчанию 5000 мс (5 с).
-         */
-        int readTimeout_;
-
-        /**
-         * @brief
-         * @en Maximum allowed timeout for sending data
-         * @ru Максимальное время ожидания записи данных
-         *
-         * @en Default value 5000 ms (5 sec).
-         * @ru Значение по умолчанию 5000 мс (5 с).
-         */
-        int writeTimeout_;
-
-        /**
-         * @brief
-         * @en Identifier number of server
-         * @ru Идентификатор сервера
-         */
-        quint8 unitID_;
-
     public:
 
-        /**
-         * @brief
-         * @en Default constructor
-         * @ru Конструктор по умолчанию
-         *
-         * @param
-         * @en parent - parent object
-         * @ru parent - указатель на объект-родитель.
-         */
+        //!
+        //! \brief Default constructor
+        //! \param parent - parent object
+        //!
         explicit Server(QObject *parent = 0);
 
-    signals:
+        explicit Server(ServerInternalData* internalData, QObject *parent = 0);
 
-        /**
-         * @brief
-         * @en Signal for debuggin info
-         * @ru Сигнал для вывода отладочного сообщения
-         *
-         * @param
-         * @en msg - Debug message
-         * @ru msg - Строка с отладочным сообщение
-         */
-        void debugMessage(const QString& msg);
+        void setInternalData(ServerInternalData* internalData);
 
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
-         *
-         * @param
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
-        void errorMessage(const QString& msg);
+    public slots :
 
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
-         *
-         * @param
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
-        void infoMessage(const QString& msg);
+        //!
+        //! \brief process incoming modbus request
+        //!
+        void processIncomingRequest();
+
+    protected:
+
+        virtual ProtocolDataUnit processADU_(const QByteArray& buf) = 0;
+
+    private:
+
+        //!
+        //! \brief Read device to read data from
+        //!
+        //! User can use it if we need to make modbus interface to equipment connected to PC.
+        //! PC will be modbus server in this case.
+        //!
+        //! \todo I do not know if we really need it here! 2022-03-13
+        //!
+        //Device* device_;
+
+        //!
+        //! \brief IO device for data exchange with client (master)
+        //!
+        QIODevice* ioDevice_;
+
+        //!
+        //! \brief Maximum allowed timeout for reading data
+        //!
+        int readTimeout_;
+
+        //!
+        //! \brief Maximum allowed timeout for sending data
+        //!
+        int writeTimeout_;
+
+        //!
+        //! \brief Identifier number of server
+        //!
+        quint8 unitID_;
+
+        ServerInternalData* internalData_ = nullptr;
+
 };
 
 } // namespace modbus4qt
 
-
-
 #endif // SERVER_H
+
+//-----------------------------------------------------------------------------
+// EOF

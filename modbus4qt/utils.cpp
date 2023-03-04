@@ -108,7 +108,8 @@ crc16(const QByteArray& buf)
     unsigned int i; /* will index into CRC lookup */
 
     /* pass through message buffer */
-    while (buffer_length--) {
+    while (buffer_length--)
+    {
         i = crc_hi ^ *buffer++; /* calculate the CRC  */
         crc_hi = crc_lo ^ table_crc_hi[i];
         crc_lo = table_crc_lo[i];
@@ -150,14 +151,21 @@ getCoilsFromBuffer(const QByteArray& buffer, quint16 regQty)
             }
 
             if (buffer[i] & bitMask)
+            {
                 coils[coilNum] = 1;
+            }
             else
+            {
                 coils[coilNum] = 0;
+            }
 
             bitMask = bitMask << 1;
         }
 
-        if (breakFlag) break;
+        if (breakFlag)
+        {
+            break;
+        }
     }
 
     return coils;
@@ -186,6 +194,74 @@ getRegistersFromBuffer(const QByteArray& buffer, quint16 regQty)
 
 //-----------------------------------------------------------------------------
 
+quint8
+hi(quint16 word)
+{
+    quint8* bytes = (quint8*)&word;
+
+    quint16 test = 1; // * 0x0001 *
+    if (*((quint8*)&test) == 0)
+    {
+        return bytes[0];	// big endian (network/motorolla)
+    }
+    else
+    {
+        return bytes[1];	// little endian (intel)
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+quint16
+host2net(quint16 word)
+{
+    quint16 test = 1; // * 0x0001 *
+    if (*((quint8*)&test) == 0)
+    {
+        return word;		// big endian (network/motorolla)
+    }
+    else
+    {
+        return swap(word);	// little endian (intel)
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+quint8
+lo(quint16 word)
+{
+    quint8* bytes = (quint8*)&word;
+
+    quint16 test = 1; // * 0x0001 *
+    if (*((quint8*)&test) == 0)
+    {
+        return bytes[1];	// big endian (network/motorolla)
+    }
+    else
+    {
+        return bytes[0];	// little endian (intel)
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+quint16
+net2host(quint16 word)
+{
+    quint16 test = 1; // * 0x0001 *
+    if (*((quint8*)&test) == 0)
+    {
+        return word;		// big endian (network/motorolla)
+    }
+    else
+    {
+        return swap(word);	// little endian (intel)
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 void
 putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& values)
 {
@@ -195,16 +271,24 @@ putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& values)
     int regQty = values.size();
 
     // Clear the buffer
+    //
     for (int i = 0; i < (regQty + 7) / 8; ++i)
+    {
         ptr[i] = 0x00;
+    }
 
     // And fill values
+    //
     for(int i = 0; i < regQty; ++i)
     {
         if (values[i] != 0)
+        {
             *ptr |= bitMask;
+        }
         else
+        {
             *ptr &= ~bitMask;
+        }
 
         if (bitMask == 0x80)
         {
@@ -212,9 +296,14 @@ putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& values)
             ++ptr;
         }
         else
+        {
             bitMask = bitMask << 1;
+        }
 
-        if (i > MaxCoilsForWrite) break;
+        if (i > MaxCoilsForWrite)
+        {
+            break;
+        }
     }
 }
 
@@ -231,10 +320,40 @@ putRegistersIntoBuffer(quint8* buffer, const QVector<quint16>& data)
         *ptr = host2net(data[i]);
         ++ptr;
 
-        if (i > MaxRegistersForWrite) break;
+        if (i > MaxRegistersForWrite)
+        {
+            break;
+        }
     }
 }
 
+//-----------------------------------------------------------------------------
+
+quint16
+swap(quint16 word)
+{
+    quint16 result = lo(word);
+    result = result << 8;
+    result += hi(word);
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+wait(int time)
+{
+    QMutex mutex;
+    mutex.lock();
+
+    QWaitCondition pause;
+    pause.wait(&mutex, time);
+}
+
+//-----------------------------------------------------------------------------
+
 } // namespace modbus
 
-
+//-----------------------------------------------------------------------------
+// EOF

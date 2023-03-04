@@ -35,7 +35,7 @@ class TcpServer : public Server
 {
     Q_OBJECT
     public:
-        TcpServer();
+        TcpServer(QObject* parent);
 };
 
 }

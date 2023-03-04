@@ -23,16 +23,11 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "tcp_server.h"
+#ifndef MAIN_H
+#define MAIN_H
 
-namespace modbus4qt
-{
+extern const char* OrganizationName;
+extern const char* OrganizationDomain;
+extern const char* ApplicationName;
 
-TcpServer::TcpServer(QObject* parent)
-    : Server(parent)
-{
-
-}
-
-}
-
+#endif // MAIN_H
