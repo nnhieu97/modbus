@@ -28,5 +28,4 @@ TEMPLATE = subdirs
     SUBDIRS += \
         master-rtu \
         master-tcp \
-        slave-tcp \
-        modbus4qt-server
+        slave-tcp
