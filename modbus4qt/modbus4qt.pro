@@ -72,36 +72,30 @@ else {
 # Source and header files
 #
 
-SOURCES += utils.cpp \
-    abstract_device.cpp \
-    server_internal_data.cpp \
-    tcp_client.cpp \
-    consts.cpp \
+SOURCES += abstract_device.cpp \
     client.cpp \
+    consts.cpp \
+    server_internal_data.cpp \
     rtu_client.cpp \
-    server.cpp \
-    tcp_server.cpp \
     rtu_server.cpp \
-#    tcp_server.cpp \
-    device.cpp \
-    dummy_device.cpp \
-    types.cpp
+    server.cpp \
+    tcp_client.cpp \
+    tcp_server.cpp \
+    types.cpp \
+    utils.cpp
 
 HEADERS += global.h \
     abstract_device.h \
+    client.h \
     consts.h \
     server_internal_data.h \
-    types.h \
-    utils.h \
-    tcp_client.h \
-    client.h \
     rtu_client.h \
-    server.h \
-    tcp_server.h \
     rtu_server.h \
-#    tcp_server.h \
-    device.h \
-    dummy_device.h
+    server.h \
+    tcp_client.h \
+    tcp_server.h \
+    types.h \
+    utils.h
 
 #------------------------------------------------------------------------------
 # Install directives
