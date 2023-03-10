@@ -29,11 +29,105 @@
 #include <QObject>
 
 #include "global.h"
-#include "consts.h"
 #include "types.h"
 
 namespace modbus4qt
 {
+
+//------------------------------------------------------------------------------
+
+//!
+//! \brief Default read/write timeout, 3000 ms
+//!
+const int DEFAULT_TIMEOUT = 3000;
+
+//!
+//! \brief Max size of protocol data unit, 253 bytes
+//!
+const int PDU_MAX_SIZE = 253;
+
+//!
+//! \brief Max size of data in protocol data unit, 252 bytes
+//!
+const int PDU_DATA_MAX_SIZE = PDU_MAX_SIZE - 1;
+
+//!
+//! \brief Default port for MODBUS/TCP, 502
+//!
+const int DEFAULT_TCP_PORT = 502;
+
+//!
+//! \brief Unit ID which will be ignored (for MODBUS/TCP only) - 255
+//!
+const uint8_t IGNORE_UNIT_ID = 255;
+
+//!
+//! \brief Unit ID for broadcast message (for MODBUS/TCP only) - 0
+//!
+const uint8_t BROADCAST_UNIT_ID = 0;
+
+//!
+//! \brief Maximum coils quantity for reading - 2000
+//!
+//! See: Modbus Protocol Specification v1.1b3, p. 11
+//!
+const int MAX_COILS_FOR_READ = 2000;
+
+//!
+//! \brief Maximum coils quantity for writing - 1968
+//!
+//! See: Modbus Protocol Specification v1.1b3, p. 29
+//!
+const int MAX_COILS_FOR_WRITE = 1968;
+
+//!
+//! \brief Maximum registers quantity for reading - 125
+//!
+//! See: Modbus Protocol Specification v1.1b3, p. 15
+//!
+const int MAX_REGISTERS_FOR_READ = 125;
+
+//!
+//! \brief Maximum registers quantity for writing - 23
+//!
+//! See: Modbus Protocol Specification v1.1b3, p. 30
+//!
+const int MAX_REGISTERS_FOR_WRITE = 23;
+
+//------------------------------------------------------------------------------
+
+//!
+//! \brief The Functions struct - place to define constants for modbus function codes.
+//!
+//! We cannot use enum class as some devices use user defined codes.
+//!
+//! Commented codes is not implemented in current version
+//!
+struct Functions
+{
+    static const uint8_t READ_COILS                          = 0x01; //! Read data block from coils table
+    static const uint8_t READ_DESCRETE_INPUTS                = 0x02; //! Read data block from discrete inputs table
+    static const uint8_t READ_HOLDING_REGISTERS              = 0x03; //! Read data block from holding registers table
+    static const uint8_t READ_INPUT_REGISTERS                = 0x04; //! Read data block from input registers table
+    static const uint8_t WRITE_SINGLE_COIL                   = 0x05; //! Write single value to coils table
+    static const uint8_t WRITE_SINGLE_REGISTER               = 0x06; //! Write single value to holding registers table
+    //ReadExceptionStatus               = 0x07,
+    //Diagnostics                       = 0x08,
+    //GetCommEventCounter               = 0x0,
+    //GetCommEventLog                   = 0x0C,
+    static const uint8_t WRITE_MULTIPLE_COILS                = 0x0F; //! Write data block to coils table
+    static const uint8_t WRITE_MULTIPLE_REGISTERS            = 0x10; //! Write data block from holding registers table
+    //ReportServerID                    = 0x11,
+    //ReadFileRecord                    = 0x14,
+    //WriteFileRecord                   = 0x15,
+    //MaskWriteRegister                 = 0x16
+    //ReadWritMultipleeRegisters        = 0x17
+    //ReadFIFOQueue                     = 0x18
+    //EncapsulatedInterfaceTransport    = 0x2B
+
+};
+
+//------------------------------------------------------------------------------
 
 //!
 //! \brief The AbstractDevice class is a base class for any device supporting modbus protocol.
@@ -53,64 +147,6 @@ class AbstractDevice : public QObject
     public:
 
         //!
-        //! \brief Return default read/write timeout, 3000 ms.
-        //!
-        static int defaultTimeout();
-
-        //!
-        //! \brief Return max size of protocol data unit, bytes (253).
-        //!
-        static int PDUMaxSize();
-
-        //!
-        //! \brief Return max size of data in protocol data unit, bytes (252).
-        //!
-        static int PDUDataMaxSize();
-
-        //!
-        //! \brief Return default port for MODBUS/TCP (502).
-        //!
-        static int defaultTCPPort();
-
-        //!
-        //! \brief Return unit ID which will be ignored (for MODBUS/TCP only) - 255.
-        //!
-        static quint8 ignoreUnitID();
-
-        //!
-        //! \brief Return unit ID for broadcast message (for MODBUS/TCP only) - 0.
-        //!
-        static quint8 broadcastUnitID();
-
-        //!
-        //! \brief Return maximum coils quantity for reading (2000).
-        //!
-        //! See: Modbus Protocol Specification v1.1b3, p. 11
-        //!
-        static int maxCoilsForRead();
-
-        //!
-        //! \brief Return maximum coils quantity for writing (1968).
-        //!
-        //! See: Modbus Protocol Specification v1.1b3, p. 29
-        //!
-        static int maxCoilsForWrite();
-
-        //!
-        //! \brief Return maximum registers quantity for reading (125)
-        //!
-        //! See: Modbus Protocol Specification v1.1b3, p. 15
-        //!
-        static int maxRegistersForRead();
-
-        //!
-        //! \brief Return maximum registers quantity for writing (23)
-        //!
-        //! See: Modbus Protocol Specification v1.1b3, p. 30
-        //!
-        static int  maxRegistersForWrite();
-
-        //!
         //! \brief The ErrorCodes enum represents error codes for modbus protocol.
         //!
         enum ErrorCodes
@@ -123,38 +159,11 @@ class AbstractDevice : public QObject
         Q_ENUM(ErrorCodes)
 
         //!
-        //! \brief The Functions enum - modbus function codes
-        //!
-        //! Commented codes is not implemented in current version
-        //!
-        enum class Functions:quint8
-        {
-            READ_COILS                          = 0x01, //! Read data block from coils table
-            READ_DESCRETE_INPUTS                = 0x02, //! Read data block from discrete inputs table
-            READ_HOLDING_REGISTERS              = 0x03, //! Read data block from holding registers table
-            READ_INPUT_REGISTERS                = 0x04, //! Read data block from input registers table
-            WRITE_SINGLE_COIL                   = 0x05, //! Write single value to coils table
-            WRITE_SINGLE_REGISTER               = 0x06, //! Write single value to holding registers table
-            //ReadExceptionStatus               = 0x07,
-            //Diagnostics                       = 0x08,
-            //GetCommEventCounter               = 0x0,
-            //GetCommEventLog                   = 0x0C,
-            WRITE_MULTIPLE_COILS                = 0x0F, //! Write data block to coils table
-            WRITE_MULTIPLE_REGISTERS            = 0x10, //! Write data block from holding registers table
-            //ReportServerID                    = 0x11,
-            //ReadFileRecord                    = 0x14,
-            //WriteFileRecord                   = 0x15,
-            //MaskWriteRegister                 = 0x16
-            //ReadWritMultipleeRegisters        = 0x17
-            //ReadFIFOQueue                     = 0x18
-            //EncapsulatedInterfaceTransport    = 0x2B
-        };
-        Q_ENUM(Functions)
-
-        //!
         //! \brief The Exception enum - modbus error codes
         //!
-        enum class Exceptions:quint8
+        //! We can use enum class as all exception codes defined in protocol.
+        //!
+        enum class Exceptions:uint8_t
         {
             OK                                          = 0x00, //! No errors
             ILLEGAL_FUNCTION                            = 0x01, //! Illegal function
@@ -168,6 +177,12 @@ class AbstractDevice : public QObject
             GATEWAY_TARGET_DEVICE_FAILED_TO_RESPONSE    = 0x0B, //! Gateway target device failed to response
         };
         Q_ENUM(Exceptions)
+
+        union WordRec
+        {
+            uint16_t word;
+            uint8_t bytes[2];
+        };
 
         /**
          * Constants which defines the format of a modbus frame. The example is
@@ -226,21 +241,21 @@ class AbstractDevice : public QObject
             //!
             //! \brief modbus function code
             //!
-            Functions functionCode;
+            uint8_t functionCode;
 
             //!
             //! \brief Data to send
             //!
-            uint8_t data[PDUDataMaxSize()];
+            uint8_t data[PDU_DATA_MAX_SIZE];
 
             //!
             //! \brief Default constructor
             //!
             //! Fill data with zeros.
             //!
-            ProtocolDataUnit() // : functionCode(0)
+            ProtocolDataUnit() : functionCode(0)
             {
-                std::fill(data, data + PDUDataMaxSize(), 0);
+                std::fill(data, data + PDU_DATA_MAX_SIZE, 0);
             }
 
             //!
@@ -252,7 +267,7 @@ class AbstractDevice : public QObject
             ProtocolDataUnit(const ProtocolDataUnit& rhv)
             {
                 functionCode = rhv.functionCode;
-                std::copy(rhv.data, rhv.data + PDUDataMaxSize(), data);
+                std::copy(rhv.data, rhv.data + PDU_DATA_MAX_SIZE, data);
             }
 
             //!
@@ -263,7 +278,7 @@ class AbstractDevice : public QObject
             ProtocolDataUnit& operator=(const ProtocolDataUnit& rhv)
             {
                 functionCode = rhv.functionCode;
-                std::copy(rhv.data, rhv.data + PDUDataMaxSize(), data);
+                std::copy(rhv.data, rhv.data + PDU_DATA_MAX_SIZE, data);
 
                 return *this;
             }
@@ -296,16 +311,108 @@ class AbstractDevice : public QObject
             uint16_t crc;
         };
 
-        /**
-         * @brief The TCPApplicationDataUnit struct
-         */
+        //!
+        //! \brief The TCPApplicationDataUnit struct
+        //!
         struct TCPApplicationDataUnit
         {
-            //! @todo Это пока не важно, надо исправить в соответствие со специйикацией
-            quint8 unitId;
+            //!
+            //! \brief Address of device
+            //!
+            //! Should be from 1 to 247. Range 248-255 is reserved by protocol specification.
+            //!
+            uint8_t unitId;
+
+            //!
+            //! \brief Protocol data unit
+            //!
+            //! \sa ProtocolDataUnit
+            //!
             ProtocolDataUnit pdu;
-            quint16 crc;
+
+            //!
+            //! \brief Error checking field is the result of a "Redundancy Checking"
+            //!
+            //! CRC calculation is performed on the message content.
+            //!
+            uint16_t crc;
         };
+
+        //!
+        //! \brief The The TcpDataHeader struct
+        //!
+        struct TcpDataHeader
+        {
+            /**
+             * @brief
+             * @en Transaction ID
+             * @ru Номер транзакции
+             */
+
+            //!
+            //! \brief Transaction ID
+            //!
+            uint16_t transactionId;
+
+            //!
+            //! \brief Protocol ID
+            //!
+            uint16_t protocolId;
+
+            //!
+            //! \brief Data packet length
+            //!
+            uint16_t recLength;
+
+            //! Адрес подчинённого устройства, к которому адресован запрос
+            /**
+                Обычно игнорируется, если соединение установлено с конкретным устройством.
+                Может использоваться, если соединение установлено с мостом,
+                который выводит нас, например, в сеть RS485.
+            */
+            uint8_t unitId;
+        };
+
+//        //!
+//        //! \brief The RequestResponseBuffer struct
+//        //!
+//        struct RequestResponseBuffer
+//        {
+//            //!
+//            //! \brief Request/response header
+//            //!
+//            TcpDataHeader header;
+
+//            //!
+//            //! \brief modbus function code
+//            //!
+//            uint8_t functionCode;
+
+//            //!
+//            //! \brief modbus data
+//            //!
+//            uint8_t mbpData[261];
+//        };
+
+//        //! \brief The ExceptionBuffer struct
+//        //!
+//        struct ExceptionBuffer
+//        {
+//            //!
+//            //! \brief header
+//            //!
+//            TcpDataHeader header;
+
+//            //!
+//            //! \brief modbus function code
+//            //!
+//            uint8_t function;
+
+//            //!
+//            //! \brief Exception code
+//            //!
+//            Exceptions exceptionCode;
+//        };
 
         #pragma pack(pop)
 
@@ -343,6 +450,170 @@ class AbstractDevice : public QObject
         void infoMessage(const QString& msg);
 
     protected:
+
+        //!
+        //! \brief Calculate the checksum of the data buffer for the crc16 algorithm
+        //! \param buf - buffer to calculate crc
+        //! \return CRC calculated
+        //!
+        //! The code of this function was taken from <a href="http://www.libmodbus.org">libmodbus</a>
+        //!
+        static uint16_t crc16(const QByteArray& buf);
+
+        /**
+         * @brief
+         * @en Process coils data readed from server and returns values of coils as array
+         * @ru Разбирает полученный от буфер с данными и записывает значения дискретных входов/выходов в массив
+         *
+         * @param
+         * @en buffer - data recieved from server
+         * @ru buffer - полученный от сервера буфер с данными
+         *
+         * @param
+         * @en regQty - quintity of coils expected
+         * @ru regQty - количество ожидаемых флагов
+         *
+         * @return
+         * @en Array of coils
+         * @ru Массив флагов
+         */
+        QVector<bool> getCoilsFromBuffer(const QByteArray& buffer, quint16 regQty);
+
+        /**
+         * @brief
+         * @en Process register data readed from server and returns values as array
+         * @ru Разбирает полученный от буфер с данными и записывает значения регистров в массив
+         *
+         * @param
+         * @en buffer - data recieved from server
+         * @ru buffer - полученный от сервера буфер с данными
+         *
+         * @param
+         * @en regQty - quintity of coils expected
+         * @ru regQty - количество ожидаемых флагов
+         *
+         * @return
+         * @en Array of values
+         * @ru Массив значений регистров
+         */
+        QVector<quint16> getRegistersFromBuffer(const QByteArray& buffer, quint16 regQty);
+
+        /**
+         * @brief
+         * @en Puts coils data into protocol data buffer
+         * @ru Записывает значения флагов в буфер данных протокола
+         *
+         * @param
+         * @en buffer - data will be writed to protocol data unit
+         * @ru buffer - буфер с данными для блока данных протокола (PDU)
+         *
+         * @param
+         * @en data - coils values
+         * @ru data - массив значений флагов
+         */
+
+        void putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& data);
+        /**
+         * @brief
+         * @en Puts registers data into protocol data buffer
+         * @ru Записывает значения регистров в буфер данных протокола
+         *
+         * @param
+         * @en buffer - data will be writed to protocol data unit
+         * @ru buffer - буфер с данными для блока данных протокола (PDU)
+         *
+         * @param
+         * @en data - registers values
+         * @ru data - массив значений регистров
+         */
+        void putRegistersIntoBuffer(quint8* buffer, const QVector<quint16>& data);
+
+        /**
+          * @brief
+          * @en Retrun hi byte of word
+          * @ru Возвращает старший байт двухбайтного целого числа
+          *
+          * @param
+          * @en word
+          * @ru word - 2-х байтное слово
+          *
+          * @return
+          * @en Hi byte of word
+          * @ru Старший байт двухбайтного целого числа
+          */
+        static quint8 hi(quint16 word);
+
+        /**
+          * @brief
+          * @en Retrun low byte of word
+          * @ru Возвращает младшиц байт двухбайтного целого числа
+          *
+          * @param
+          * @en word
+          * @ru word - 2-х байтное слово
+          *
+          * @return
+          * @en Low byte of word
+          * @ru Младший байт двухбайтного целого числа
+          */
+        static quint8 lo(quint16 word);
+
+        /**
+          * @brief
+          * @en Swap two bytes in word and return result
+          * @ru Переставляет местами байты в 2-х байтном целом и возвращает результат
+          *
+          * @param
+          * @en word
+          * @ru word - 2-х байтное слово
+          *
+          * @return
+          * @en Word with swapped bytes
+          * @ru Слово с переставленными байтами
+          */
+        static quint16 swap(quint16 word);
+
+        /**
+          * @brief
+          * @en Convert 2 bytes word from local byte order to net byte order
+          * @ru Конвертирует 16-битную беззнаковую величину из локального порядка байтов в сетевой
+          *
+          * @param
+          * @en word
+          * @ru word - 2-х байтное слово
+          *
+          * @return
+          * @en Two bytes word with net byte order
+          * @ru Двухбайтное слово с сетевым порядком байт
+          */
+        static quint16 host2net(quint16 word);
+
+        /**
+          * @brief
+          * @en Convert 2 bytes word from  net byte order to local byte order
+          * @ru Конвертирует 16-битную беззнаковую величину из сетевого порядка байтов в локальный
+          *
+          * @param
+          * @en word
+          * @ru word - 2-х байтное слово
+          *
+          * @return
+          * @en Two bytes word with local byte order
+          * @ru Двухбайтное слово с локальным порядком байт
+          */
+        static quint16 net2host(quint16 word);
+
+        /**
+          * @brief
+          * @en Wait time milliseconds
+          * @ru Сделать паузу в выполнении
+          *
+          * @param
+          * @en time - pause time, milliseconds
+          * @ru time - время задержки в миллисекундах
+          */
+        void wait(int time);
+
 
         /**
          * @brief

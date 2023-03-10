@@ -24,7 +24,6 @@
 *****************************************************************************/
 
 #include "rtu_client.h"
-#include "utils.h"
 
 #include <QDebug>
 #include <QMutex>

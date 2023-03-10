@@ -24,7 +24,6 @@
 *****************************************************************************/
 
 #include "client.h"
-#include "utils.h"
 
 #include <QDataStream>
 #include <QIODevice>
@@ -71,7 +70,10 @@ Client::readCoils(quint16 regStart, quint16 regQty, QVector<bool>& values)
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
-    if (regQty > MaxCoilsForRead) regQty = MaxCoilsForRead;
+    if (regQty > MAX_COILS_FOR_READ)
+    {
+        regQty = MAX_COILS_FOR_READ;
+    }
 
     // Quantity of registers
     requestPDU.data[2] = hi(regQty);
@@ -113,9 +115,13 @@ Client::readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& valu
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
-    if (regQty > MaxCoilsForRead) regQty = MaxCoilsForRead;
+    if (regQty > MAX_COILS_FOR_READ)
+    {
+        regQty = MAX_COILS_FOR_READ;
+    }
 
     // Quantity of registers
+    //
     requestPDU.data[2] = hi(regQty);
     requestPDU.data[3] = lo(regQty);
 
@@ -210,10 +216,10 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
-    if (regQty > MaxRegistersForRead)
+    if (regQty > MAX_REGISTERS_FOR_READ)
     {
         emit infoMessage(tr("Maxixmum registers quantity (125 items) for reading exceeded. Only allowed quantity will be readed!"));
-        regQty = MaxRegistersForRead;
+        regQty = MAX_REGISTERS_FOR_READ;
     }
 
     // Quantity of registers
@@ -274,10 +280,10 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
-    if (regQty > MaxRegistersForRead)
+    if (regQty > MAX_REGISTERS_FOR_READ)
     {
         //emit infoMessage(tr("Maxixmum registers quantity for reading exceeded. Only allowed quantity will be readed!"));
-        regQty = MaxRegistersForRead;
+        regQty = MAX_REGISTERS_FOR_READ;
     }
 
     // Quantity of registers
@@ -480,10 +486,10 @@ Client::writeMultipleCoils(quint16 regStart, const QVector<bool>& values)
     requestPDU.data[1] = lo(regStart);
 
     int regQty = values.size();
-    if (regQty > MaxCoilsForWrite)
+    if (regQty > MAX_COILS_FOR_WRITE)
     {
         // emit infoMessage();
-        regQty = MaxCoilsForWrite;
+        regQty = MAX_COILS_FOR_WRITE;
     }
 
     // Quantity of values to write
@@ -517,10 +523,10 @@ Client::writeMultipleRegisters(quint16 regStart, const QVector<quint16> &values)
     requestPDU.data[1] = lo(regStart);
 
     int regQty = values.size();
-    if (regQty > MaxRegistersForWrite)
+    if (regQty > MAX_REGISTERS_FOR_WRITE)
     {
         // emit infoMessage();
-        regQty = MaxRegistersForWrite;
+        regQty = MAX_REGISTERS_FOR_WRITE;
     }
 
     // Quantity of values to write

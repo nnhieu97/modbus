@@ -109,7 +109,7 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         explicit TcpClient(QObject *parent = 0);
 
         //! Выполняет подключение к серверу
-        virtual bool connectToServer(int timeout = CONNECTION_TIMEOUT);
+        virtual bool connectToServer(int timeout = DEFAULT_TIMEOUT);
 
         //! Отключается от сервера
         virtual void disconnectFromServer();

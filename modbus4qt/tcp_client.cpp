@@ -25,8 +25,6 @@
 
 
 #include "tcp_client.h"
-#include "consts.h"
-#include "utils.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -38,13 +36,13 @@ namespace modbus4qt
 
 TcpClient::TcpClient(QObject *parent) :
     Client(parent)
-    , connectTimeOut_(CONNECTION_TIMEOUT)
+    , connectTimeOut_(DEFAULT_TIMEOUT)
     , lastTransactionID_(0)
 {
     autoConnect_		= true;
-    port_				= DefaultTcpPort;
+    port_				= DEFAULT_TCP_PORT;
     serverAddress_		= QHostAddress("127.0.0.1");
-    unitID_				= IgnoreUnitId;
+    unitID_				= IGNORE_UNIT_ID;
 
     ioDevice_ = new QTcpSocket(this);
     tcpSocket_ = dynamic_cast<QTcpSocket*>(ioDevice_);
@@ -226,9 +224,6 @@ TcpClient::processADU_(const QByteArray& buf)
 #ifndef QT_NO_DEBUG
     // If we want to print PDU into log file we should remove first 7 byte
     // After that we have pdu in tempBuf
-    //
-    // Чтобы вывести в лог PDU, удаляем первые 7 байтов
-    // Теперь в tempBuf остался только pdu
     //
     tempBuf.remove(0, 7);
     qDebug() << "PDU: " << tempBuf.toHex();
