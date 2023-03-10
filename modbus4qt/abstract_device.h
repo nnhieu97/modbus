@@ -35,23 +35,35 @@
 namespace modbus4qt
 {
 
+//!
+//! \brief The AbstractDevice class is a base class for any device supporting modbus protocol.
+//!
+//! In our case abstract device is not external device. It is a device
+//! presenting in PC where application runs. It sould be client or server.
+//!
+//! If you connecting to external device supporting modbus protocol you should
+//! use client to make connection.
+//!
 class AbstractDevice : public QObject
 {
         Q_OBJECT
     public:
 
+        //!
+        //! \brief The ErrorCodes enum represents error codes for modbus protocol.
+        //!
         enum ErrorCodes
         {
-            NO_ERROR = 0,
-            TOO_SHORT_ADU = 1,
-            CRC_MISMATCH = 2
+            NO_ERROR        = 0,
+            TOO_SHORT_ADU   = 1,
+            CRC_MISMATCH    = 2
 
         };
         Q_ENUM(ErrorCodes)
 
         //!
         //! \brief AbstractDevice - default constructor
-        //! \param parent
+        //! \param parent - Qt parent object
         //!
         explicit AbstractDevice(QObject* parent = nullptr);
 
@@ -65,7 +77,7 @@ class AbstractDevice : public QObject
     signals:
 
         //!
-        //! \brief Signal for debuggin info
+        //! \brief Signal for debugging informing
         //! \param msg - Debug message
         //!
         void debugMessage(const QString& msg);
@@ -77,38 +89,28 @@ class AbstractDevice : public QObject
         void errorMessage(const QString& msg);
 
         //!
-        //! \brief Signal for informing
+        //! \brief Signal for general purposes informing
         //! \param msg - message
         //!
         void infoMessage(const QString& msg);
-
 
     protected:
 
         /**
          * @brief
-         * @en Forms protocol data unit
-         * @ru Формирует блок данных (Application Data Unit)
+         * Forms protocol data unit
          *
-         * @en
          * Function should be realized in descendent class since format of application
          * data unit depends from physical commincation line used.
          *
-         * @ru
-         * Функция должна быть реализована в классе-потомке, так как формат блока
-         * данных приложения зависит от используемого канала передачи данных.
+         * @param
+         * pdu - Protocol Data Unit
          *
          * @param
-         * @en pdu - Protocol Data Unit
-         * @ru pdu - блок данных протокола (Protocol Data Unit)
-         *
-         * @param
-         * @en pduSize - size of protocol data unit (in bytes)
-         * @ru pduSize - размер в байтах блока данных протокола
+         * pduSize - size of protocol data unit (in bytes)
          *
          * @return
-         * @en Application Data Unit formed
-         * @ru Сформированный блок данных приложения (Application Data Unit)
+         * Application Data Unit formed
          *
          * @sa ProtocolDataUnit, RTUApplicationDataUnit
          *
@@ -117,24 +119,16 @@ class AbstractDevice : public QObject
 
         /**
          * @brief
-         * @en Process application data unit recieved from server and returns protocol data unit
-         * @ru Разбирает полученный от сервера блок данных (Application Data Unit) и возвращает блок данных протокола MODBUS (Protocol Data Unit).
+         * Process application data unit recieved from server and returns protocol data unit
          *
-         * @en
          * Function should be realized in descendent class since format of application
-         * data unit depends from physical commincation line used.
-         *
-         * @ru
-         * Функция должна быть реализована в классе-потомке, так как формат блока
-         * данных приложения зависит от используемого канала передачи данных.
+         * data unit depends from physical commincation line used (RTU or TCP).
          *
          * @param
-         * @en buf - data recieved from server
-         * @ru buf - полученный массив данных, полученный от устройства севера
+         * buf - data recieved from server
          *
          * @return
-         * @en Protocol data unit
-         * @ru Блок данных протокола MODBUS
+         * Protocol data unit
          *
          * @sa ProtocolDataUnit, RTUApplicationDataUnit
          *
@@ -143,20 +137,15 @@ class AbstractDevice : public QObject
 
         /**
          * @brief
-         * @en Read response from slave device
-         * @ru Читает ответ от сервера MODBUS
+         * Read response from slave device
          *
          * @return
-         * @en Readed data array
-         * @ru Массив прочитанных данных
+         * Readed data array
          *
-         * @en As timeout processing is differ for RTU and TCP we need to implement
+         * As timeout processing is differ for RTU and TCP we need to implement
          * method in descendance.
-         * @ru Так как обработка времени задержки чтения разная для RTU и TCP
-         * метод должен быть реализован в классе-потомке.
          */
         virtual QByteArray readResponse_() = 0;
-
 };
 
 } // namespace modbus4qt
