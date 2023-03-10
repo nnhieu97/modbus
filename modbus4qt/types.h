@@ -44,80 +44,7 @@ union WordRec
 
 //-----------------------------------------------------------------------------
 
-#pragma pack(push, 1)
 
-//!
-//! \brief Protocol Data Unit is used in all types of communication lines.
-//!
-//! See: Modbus Protocol Specification v1.1b3, page 5
-//!
-struct ProtocolDataUnit
-{
-    //!
-    //! \brief modbus function code
-    //!
-    quint8 functionCode;
-
-    //!
-    //! \brief Data to send
-    //!
-    uint8_t data[PDUDataMaxSize];
-
-    //!
-    //! \brief Default constructor
-    //!
-    //! Fill data with zeros.
-    //!
-    ProtocolDataUnit();
-
-    //!
-    //! \brief Copying constructor
-    //! \param rhv - right hand value
-    //!
-    //! Copy data array from rhv.
-    //!
-    ProtocolDataUnit(const ProtocolDataUnit& rhv);
-
-    //!
-    //! \brief Copy data array from rhv
-    //! \param rhv - right hand value
-    //! \return Copied entity
-    //!
-    ProtocolDataUnit& operator=(const ProtocolDataUnit& rhv);
-};
-#pragma pack(pop)
-
-//-----------------------------------------------------------------------------
-
-#pragma pack(push, 1)
-
-//!
-//! \brief Application data unit for MODBUS over serial line
-//!
-struct RTUApplicationDataUnit
-{
-    //!
-    //! \brief Address of device
-    //!
-    //! Should be from 1 to 247. Range 248-255 is reserved by protocol specification.
-    //!
-    uint8_t unitId;
-
-    //!
-    //! \brief Protocol data unit
-    //!
-    //! \sa ProtocolDataUnit
-    //!
-    ProtocolDataUnit pdu;
-
-    //!
-    //! \brief Error checking field is the result of a "Redundancy Checking"
-    //!
-    //! CRC calculation is performed on the message content.
-    //!
-    uint16_t crc;
-};
-#pragma pack(pop)
 
 //-----------------------------------------------------------------------------
 //
@@ -162,18 +89,7 @@ struct TcpDataHeader
 };
 #pragma pack()
 
-/**
- * @brief The TCPApplicationDataUnit struct
- */
-#pragma pack(1)
-struct TCPApplicationDataUnit
-{
-    //! @todo Это пока не важно, надо исправить в соответствие со специйикацией
-    quint8 unitId;
-    ProtocolDataUnit pdu;
-    quint16 crc;
-};
-#pragma pack()
+
 
 
 #pragma pack(1)

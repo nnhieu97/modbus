@@ -32,33 +32,6 @@ namespace modbus4qt
 
 //-----------------------------------------------------------------------------
 
-ProtocolDataUnit::ProtocolDataUnit()
-    : functionCode(0)
-{
-    std::fill(data, data + PDUDataMaxSize, 0);
-}
-
-//-----------------------------------------------------------------------------
-
-ProtocolDataUnit::ProtocolDataUnit(const ProtocolDataUnit& rhv)
-    : functionCode(rhv.functionCode)
-{
-    std::copy(rhv.data, rhv.data + PDUDataMaxSize, data);
-}
-
-//-----------------------------------------------------------------------------
-
-ProtocolDataUnit&
-ProtocolDataUnit::operator=(const ProtocolDataUnit& rhv)
-{
-    functionCode = rhv.functionCode;
-    std::copy(rhv.data, rhv.data + PDUDataMaxSize, data);
-
-    return *this;
-}
-
-//-----------------------------------------------------------------------------
-
 } // namespace modbus4qt
 
 //-----------------------------------------------------------------------------

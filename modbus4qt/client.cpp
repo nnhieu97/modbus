@@ -65,7 +65,7 @@ Client::readCoils(quint16 regStart, quint16 regQty, QVector<bool>& values)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::ReadCoils;
+    requestPDU.functionCode = Functions::READ_COILS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
@@ -107,7 +107,7 @@ Client::readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& valu
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::ReadDescereteInputs;
+    requestPDU.functionCode = Functions::READ_DESCRETE_INPUTS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
@@ -204,7 +204,7 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::ReadHoldingRegisters;
+    requestPDU.functionCode = Functions::READ_HOLDING_REGISTERS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
@@ -268,7 +268,7 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::ReadInputRegisters;
+    requestPDU.functionCode = Functions::READ_INPUT_REGISTERS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
@@ -411,9 +411,11 @@ Client::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUS
     }
     else
     {
-        if ((requestPDU.functionCode | 0x80) == responsePDU->functionCode)
+        quint8 functionCode = static_cast<quint8>(requestPDU.functionCode);
+
+        if ((functionCode | 0x80) == functionCode)
         {
-            switch (responsePDU->functionCode - 0x80)
+            switch (functionCode - 0x80)
             {
                 case static_cast<quint8>(Exceptions::ILLEGAL_FUNCTION) :
                     emit errorMessage(tr("Illegal function for unit #%1!").arg(unitID_));
@@ -471,7 +473,7 @@ Client::writeMultipleCoils(quint16 regStart, const QVector<bool>& values)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WriteMultipleCoils;
+    requestPDU.functionCode = Functions::WRITE_MULTIPLE_COILS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
@@ -508,7 +510,7 @@ Client::writeMultipleRegisters(quint16 regStart, const QVector<quint16> &values)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WriteMultipleRegisters;
+    requestPDU.functionCode = Functions::WRITE_MULTIPLE_REGISTERS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
@@ -545,7 +547,7 @@ Client::writeSingleCoil(quint16 regAddress, bool value)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WriteSingleCoil;
+    requestPDU.functionCode = Functions::WRITE_SINGLE_COIL;
 
     // Coil address
     requestPDU.data[0] = hi(regAddress);
@@ -603,7 +605,7 @@ Client::writeSingleRegister(quint16 regAddress, quint16 value)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WriteSingleRegister;
+    requestPDU.functionCode = Functions::WRITE_SINGLE_REGISTER;
 
     // Register address
     requestPDU.data[0] = hi(regAddress);
@@ -652,30 +654,36 @@ Client::writeSingleRegister(quint16 regAddress, quint16 value)
 bool
 Client::userDefinedFunction(quint8 function, const QVector<quint8>& data, QVector<quint8>& retData)
 {
-    ProtocolDataUnit pdu;
+//    ProtocolDataUnit pdu;
 
-    int pduSize = 0;
+//    int pduSize = 0;
 
-    pdu.functionCode = function;
+//    pdu.functionCode = function;
 
-    for (quint16 i = 0; (i < data.size()) && (i < PDUDataMaxSize); ++i)
-        pdu.data[i] = data[i];
+//    for (quint16 i = 0; (i < data.size()) && (i < PDUDataMaxSize); ++i)
+//    {
+//        pdu.data[i] = data[i];
+//    }
 
-    pduSize = 1 + data.size();
+//    pduSize = 1 + data.size();
 
-    ProtocolDataUnit replyPdu;
-    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
+//    ProtocolDataUnit replyPdu;
+//    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
 
-    if (!isOk)
-        return false;
-    else
-    {
-        retData.clear();
-        for (int i = 0; i < PDUDataMaxSize; ++i)
-            retData.append(pdu.data[i]);
+//    if (!isOk)
+//    {
+//        return false;
+//    }
+//    else
+//    {
+//        retData.clear();
+//        for (int i = 0; i < PDUDataMaxSize; ++i)
+//        {
+//            retData.append(pdu.data[i]);
+//        }
 
-        return true;
-    }
+//        return true;
+//    }
 }
 
 //-----------------------------------------------------------------------------
@@ -683,31 +691,31 @@ Client::userDefinedFunction(quint8 function, const QVector<quint8>& data, QVecto
 bool
 Client::userDefinedFunction(quint8 function, quint8 subFunction, const QVector<quint8>& data, QVector<quint8>& retData)
 {
-    ProtocolDataUnit pdu;
+//    ProtocolDataUnit pdu;
 
-    int pduSize = 0;
+//    int pduSize = 0;
 
-    pdu.functionCode = function;
-    pdu.data[0] = subFunction;
+//    pdu.functionCode = function;
+//    pdu.data[0] = subFunction;
 
-    for (quint16 i = 0; (i < data.size()) && (i < (PDUDataMaxSize - 1)); ++i)
-        pdu.data[i + 1] = data[i];
+//    for (quint16 i = 0; (i < data.size()) && (i < (PDUDataMaxSize - 1)); ++i)
+//        pdu.data[i + 1] = data[i];
 
-    pduSize = 2 + data.size();
+//    pduSize = 2 + data.size();
 
-    ProtocolDataUnit replyPdu;
-    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
+//    ProtocolDataUnit replyPdu;
+//    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
 
-    if (!isOk)
-        return false;
-    else
-    {
-        retData.clear();
-        for (int i = 0; i < PDUDataMaxSize; ++i)
-            retData.append(replyPdu.data[i]);
+//    if (!isOk)
+//        return false;
+//    else
+//    {
+//        retData.clear();
+//        for (int i = 0; i < PDUDataMaxSize; ++i)
+//            retData.append(replyPdu.data[i]);
 
-        return true;
-    }
+//        return true;
+//    }
 }
 
 //-----------------------------------------------------------------------------

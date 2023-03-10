@@ -75,231 +75,95 @@
  */
 
 
-namespace modbus4qt
-{
+//namespace modbus4qt
+//{
 
-//!
-//! \brief Default read/write timeout, 3000 ms
-//!
-const int DEFAULT_TIMEOUT = 3000;
+////!
+////! \brief Default read/write timeout, 3000 ms
+////!
+//const int DEFAULT_TIMEOUT = 3000;
 
-/**
- * @brief
- * @en Max size of protocol data unit, bytes
- * @ru Максимальный размер блока данных протокола, байт
- */
-const int PDUMaxSize = 253;
+///**
+// * @brief
+// * @en Max size of protocol data unit, bytes
+// * @ru Максимальный размер блока данных протокола, байт
+// */
+//const int PDUMaxSize = 253;
 
-/**
- * @brief
- * @en Max size of data in protocol data unit, bytes.
- * @ru Максимальный размер массива данных в блоке данных протокола, байт
- */
-const int PDUDataMaxSize = PDUMaxSize - 1;
+///**
+// * @brief
+// * @en Max size of data in protocol data unit, bytes.
+// * @ru Максимальный размер массива данных в блоке данных протокола, байт
+// */
+//const int PDUDataMaxSize = PDUMaxSize - 1;
 
-/**
- * @brief
- * @en Default port for MODBUS/TCP
- * @ru TCP порт для сервера MODBUS/TCP по умолчанию
- */
-const int DefaultTcpPort = 502;
+///**
+// * @brief
+// * @en Default port for MODBUS/TCP
+// * @ru TCP порт для сервера MODBUS/TCP по умолчанию
+// */
+//const int DefaultTcpPort = 502;
 
-/**
- * @brief
- * @en Unit ID which will be ignored (for MODBUS/TCP only)
- * @ru Значение номера устройства в сети, при котором номер устройства не используется
- */
-const quint8 IgnoreUnitId = 255;
+///**
+// * @brief
+// * @en Unit ID which will be ignored (for MODBUS/TCP only)
+// * @ru Значение номера устройства в сети, при котором номер устройства не используется
+// */
+//const quint8 IgnoreUnitId = 255;
 
-/**
- * @brief
- * @en Unit ID for broadcast message (for MODBUS/TCP only)
- * @ru Номер устройства для широковещательной рассылки
- */
-const quint8 BroadcastUnitId = 0;
+///**
+// * @brief
+// * @en Unit ID for broadcast message (for MODBUS/TCP only)
+// * @ru Номер устройства для широковещательной рассылки
+// */
+//const quint8 BroadcastUnitId = 0;
 
-/**
- * @brief
- * @en Maximum coils quantity for reading
- * @ru Максимальное количество дискретных входов-выходов для пакетного чтения
- *
- * @en See also: Modbus Protocol Specification v1.1b3, p. 11
- * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 11
- */
-const int MaxCoilsForRead = 2000;
+///**
+// * @brief
+// * @en Maximum coils quantity for reading
+// * @ru Максимальное количество дискретных входов-выходов для пакетного чтения
+// *
+// * @en See also: Modbus Protocol Specification v1.1b3, p. 11
+// * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 11
+// */
+//const int MaxCoilsForRead = 2000;
 
-/**
- * @brief
- * @en Maximum coils quantity for writing
- * @ru Максимальное количество дискретных выходов для пакетной записи
- *
- * @en See also: Modbus Protocol Specification v1.1b3, p. 29
- * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 29
- */
-const int MaxCoilsForWrite = 1968;
+///**
+// * @brief
+// * @en Maximum coils quantity for writing
+// * @ru Максимальное количество дискретных выходов для пакетной записи
+// *
+// * @en See also: Modbus Protocol Specification v1.1b3, p. 29
+// * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 29
+// */
+//const int MaxCoilsForWrite = 1968;
 
-/**
- * @brief
- * @en Maximum registers quantity for reading
- * @ru Максимальное количество читаемых значений регистров ввода/вывода для пакетного чтения
- *
- * @en  See also: Modbus Protocol Specification v1.1b3, p. 15
- * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 15
- */
-const int MaxRegistersForRead = 125;
+///**
+// * @brief
+// * @en Maximum registers quantity for reading
+// * @ru Максимальное количество читаемых значений регистров ввода/вывода для пакетного чтения
+// *
+// * @en  See also: Modbus Protocol Specification v1.1b3, p. 15
+// * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 15
+// */
+//const int MaxRegistersForRead = 125;
 
-/**
- * @brief
- * @en Maximum registers quantity for writing
- * @ru Максимальное количество записываемых значений регистров вывода для пакетной записи
- *
- * @en  See also: Modbus Protocol Specification v1.1b3, p. 30
- * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 30
- */
-const int MaxRegistersForWrite = 23;
+///**
+// * @brief
+// * @en Maximum registers quantity for writing
+// * @ru Максимальное количество записываемых значений регистров вывода для пакетной записи
+// *
+// * @en  See also: Modbus Protocol Specification v1.1b3, p. 30
+// * @ru Подробнее: Modbus Protocol Specification v1.1b3, стр. 30
+// */
+//const int MaxRegistersForWrite = 23;
 
-//!
-//! \brief Default timeout connection, ms
-//!
-const int CONNECTION_TIMEOUT = 3000;
+////!
+////*/! \brief Default timeout connection, ms
+////!
+//const int CONNECTION_TIMEOUT = 3000;
+//;
 
-
-/**
- * @brief
- * @en MODBUS function codes
- * @ru Коды функций MODBUS
- */
-struct Functions
-{
-    /**
-     * @brief
-     * @en Read data block from coils table
-     * @ru Читать блок данных из таблицы дискретных выходов (Coils)
-     */
-    static const quint8 ReadCoils = 0x01;
-
-    /**
-     * @brief
-     * @en Read data block from discrete inputs table
-     * @ru Читать блок данных из таблицы дискретных входов (Descrete Input)
-     */
-    static const quint8 ReadDescereteInputs = 0x02;
-
-    /**
-     * @brief
-     * @en Read data block from holding registers table
-     * @ru Читать блок данных из таблицы регистров вывода (Holding Registers)
-     */
-    static const quint8 ReadHoldingRegisters = 0x03;
-
-    /**
-     * @brief
-     * @en Read data block from input registers table
-     * @ru Читать блок данных из таблицы регистров ввода (Input Registers)
-     */
-    static const quint8 ReadInputRegisters = 0x04;
-
-    /**
-     * @brief
-     * @en Write single value to coils table
-     * @ru Записать значение в таблицу дискретных выходов (Coils)
-     */
-    static const quint8 WriteSingleCoil = 0x05;
-
-    /**
-     * @brief
-     * @en Write single value to holding registers table
-     * @ru Записать значение в таблицу регистров вывывода (Holding Registers)
-     */
-    static const quint8 WriteSingleRegister = 0x06;
-
-//      Commented function codes not implemeted for now!
-//
-//    /**
-//     * @brief Чтение содержимого of Eight Exception Status outputs на удаленном устройстве.
-//     *
-//     * Используется только при передаче данных через последовательную линию связи.
-//     *
-//     */
-//    static const quint8 ReadExceptionStatus = 0x07;
-
-//    /**
-//     * @brief Провести серию тестов для проверки системы передачи данных между клиентом и сервером.
-//     *
-//     * Используется только при передаче данных через последовательную линию связи.
-//     *
-//     */
-//    static const quint8 Diagnostics = 0x08;
-
-//    /**
-//     * @brief Получить значение состояния и счетчик событий удаленного устройства.
-//     *
-//     * Используется только при передаче данных через последовательную линию связи.
-//     *
-//     */
-//    static const quint8 GetCommEventCounter = 0x0B;
-
-//    /**
-//     * @brief Получить значение состояния, счетчик событий, счетчик сообщений и поле с байтами событий
-//     *
-//     * Используется только при передаче данных через последовательную линию связи.
-//     *
-//     */
-//    static const quint8 GetCommEventLog = 0x0C;
-
-    /**
-     * @brief
-     * @en Write data block to coils table
-     * @ru Записать блок данных в таблицу дискретных выходов (Coils)
-     */
-    static const quint8 WriteMultipleCoils = 0x0F;
-
-    /**
-     * @brief
-     * @en Write data block from holding registers table
-     * @ru Записать блок данных в таблицу регистров вывода (Holding Registers)
-     */
-    static const quint8 WriteMultipleRegisters = 0x10;
-
-//    /**
-//     * @brief Прочитать описание типа, текущее состояние и другую информацию, специфичную для удаленного устройства.
-//     *
-//     * Используется только при передаче данных через последовательную линию связи.
-//     *
-//     */
-//    static const quint8 ReportServerID = 0x11;
-
-//    /**
-//     * @brief ReadFileRecord
-//     */
-//    static const quint8 ReadFileRecord = 0x14;
-
-//    /**
-//     * @brief WriteFileRecord
-//     */
-//    static const quint8 WriteFileRecord = 0x15;
-
-//    /**
-//     * @brief MaskWriteReg
-//     */
-//    static const quint8 MaskWriteRegister = 0x16;
-
-//    /**
-//     * @brief ReadWriteRegs
-//     */
-//    static const quint8 ReadWritMultipleeRegisters = 0x17;
-
-//    /**
-//     * @brief ReadFiFoQueue
-//     */
-//    static const quint8 ReadFIFOQueue = 0x18;
-
-//    /**
-//     * @brief EncapsulatedInterfaceTransport
-//     */
-//    static const quint8 EncapsulatedInterfaceTransport = 0x2B;
-};
-
-} // namespace modbus
+//} // namespace modbus*/
 
 #endif // CONSTS_H

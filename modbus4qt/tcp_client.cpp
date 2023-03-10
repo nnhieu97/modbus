@@ -163,7 +163,7 @@ TcpClient::prepareADU_(const ProtocolDataUnit& pdu, int pduSize)
 
 //-----------------------------------------------------------------------------
 
-ProtocolDataUnit
+AbstractDevice::ProtocolDataUnit
 TcpClient::processADU_(const QByteArray& buf)
 {
     qDebug() << "ADU: " << buf.toHex();

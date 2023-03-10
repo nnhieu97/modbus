@@ -41,6 +41,56 @@ AbstractDevice::AbstractDevice(QObject *parent)
 
 }
 
+int AbstractDevice::defaultTimeout()
+{
+    return 3000;
+}
+
+int AbstractDevice::PDUMaxSize()
+{
+    return 253;
+}
+
+int AbstractDevice::PDUDataMaxSize()
+{
+    return PDUMaxSize() - 1;
+}
+
+int AbstractDevice::defaultTCPPort()
+{
+    return 502;
+}
+
+quint8 AbstractDevice::ignoreUnitID()
+{
+    return 255;
+}
+
+quint8 AbstractDevice::broadcastUnitID()
+{
+    return 0;
+}
+
+int AbstractDevice::maxCoilsForRead()
+{
+    return 2000;
+}
+
+int AbstractDevice::maxCoilsForWrite()
+{
+    return 1968;
+}
+
+int AbstractDevice::maxRegistersForRead()
+{
+    return 125;
+}
+
+int AbstractDevice::maxRegistersForWrite()
+{
+    return 23;
+}
+
 //-----------------------------------------------------------------------------
 
 bool
@@ -75,7 +125,7 @@ AbstractDevice::preparePDUForRTU(const QByteArray& buf, ProtocolDataUnit& pdu, E
     RTUApplicationDataUnit adu;
 
     adu.unitId = tempBuf[0];
-    adu.pdu.functionCode = tempBuf[1];
+    adu.pdu.functionCode = static_cast<Exceptions>(tempBuf[1]);
 
     for (int i = 2; i < tempBufSize - 2; ++i)
     {

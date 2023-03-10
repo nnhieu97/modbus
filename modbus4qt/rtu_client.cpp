@@ -288,7 +288,7 @@ RtuClient::prepareADU_(const ProtocolDataUnit &pdu, int pduSize)
 
 //-----------------------------------------------------------------------------
 
-ProtocolDataUnit
+AbstractDevice::ProtocolDataUnit
 RtuClient::processADU_(const QByteArray &buf)
 {
     ProtocolDataUnit pdu;
