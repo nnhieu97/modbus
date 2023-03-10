@@ -62,6 +62,24 @@ class AbstractDevice : public QObject
         Q_ENUM(ErrorCodes)
 
         //!
+        //! \brief The Exception enum - modbus error codes
+        //!
+        enum class Exceptions:quint8
+        {
+            OK                                          = 0x00, //! No errors
+            ILLEGAL_FUNCTION                            = 0x01, //! Illegal function
+            ILLEGAL_DATA_ADDRESS                        = 0x02, //! Illegal data address
+            ILLEGAL_DATA_VALUE                          = 0x03, //! Illegal data value
+            SERVER_DEVICE_FAILURE                       = 0x04, //! Server device falilure
+            ACKNOWLEDGE                                 = 0x05, //! Acknowledge
+            SERVER_DEVICE_BUSY                          = 0x06, //! Server device busy
+            MEMORY_PARITY_ERROR                         = 0x08, //! Memory parity error
+            GATEWAY_PATH_NOT_AVAILABLE                  = 0x0A, //! Gateway path not available
+            GATEWAY_TARGET_DEVICE_FAILED_TO_RESPONSE    = 0x0B, //! Gateway target device failed to response
+        };
+        Q_ENUM(Exceptions)
+
+        //!
         //! \brief AbstractDevice - default constructor
         //! \param parent - Qt parent object
         //!

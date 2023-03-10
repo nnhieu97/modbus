@@ -56,7 +56,7 @@ struct ProtocolDataUnit
     //!
     //! \brief modbus function code
     //!
-    uint8_t functionCode;
+    quint8 functionCode;
 
     //!
     //! \brief Data to send

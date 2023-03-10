@@ -415,31 +415,31 @@ Client::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUS
         {
             switch (responsePDU->functionCode - 0x80)
             {
-                case Exceptions::IllegalFunction :
-                    emit errorMessage(tr("Illegal function for unit #1%1!").arg(unitID_));
+                case static_cast<quint8>(Exceptions::ILLEGAL_FUNCTION) :
+                    emit errorMessage(tr("Illegal function for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::IllegalDataAddress :
+                case static_cast<quint8>(Exceptions::ILLEGAL_DATA_ADDRESS) :
                     emit errorMessage(tr("Illegal data address for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::IllegalDataValue :
+                case static_cast<quint8>(Exceptions::ILLEGAL_DATA_VALUE) :
                     emit errorMessage(tr("Illegal data value for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::ServerDeviceFailure :
+                case static_cast<quint8>(Exceptions::SERVER_DEVICE_FAILURE) :
                     emit errorMessage(tr("Server device failure for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::Acknowledge :
+                case static_cast<quint8>(Exceptions::ACKNOWLEDGE) :
                     emit errorMessage(tr("Acknowledge for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::ServerDeviceBusy :
+                case static_cast<quint8>(Exceptions::SERVER_DEVICE_BUSY) :
                     emit errorMessage(tr("Server device at #%1 busy!").arg(unitID_));
                 break;
-                case Exceptions::MemoryParityError :
+                case static_cast<quint8>(Exceptions::MEMORY_PARITY_ERROR) :
                     emit errorMessage(tr("Memory parity error in unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::GatewayPathNotAvailable :
+                case static_cast<quint8>(Exceptions::GATEWAY_PATH_NOT_AVAILABLE) :
                     emit errorMessage(tr("Gateway path not available for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::GatewayTargetDeviceFailedToResponse :
+                case static_cast<quint8>(Exceptions::GATEWAY_TARGET_DEVICE_FAILED_TO_RESPONSE) :
                     emit errorMessage(tr("Gateway target device failed to response for unit #%1!").arg(unitID_));
                 break;
                 default :
