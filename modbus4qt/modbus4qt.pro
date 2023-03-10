@@ -74,7 +74,6 @@ else {
 
 SOURCES += abstract_device.cpp \
     client.cpp \
-    consts.cpp \
     server_internal_data.cpp \
     rtu_client.cpp \
     rtu_server.cpp \
@@ -87,7 +86,6 @@ SOURCES += abstract_device.cpp \
 HEADERS += global.h \
     abstract_device.h \
     client.h \
-    consts.h \
     server_internal_data.h \
     rtu_client.h \
     rtu_server.h \
