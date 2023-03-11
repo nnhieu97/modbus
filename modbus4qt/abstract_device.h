@@ -284,94 +284,7 @@ class AbstractDevice : public QObject
             }
         };
 
-        //!
-        //! \brief Application data unit for MODBUS over serial line
-        //!
-        struct RTUApplicationDataUnit
-        {
-            //!
-            //! \brief Address of device
-            //!
-            //! Should be from 1 to 247. Range 248-255 is reserved by protocol specification.
-            //!
-            uint8_t unitId;
 
-            //!
-            //! \brief Protocol data unit
-            //!
-            //! \sa ProtocolDataUnit
-            //!
-            ProtocolDataUnit pdu;
-
-            //!
-            //! \brief Error checking field is the result of a "Redundancy Checking"
-            //!
-            //! CRC calculation is performed on the message content.
-            //!
-            uint16_t crc;
-        };
-
-        //!
-        //! \brief The TCPApplicationDataUnit struct
-        //!
-        struct TCPApplicationDataUnit
-        {
-            //!
-            //! \brief Address of device
-            //!
-            //! Should be from 1 to 247. Range 248-255 is reserved by protocol specification.
-            //!
-            uint8_t unitId;
-
-            //!
-            //! \brief Protocol data unit
-            //!
-            //! \sa ProtocolDataUnit
-            //!
-            ProtocolDataUnit pdu;
-
-            //!
-            //! \brief Error checking field is the result of a "Redundancy Checking"
-            //!
-            //! CRC calculation is performed on the message content.
-            //!
-            uint16_t crc;
-        };
-
-        //!
-        //! \brief The The TcpDataHeader struct
-        //!
-        struct TcpDataHeader
-        {
-            /**
-             * @brief
-             * @en Transaction ID
-             * @ru Номер транзакции
-             */
-
-            //!
-            //! \brief Transaction ID
-            //!
-            uint16_t transactionId;
-
-            //!
-            //! \brief Protocol ID
-            //!
-            uint16_t protocolId;
-
-            //!
-            //! \brief Data packet length
-            //!
-            uint16_t recLength;
-
-            //! Адрес подчинённого устройства, к которому адресован запрос
-            /**
-                Обычно игнорируется, если соединение установлено с конкретным устройством.
-                Может использоваться, если соединение установлено с мостом,
-                который выводит нас, например, в сеть RS485.
-            */
-            uint8_t unitId;
-        };
 
 //        //!
 //        //! \brief The RequestResponseBuffer struct
@@ -422,13 +335,6 @@ class AbstractDevice : public QObject
         //!
         explicit AbstractDevice(QObject* parent = nullptr);
 
-        //!
-        //! \brief Process Modbus-RTU application data unit and return protocol data unit
-        //! \param buf - array with data readed, should contain ADU record
-        //! \return Protocol data unit
-        //!
-        static bool preparePDUForRTU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& errorCode);
-
     signals:
 
         //!
@@ -450,15 +356,6 @@ class AbstractDevice : public QObject
         void infoMessage(const QString& msg);
 
     protected:
-
-        //!
-        //! \brief Calculate the checksum of the data buffer for the crc16 algorithm
-        //! \param buf - buffer to calculate crc
-        //! \return CRC calculated
-        //!
-        //! The code of this function was taken from <a href="http://www.libmodbus.org">libmodbus</a>
-        //!
-        static uint16_t crc16(const QByteArray& buf);
 
         /**
          * @brief

@@ -28,6 +28,7 @@
 #define RTU_CLIENT_H
 
 #include "client.h"
+#include "rtu_device.h"
 
 #include <QSerialPort>
 #include <QTimer>
@@ -38,7 +39,7 @@ namespace modbus4qt
 /**
  * @brief Класс MODBUS/RTU клиента.
  */
-class MODBUS4QT_EXPORT RtuClient : public Client
+class MODBUS4QT_EXPORT RtuClient : public Client, public RTUDevice
 {
     Q_OBJECT
 

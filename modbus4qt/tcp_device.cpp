@@ -1,6 +1,8 @@
 #include "tcp_device.h"
 
-TCPDevice::TCPDevice()
+namespace modbus4qt
 {
 
-}
+} //namespace modbus4qt
+
+//-----------------------------------------------------------------------------

@@ -28,6 +28,7 @@
 
 
 #include "client.h"
+#include "tcp_device.h"
 
 #include <QHostAddress>
 #include <QTcpSocket>
@@ -37,7 +38,7 @@ namespace modbus4qt
 {
 
 //! Класс MODBUS/Tcp клиента
-class MODBUS4QT_EXPORT TcpClient : public Client
+class MODBUS4QT_EXPORT TcpClient : public Client, public TCPDevice
 {
     Q_OBJECT
 
