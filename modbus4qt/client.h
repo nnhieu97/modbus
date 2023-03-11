@@ -736,28 +736,18 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
         bool userDefinedFunction(quint8 function, quint8 subFunction, const QVector<quint8>& data, QVector<quint8>& retData);
 
     signals:
-
         /**
-         * @brief
-         * @en Signal for debuggin info
-         * @ru Сигнал для вывода отладочного сообщения
+         * @brief Signal for dbugging informing
          *
          * @param
-         * @en msg - Debug message
-         * @ru msg - Строка с отладочным сообщение
-         */
-        void debugMessage(const QString& msg);
-
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
+         * @en unitID - unit ID of device
+         * @en unitID - адрес устройства, при обмене данными с которым произошла ошибка
          *
-         * @param
          * @en msg - Message with error description
          * @ru msg - Строка с описанием ошибки
          */
-        void errorMessage(const QString& msg);
+        void debugMessage(quint8 unitID, const QString& msg);
+
 
         /**
          * @brief
@@ -772,17 +762,6 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru msg - Строка с описанием ошибки
          */
         void errorMessage(quint8 unitID, const QString& msg);
-
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
-         *
-         * @param
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
-        void infoMessage(const QString& msg);
 
         /**
          * @brief
