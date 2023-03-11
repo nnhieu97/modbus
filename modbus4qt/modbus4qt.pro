@@ -74,7 +74,6 @@ else {
 
 SOURCES += abstract_device.cpp \
     client.cpp \
-    communication_application_layer.cpp \
     memory_utils.cpp \
     rtu_device.cpp \
     server_internal_data.cpp \
@@ -88,7 +87,6 @@ SOURCES += abstract_device.cpp \
 HEADERS += global.h \
     abstract_device.h \
     client.h \
-    communication_application_layer.h \
     memory_utils.h \
     rtu_device.h \
     server_internal_data.h \
