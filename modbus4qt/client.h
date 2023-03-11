@@ -145,7 +145,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru Это сокращенная версия. Используется для операций записи, где нет
          * необходимости в анализе ответа от сервера.
          */
-        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize);
+        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize);
 
     public:
         /**

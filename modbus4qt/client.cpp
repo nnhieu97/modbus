@@ -514,7 +514,7 @@ Client::sendRequest_(const ProtocolDataUnit& requestPDU, int requestPDUSize, Pro
 //-----------------------------------------------------------------------------
 
 bool
-Client::sendRequestToServer_(const ProtocolDataUnit &pdu, int pduSize)
+Client::sendRequest_(const ProtocolDataUnit &pdu, int pduSize)
 {
     ProtocolDataUnit responsePDU;
     return sendRequest_(pdu, pduSize, &responsePDU);
@@ -554,7 +554,7 @@ Client::writeMultipleCoils(quint16 regStart, const QVector<bool>& values)
     // PDU size: 6 bytes + bytes needed for values to write
     requestPDUSize = 6 + requestPDU.data[4];
 
-    return sendRequestToServer_(requestPDU, requestPDUSize);
+    return sendRequest_(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -591,7 +591,7 @@ Client::writeMultipleRegisters(quint16 regStart, const QVector<quint16> &values)
     // PDU size: 6 bytes + bytes needed for values to write
     requestPDUSize = 6 + requestPDU.data[4];
 
-    return sendRequestToServer_(requestPDU, requestPDUSize);
+    return sendRequest_(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -621,7 +621,7 @@ Client::writeSingleCoil(quint16 regAddress, bool value)
 
     requestPDUSize = 5;
 
-    return sendRequestToServer_(requestPDU, requestPDUSize);
+    return sendRequest_(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -672,7 +672,7 @@ Client::writeSingleRegister(quint16 regAddress, quint16 value)
 
     requestPDUSize = 5;
 
-    return sendRequestToServer_(requestPDU, requestPDUSize);
+    return sendRequest_(requestPDU, requestPDUSize);
 }
 
 int Client::writeTimeout() const
