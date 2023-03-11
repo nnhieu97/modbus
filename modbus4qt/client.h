@@ -353,6 +353,19 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          */
         bool readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& values);
 
+        /**
+         * @brief
+         * Read response from slave device
+         *
+         * @return
+         * Readed data array
+         *
+         * As timeout processing is differ for RTU and TCP we need to implement
+         * method in descendance.
+         */
+        virtual QByteArray readResponse_() = 0;
+
+
 //        /**
 //         * @brief readSingle
 //         * @param regNo

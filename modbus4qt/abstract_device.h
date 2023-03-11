@@ -468,17 +468,6 @@ class AbstractDevice : public QObject
          */
         virtual ProtocolDataUnit processADU_(const QByteArray& buf) = 0;
 
-        /**
-         * @brief
-         * Read response from slave device
-         *
-         * @return
-         * Readed data array
-         *
-         * As timeout processing is differ for RTU and TCP we need to implement
-         * method in descendance.
-         */
-        virtual QByteArray readResponse_() = 0;
 };
 
 } // namespace modbus4qt
