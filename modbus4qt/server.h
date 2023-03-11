@@ -32,8 +32,6 @@
 #include <QSet>
 
 #include "global.h"
-#include "consts.h"
-#include "types.h"
 
 #include "abstract_device.h"
 

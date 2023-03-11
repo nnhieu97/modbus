@@ -23,12 +23,12 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "rtu_client.h"
-#include "utils.h"
-
 #include <QDebug>
 #include <QMutex>
 #include <QWaitCondition>
+
+#include "rtu_client.h"
+#include "memory_utils.h"
 
 namespace modbus4qt
 {
@@ -288,14 +288,14 @@ RtuClient::prepareADU_(const ProtocolDataUnit &pdu, int pduSize)
 
 //-----------------------------------------------------------------------------
 
-ProtocolDataUnit
+AbstractDevice::ProtocolDataUnit
 RtuClient::processADU_(const QByteArray &buf)
 {
     ProtocolDataUnit pdu;
 
     ErrorCodes errorCode;
 
-    if (!preparePDUForRTU(buf, pdu, errorCode))
+    if (!preparePDU(buf, pdu, errorCode))
     {
         switch (errorCode)
         {
@@ -330,7 +330,7 @@ RtuClient::readResponse_()
 //-----------------------------------------------------------------------------
 
 bool
-RtuClient::sendRequestToServer_(const ProtocolDataUnit &requestPDU, int requestPDUSize, ProtocolDataUnit *responsePDU)
+RtuClient::sendRequest_(const ProtocolDataUnit &requestPDU, int requestPDUSize, ProtocolDataUnit *responsePDU)
 {
     if (inSilenceState_)
     {
@@ -351,7 +351,7 @@ RtuClient::sendRequestToServer_(const ProtocolDataUnit &requestPDU, int requestP
         return false;
     }
 
-    bool result = Client::sendRequestToServer_(requestPDU, requestPDUSize, responsePDU);
+    bool result = Client::sendRequest_(requestPDU, requestPDUSize, responsePDU);
 
     startSilence_();
 

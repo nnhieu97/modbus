@@ -23,14 +23,14 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "client.h"
-#include "utils.h"
-
 #include <QDataStream>
 #include <QIODevice>
 #include <QVector>
 
 #include <QDebug>
+
+#include "client.h"
+#include "memory_utils.h"
 
 namespace modbus4qt
 {
@@ -42,6 +42,14 @@ Client::Client(QObject *parent) :
     writeTimeout_(DEFAULT_TIMEOUT),
     unitID_(0)
 {
+}
+
+QString Client::lastErrorMessage()
+{
+    QString result = errorMessage_;
+    errorMessage_ = "";
+
+    return result;
 }
 
 //-----------------------------------------------------------------------------
@@ -65,13 +73,16 @@ Client::readCoils(quint16 regStart, quint16 regQty, QVector<bool>& values)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::ReadCoils;
+    requestPDU.functionCode = Functions::READ_COILS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
-    if (regQty > MaxCoilsForRead) regQty = MaxCoilsForRead;
+    if (regQty > MAX_COILS_FOR_READ)
+    {
+        regQty = MAX_COILS_FOR_READ;
+    }
 
     // Quantity of registers
     requestPDU.data[2] = hi(regQty);
@@ -81,7 +92,7 @@ Client::readCoils(quint16 regStart, quint16 regQty, QVector<bool>& values)
 
     ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequestToServer_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
 
     if (isOk)
     {
@@ -107,15 +118,19 @@ Client::readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& valu
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::ReadDescereteInputs;
+    requestPDU.functionCode = Functions::READ_DESCRETE_INPUTS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
-    if (regQty > MaxCoilsForRead) regQty = MaxCoilsForRead;
+    if (regQty > MAX_COILS_FOR_READ)
+    {
+        regQty = MAX_COILS_FOR_READ;
+    }
 
     // Quantity of registers
+    //
     requestPDU.data[2] = hi(regQty);
     requestPDU.data[3] = lo(regQty);
 
@@ -123,7 +138,7 @@ Client::readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& valu
 
     ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequestToServer_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
 
     if (isOk)
     {
@@ -204,16 +219,16 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::ReadHoldingRegisters;
+    requestPDU.functionCode = Functions::READ_HOLDING_REGISTERS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
-    if (regQty > MaxRegistersForRead)
+    if (regQty > MAX_REGISTERS_FOR_READ)
     {
         emit infoMessage(tr("Maxixmum registers quantity (125 items) for reading exceeded. Only allowed quantity will be readed!"));
-        regQty = MaxRegistersForRead;
+        regQty = MAX_REGISTERS_FOR_READ;
     }
 
     // Quantity of registers
@@ -225,7 +240,7 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
 
     ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequestToServer_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
 
     if (isOk)
     {
@@ -268,16 +283,16 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::ReadInputRegisters;
+    requestPDU.functionCode = Functions::READ_INPUT_REGISTERS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
-    if (regQty > MaxRegistersForRead)
+    if (regQty > MAX_REGISTERS_FOR_READ)
     {
         //emit infoMessage(tr("Maxixmum registers quantity for reading exceeded. Only allowed quantity will be readed!"));
-        regQty = MaxRegistersForRead;
+        regQty = MAX_REGISTERS_FOR_READ;
     }
 
     // Quantity of registers
@@ -288,7 +303,7 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
 
     ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequestToServer_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
 
     if (isOk)
     {
@@ -307,6 +322,46 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
     }
 
     return isOk;
+}
+
+int Client::readTimeout() const
+{
+    return readTimeout_;
+}
+
+void Client::setReadTimeOut(int readTimeout)
+{
+    readTimeout_ = readTimeout;
+}
+
+void Client::setUnitID(quint8 unitID)
+{
+    unitID_ = unitID;
+}
+
+void Client::setWriteTimeOut(int writeTimeout)
+{
+    writeTimeout_ = writeTimeout;
+}
+
+bool Client::writeCoil(quint16 regNo, bool value)
+{
+    return writeSingleCoil(regNo, value);
+}
+
+bool Client::writeCoils(quint16 regStart, const QVector<bool>& values)
+{
+    return writeMultipleCoils(regStart, values);
+}
+
+bool Client::writeHoldingRegister(quint16 regAddress, quint16 value)
+{
+    return writeSingleRegister(regAddress, value);
+}
+
+bool Client::writeHoldingRegisters(quint16 regStart, const QVector<quint16>& values)
+{
+    return writeMultipleRegisters(regStart, values);
 }
 
 //-----------------------------------------------------------------------------
@@ -366,7 +421,7 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
 //-----------------------------------------------------------------------------
 
 bool
-Client::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
+Client::sendRequest_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
 {
     QByteArray adu = prepareADU_(requestPDU, requestPDUSize);
 
@@ -411,35 +466,37 @@ Client::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUS
     }
     else
     {
-        if ((requestPDU.functionCode | 0x80) == responsePDU->functionCode)
+        quint8 functionCode = static_cast<quint8>(requestPDU.functionCode);
+
+        if ((functionCode | 0x80) == functionCode)
         {
-            switch (responsePDU->functionCode - 0x80)
+            switch (functionCode - 0x80)
             {
-                case Exceptions::IllegalFunction :
-                    emit errorMessage(tr("Illegal function for unit #1%1!").arg(unitID_));
+                case static_cast<quint8>(Exceptions::ILLEGAL_FUNCTION) :
+                    emit errorMessage(tr("Illegal function for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::IllegalDataAddress :
+                case static_cast<quint8>(Exceptions::ILLEGAL_DATA_ADDRESS) :
                     emit errorMessage(tr("Illegal data address for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::IllegalDataValue :
+                case static_cast<quint8>(Exceptions::ILLEGAL_DATA_VALUE) :
                     emit errorMessage(tr("Illegal data value for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::ServerDeviceFailure :
+                case static_cast<quint8>(Exceptions::SERVER_DEVICE_FAILURE) :
                     emit errorMessage(tr("Server device failure for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::Acknowledge :
+                case static_cast<quint8>(Exceptions::ACKNOWLEDGE) :
                     emit errorMessage(tr("Acknowledge for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::ServerDeviceBusy :
+                case static_cast<quint8>(Exceptions::SERVER_DEVICE_BUSY) :
                     emit errorMessage(tr("Server device at #%1 busy!").arg(unitID_));
                 break;
-                case Exceptions::MemoryParityError :
+                case static_cast<quint8>(Exceptions::MEMORY_PARITY_ERROR) :
                     emit errorMessage(tr("Memory parity error in unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::GatewayPathNotAvailable :
+                case static_cast<quint8>(Exceptions::GATEWAY_PATH_NOT_AVAILABLE) :
                     emit errorMessage(tr("Gateway path not available for unit #%1!").arg(unitID_));
                 break;
-                case Exceptions::GatewayTargetDeviceFailedToResponse :
+                case static_cast<quint8>(Exceptions::GATEWAY_TARGET_DEVICE_FAILED_TO_RESPONSE) :
                     emit errorMessage(tr("Gateway target device failed to response for unit #%1!").arg(unitID_));
                 break;
                 default :
@@ -457,10 +514,10 @@ Client::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUS
 //-----------------------------------------------------------------------------
 
 bool
-Client::sendRequestToServer_(const ProtocolDataUnit &pdu, int pduSize)
+Client::sendRequest_(const ProtocolDataUnit &pdu, int pduSize)
 {
     ProtocolDataUnit responsePDU;
-    return sendRequestToServer_(pdu, pduSize, &responsePDU);
+    return sendRequest_(pdu, pduSize, &responsePDU);
 }
 
 //-----------------------------------------------------------------------------
@@ -471,17 +528,17 @@ Client::writeMultipleCoils(quint16 regStart, const QVector<bool>& values)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WriteMultipleCoils;
+    requestPDU.functionCode = Functions::WRITE_MULTIPLE_COILS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
     int regQty = values.size();
-    if (regQty > MaxCoilsForWrite)
+    if (regQty > MAX_COILS_FOR_WRITE)
     {
         // emit infoMessage();
-        regQty = MaxCoilsForWrite;
+        regQty = MAX_COILS_FOR_WRITE;
     }
 
     // Quantity of values to write
@@ -497,7 +554,7 @@ Client::writeMultipleCoils(quint16 regStart, const QVector<bool>& values)
     // PDU size: 6 bytes + bytes needed for values to write
     requestPDUSize = 6 + requestPDU.data[4];
 
-    return sendRequestToServer_(requestPDU, requestPDUSize);
+    return sendRequest_(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -508,17 +565,17 @@ Client::writeMultipleRegisters(quint16 regStart, const QVector<quint16> &values)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WriteMultipleRegisters;
+    requestPDU.functionCode = Functions::WRITE_MULTIPLE_REGISTERS;
 
     // Start address
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = lo(regStart);
 
     int regQty = values.size();
-    if (regQty > MaxRegistersForWrite)
+    if (regQty > MAX_REGISTERS_FOR_WRITE)
     {
         // emit infoMessage();
-        regQty = MaxRegistersForWrite;
+        regQty = MAX_REGISTERS_FOR_WRITE;
     }
 
     // Quantity of values to write
@@ -534,7 +591,7 @@ Client::writeMultipleRegisters(quint16 regStart, const QVector<quint16> &values)
     // PDU size: 6 bytes + bytes needed for values to write
     requestPDUSize = 6 + requestPDU.data[4];
 
-    return sendRequestToServer_(requestPDU, requestPDUSize);
+    return sendRequest_(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -545,7 +602,7 @@ Client::writeSingleCoil(quint16 regAddress, bool value)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WriteSingleCoil;
+    requestPDU.functionCode = Functions::WRITE_SINGLE_COIL;
 
     // Coil address
     requestPDU.data[0] = hi(regAddress);
@@ -564,7 +621,7 @@ Client::writeSingleCoil(quint16 regAddress, bool value)
 
     requestPDUSize = 5;
 
-    return sendRequestToServer_(requestPDU, requestPDUSize);
+    return sendRequest_(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -603,7 +660,7 @@ Client::writeSingleRegister(quint16 regAddress, quint16 value)
     ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WriteSingleRegister;
+    requestPDU.functionCode = Functions::WRITE_SINGLE_REGISTER;
 
     // Register address
     requestPDU.data[0] = hi(regAddress);
@@ -615,7 +672,17 @@ Client::writeSingleRegister(quint16 regAddress, quint16 value)
 
     requestPDUSize = 5;
 
-    return sendRequestToServer_(requestPDU, requestPDUSize);
+    return sendRequest_(requestPDU, requestPDUSize);
+}
+
+int Client::writeTimeout() const
+{
+    return writeTimeout_;
+}
+
+quint8 Client::unitID() const
+{
+    return unitID_;
 }
 
 //-----------------------------------------------------------------------------
@@ -652,30 +719,36 @@ Client::writeSingleRegister(quint16 regAddress, quint16 value)
 bool
 Client::userDefinedFunction(quint8 function, const QVector<quint8>& data, QVector<quint8>& retData)
 {
-    ProtocolDataUnit pdu;
+//    ProtocolDataUnit pdu;
 
-    int pduSize = 0;
+//    int pduSize = 0;
 
-    pdu.functionCode = function;
+//    pdu.functionCode = function;
 
-    for (quint16 i = 0; (i < data.size()) && (i < PDUDataMaxSize); ++i)
-        pdu.data[i] = data[i];
+//    for (quint16 i = 0; (i < data.size()) && (i < PDUDataMaxSize); ++i)
+//    {
+//        pdu.data[i] = data[i];
+//    }
 
-    pduSize = 1 + data.size();
+//    pduSize = 1 + data.size();
 
-    ProtocolDataUnit replyPdu;
-    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
+//    ProtocolDataUnit replyPdu;
+//    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
 
-    if (!isOk)
-        return false;
-    else
-    {
-        retData.clear();
-        for (int i = 0; i < PDUDataMaxSize; ++i)
-            retData.append(pdu.data[i]);
+//    if (!isOk)
+//    {
+//        return false;
+//    }
+//    else
+//    {
+//        retData.clear();
+//        for (int i = 0; i < PDUDataMaxSize; ++i)
+//        {
+//            retData.append(pdu.data[i]);
+//        }
 
-        return true;
-    }
+//        return true;
+//    }
 }
 
 //-----------------------------------------------------------------------------
@@ -683,31 +756,31 @@ Client::userDefinedFunction(quint8 function, const QVector<quint8>& data, QVecto
 bool
 Client::userDefinedFunction(quint8 function, quint8 subFunction, const QVector<quint8>& data, QVector<quint8>& retData)
 {
-    ProtocolDataUnit pdu;
+//    ProtocolDataUnit pdu;
 
-    int pduSize = 0;
+//    int pduSize = 0;
 
-    pdu.functionCode = function;
-    pdu.data[0] = subFunction;
+//    pdu.functionCode = function;
+//    pdu.data[0] = subFunction;
 
-    for (quint16 i = 0; (i < data.size()) && (i < (PDUDataMaxSize - 1)); ++i)
-        pdu.data[i + 1] = data[i];
+//    for (quint16 i = 0; (i < data.size()) && (i < (PDUDataMaxSize - 1)); ++i)
+//        pdu.data[i + 1] = data[i];
 
-    pduSize = 2 + data.size();
+//    pduSize = 2 + data.size();
 
-    ProtocolDataUnit replyPdu;
-    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
+//    ProtocolDataUnit replyPdu;
+//    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
 
-    if (!isOk)
-        return false;
-    else
-    {
-        retData.clear();
-        for (int i = 0; i < PDUDataMaxSize; ++i)
-            retData.append(replyPdu.data[i]);
+//    if (!isOk)
+//        return false;
+//    else
+//    {
+//        retData.clear();
+//        for (int i = 0; i < PDUDataMaxSize; ++i)
+//            retData.append(replyPdu.data[i]);
 
-        return true;
-    }
+//        return true;
+//    }
 }
 
 //-----------------------------------------------------------------------------

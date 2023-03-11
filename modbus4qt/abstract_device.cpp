@@ -25,13 +25,15 @@
 
 #include <QDebug>
 #include <QByteArray>
-
-#include "utils.h"
+#include <QMutex>
+#include <QWaitCondition>
 
 #include "abstract_device.h"
+#include "memory_utils.h"
 
 namespace modbus4qt
 {
+
 
 //-----------------------------------------------------------------------------
 
@@ -43,89 +45,155 @@ AbstractDevice::AbstractDevice(QObject *parent)
 
 //-----------------------------------------------------------------------------
 
-bool
-AbstractDevice::preparePDUForRTU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& errorCode)
+QVector<bool>
+AbstractDevice::getCoilsFromBuffer(const QByteArray& buffer, quint16 regQty)
 {
-    errorCode = NO_ERROR;
+    QVector<bool> coils(regQty);
+    coils.fill(false);
 
-    qDebug() << "ADU: " << buf.toHex();
-    qDebug() << "ADU size: " << buf.size();
+    /*
+    The coils in the response message are packed as one coil per bit of the data field. Status is
+    indicated as 1=ON and 0=OFF. The LSB of the first data byte contains the output addressed
+    in the query. The other coils follow toward the high order end of this byte, and from low order
+    to high order in subsequent bytes
+    */
 
-    QByteArray tempBuf(buf);
+    // For every byte from buffer
+    for(int i = 0; i < buffer.size(); ++i)
+    {
+        quint8 bitMask = 1;
+        bool breakFlag = false;
 
-    // For any case we should check size of recieved data to protect memory
+        //  For every bit from bytes
+        for (int j = 0; j < 8; ++j)
+        {
+            int coilNum = i * 8 + j;
+
+            if (coilNum == regQty)
+            {
+                breakFlag = true;
+                break;
+            }
+
+            if (buffer[i] & bitMask)
+            {
+                coils[coilNum] = 1;
+            }
+            else
+            {
+                coils[coilNum] = 0;
+            }
+
+            bitMask = bitMask << 1;
+        }
+
+        if (breakFlag)
+        {
+            break;
+        }
+    }
+
+    return coils;
+}
+
+//-----------------------------------------------------------------------------
+
+QVector<quint16>
+AbstractDevice::getRegistersFromBuffer(const QByteArray& buffer, quint16 regQty)
+{
+    QVector<quint16> regValues(regQty);
+    regValues.fill(0);
+
+    const char* charBuffer = buffer.constData();
+
+    const quint16* ptr = (const quint16*)charBuffer;
+
+    for (quint16 i = 0; i < regQty; ++i)
+    {
+        regValues[i] = net2host(*ptr);
+        ++ptr;
+    }
+
+    return regValues;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+AbstractDevice::putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& values)
+{
+    quint8 bitMask = 1;
+    quint8* ptr = buffer;
+
+    int regQty = values.size();
+
+    // Clear the buffer
     //
-    if (tempBuf.size() > int(sizeof(RTUApplicationDataUnit)))
+    for (int i = 0; i < (regQty + 7) / 8; ++i)
     {
-        tempBuf.resize(sizeof(RTUApplicationDataUnit));
+        ptr[i] = 0x00;
     }
 
-    int tempBufSize = tempBuf.size();
-
-    // Minimum ADU size can be 5 bytes: 1 byte for address, 2 bytes for minimum PDU, 2 bytes for CRC
+    // And fill values
     //
-    if (tempBufSize < 5)
+    for(int i = 0; i < regQty; ++i)
     {
-        errorCode = TOO_SHORT_ADU;
+        if (values[i] != 0)
+        {
+            *ptr |= bitMask;
+        }
+        else
+        {
+            *ptr &= ~bitMask;
+        }
 
-        tempBuf.resize(5);
-        tempBufSize = 5;
+        if (bitMask == 0x80)
+        {
+            bitMask = 1;
+            ++ptr;
+        }
+        else
+        {
+            bitMask = bitMask << 1;
+        }
+
+        if (i > MAX_COILS_FOR_WRITE)
+        {
+            break;
+        }
     }
+}
 
-    RTUApplicationDataUnit adu;
+//-----------------------------------------------------------------------------
 
-    adu.unitId = tempBuf[0];
-    adu.pdu.functionCode = tempBuf[1];
+void
+AbstractDevice::putRegistersIntoBuffer(quint8* buffer, const QVector<quint16>& data)
+{
+    quint16* ptr = (quint16*)buffer;
 
-    for (int i = 2; i < tempBufSize - 2; ++i)
+    for (quint16 i = 0; i < data.size(); ++i)
     {
-        adu.pdu.data[i - 2] = tempBuf[i];
+        *ptr = host2net(data[i]);
+        ++ptr;
+
+        if (i > MAX_COILS_FOR_WRITE)
+        {
+            break;
+        }
     }
+}
 
-    WordRec aduCRC;
-    aduCRC.bytes[0] = tempBuf[tempBufSize - 2];
-    aduCRC.bytes[1] = tempBuf[tempBufSize - 1];
 
-    adu.crc = aduCRC.word;
+//-----------------------------------------------------------------------------
 
-    quint16 recievedCRC = net2host(adu.crc);
+void
+AbstractDevice::wait(int time)
+{
+    QMutex mutex;
+    mutex.lock();
 
-    qDebug() << QString("recievied crc: %1").arg(recievedCRC, 4, 16);
-
-    // Calculate CRC for recived packet
-    // At first we should delete last 2 bytes, which is the CRC
-    //
-    tempBuf.resize(tempBuf.size() - 2);
-    quint16 calculatedCRC = crc16(tempBuf);
-
-    qDebug() << QString("calculated crc: %1").arg(calculatedCRC, 4, 16);
-
-    // In case of mismatch emit error message
-    //
-    if (recievedCRC != calculatedCRC)
-    {
-        errorCode = CRC_MISMATCH;
-    }
-
-#ifndef QT_NO_DEBUG
-    // If we want to print PDU into log file we should remove 1st byte
-    // After that we have pdu in tempBuf as CRC was deleted before
-    //
-    tempBuf.remove(0, 1);
-    qDebug() << "PDU: " << tempBuf.toHex();
-    qDebug() << "PDU size: " << tempBuf.size();
-#endif
-
-    pdu = adu.pdu;
-
-    if (errorCode == NO_ERROR)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    QWaitCondition pause;
+    pause.wait(&mutex, time);
 }
 
 //-----------------------------------------------------------------------------

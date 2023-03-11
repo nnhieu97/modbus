@@ -130,7 +130,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru true если запрос прошел успешно; false в случае возникновения ошибки
          *
          */
-        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU);
+        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU);
 
         /**
          * @brief sendRequestToServer_
@@ -145,7 +145,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru Это сокращенная версия. Используется для операций записи, где нет
          * необходимости в анализе ответа от сервера.
          */
-        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize);
+        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize);
 
     public:
         /**
@@ -169,13 +169,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru Сообщение о последней возникшей ошибке
          *
          */
-        QString lastErrorMessage()
-        {
-            QString result = errorMessage_;
-            errorMessage_ = "";
-
-            return result;
-        }
+        QString lastErrorMessage();
 
         /**
          * @brief
@@ -359,6 +353,19 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          */
         bool readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& values);
 
+        /**
+         * @brief
+         * Read response from slave device
+         *
+         * @return
+         * Readed data array
+         *
+         * As timeout processing is differ for RTU and TCP we need to implement
+         * method in descendance.
+         */
+        virtual QByteArray readResponse_() = 0;
+
+
 //        /**
 //         * @brief readSingle
 //         * @param regNo
@@ -385,10 +392,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en Value for reading timeout
          * @ru Время ожидания ответа от сервера
          */
-        int readTimeout() const
-        {
-            return readTimeout_;
-        }
+        int readTimeout() const;
 
         /**
          * @brief
@@ -399,10 +403,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en readTimeout - new value for reading timeout, ms
          * @ru readTimeout - максимальное время ожидания ответа от сервера, мс
          */
-        void setReadTimeOut(int readTimeout)
-        {
-            readTimeout_ = readTimeout;
-        }
+        void setReadTimeOut(int readTimeout);
 
         /**
          * @brief
@@ -413,10 +414,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en unitID - server device unit id
          * @ru unitID - адрес устройства сервера
          */
-        void setUnitID(quint8 unitID)
-        {
-            unitID_ = unitID;
-        }
+        void setUnitID(quint8 unitID);
 
         /**
          * @brief
@@ -427,10 +425,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en readTimeout - new value for reading timeout, ms
          * @ru readTimeout - максимальное время ожидания ответа от сервера, мс
          */
-        void setWriteTimeOut(int writeTimeout)
-        {
-            writeTimeout_ = writeTimeout;
-        }
+        void setWriteTimeOut(int writeTimeout);
 
         /**
          * @brief
@@ -452,10 +447,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en It is alias of writeSingleCoil() method for convinience.
          * @ru Этот метод является псевдонимом метода writeSingleCoil().
          */
-        bool writeCoil(quint16 regNo, bool value)
-        {
-            return writeSingleCoil(regNo, value);
-        }
+        bool writeCoil(quint16 regNo, bool value);
 
         /**
          * @brief
@@ -477,10 +469,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en It is alias of writeMultipleCoils() method for convinience.
          * @ru Этот метод является псевдонимом метода writeMultipleCoils().
          */
-        bool writeCoils(quint16 regStart, const QVector<bool>& values)
-        {
-            return writeMultipleCoils(regStart, values);
-        }
+        bool writeCoils(quint16 regStart, const QVector<bool>& values);
 
         /**
          * @brief
@@ -503,10 +492,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru Этот метод является псевдонимом метода writeSingleRegister().
          *
          */
-        bool writeHoldingRegister(quint16 regAddress, quint16 value)
-        {
-            return writeSingleRegister(regAddress, value);
-        }
+        bool writeHoldingRegister(quint16 regAddress, quint16 value);
 
         /**
          * @brief
@@ -529,10 +515,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru Этот метод является псевдонимом метода writeMultipleRegisters().
          *
          */
-        bool writeHoldingRegisters(quint16 regStart, const QVector<quint16>& values)
-        {
-            return writeMultipleRegisters(regStart, values);
-        }
+        bool writeHoldingRegisters(quint16 regStart, const QVector<quint16>& values);
 
         /**
          * @brief
@@ -666,10 +649,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en Value for reading timeout
          * @ru Время ожидания передачи данных серверу
          */
-        int writeTimeout() const
-        {
-            return writeTimeout_;
-        }
+        int writeTimeout() const;
 
         /**
          * @brief
@@ -680,10 +660,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en Server unit id
          * @ru Адрес устройства сервера
          */
-        quint8 unitID() const
-        {
-            return unitID_;
-        }
+        quint8 unitID() const;
 
         /**
          * @brief
@@ -737,27 +714,36 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
 
     signals:
 
-        /**
-         * @brief
-         * @en Signal for debuggin info
-         * @ru Сигнал для вывода отладочного сообщения
-         *
-         * @param
-         * @en msg - Debug message
-         * @ru msg - Строка с отладочным сообщение
-         */
+        //!
+        //! \brief Signal for debugging informing
+        //! \param msg - Debug message
+        //!
         void debugMessage(const QString& msg);
 
+        //!
+        //! \brief Signal for informing about error occured
+        //! \param msg - Message with error description
+        //!
+        void errorMessage(const QString& msg);
+
+        //!
+        //! \brief Signal for general purposes informing
+        //! \param msg - message
+        //!
+        void infoMessage(const QString& msg);
+
         /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
+         * @brief Signal for dbugging informing
          *
          * @param
+         * @en unitID - unit ID of device
+         * @en unitID - адрес устройства, при обмене данными с которым произошла ошибка
+         *
          * @en msg - Message with error description
          * @ru msg - Строка с описанием ошибки
          */
-        void errorMessage(const QString& msg);
+        void debugMessage(quint8 unitID, const QString& msg);
+
 
         /**
          * @brief
@@ -772,17 +758,6 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru msg - Строка с описанием ошибки
          */
         void errorMessage(quint8 unitID, const QString& msg);
-
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
-         *
-         * @param
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
-        void infoMessage(const QString& msg);
 
         /**
          * @brief

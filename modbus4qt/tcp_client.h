@@ -28,6 +28,7 @@
 
 
 #include "client.h"
+#include "tcp_device.h"
 
 #include <QHostAddress>
 #include <QTcpSocket>
@@ -37,7 +38,7 @@ namespace modbus4qt
 {
 
 //! Класс MODBUS/Tcp клиента
-class MODBUS4QT_EXPORT TcpClient : public Client
+class MODBUS4QT_EXPORT TcpClient : public Client, public TCPDevice
 {
     Q_OBJECT
 
@@ -93,7 +94,7 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         */
         quint16 getNewTransactionID_();
 
-        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
+        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
 
     public:
 
@@ -109,7 +110,7 @@ class MODBUS4QT_EXPORT TcpClient : public Client
         explicit TcpClient(QObject *parent = 0);
 
         //! Выполняет подключение к серверу
-        virtual bool connectToServer(int timeout = CONNECTION_TIMEOUT);
+        virtual bool connectToServer(int timeout = DEFAULT_TIMEOUT);
 
         //! Отключается от сервера
         virtual void disconnectFromServer();

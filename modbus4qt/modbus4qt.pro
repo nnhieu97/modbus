@@ -74,28 +74,28 @@ else {
 
 SOURCES += abstract_device.cpp \
     client.cpp \
-    consts.cpp \
+    memory_utils.cpp \
+    rtu_device.cpp \
     server_internal_data.cpp \
     rtu_client.cpp \
     rtu_server.cpp \
     server.cpp \
     tcp_client.cpp \
-    tcp_server.cpp \
-    types.cpp \
-    utils.cpp
+    tcp_device.cpp \
+    tcp_server.cpp
 
 HEADERS += global.h \
     abstract_device.h \
     client.h \
-    consts.h \
+    memory_utils.h \
+    rtu_device.h \
     server_internal_data.h \
     rtu_client.h \
     rtu_server.h \
     server.h \
     tcp_client.h \
-    tcp_server.h \
-    types.h \
-    utils.h
+    tcp_device.h \
+    tcp_server.h
 
 #------------------------------------------------------------------------------
 # Install directives
