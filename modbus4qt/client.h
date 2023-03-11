@@ -700,6 +700,25 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
         bool userDefinedFunction(quint8 function, quint8 subFunction, const QVector<quint8>& data, QVector<quint8>& retData);
 
     signals:
+
+        //!
+        //! \brief Signal for debugging informing
+        //! \param msg - Debug message
+        //!
+        void debugMessage(const QString& msg);
+
+        //!
+        //! \brief Signal for informing about error occured
+        //! \param msg - Message with error description
+        //!
+        void errorMessage(const QString& msg);
+
+        //!
+        //! \brief Signal for general purposes informing
+        //! \param msg - message
+        //!
+        void infoMessage(const QString& msg);
+
         /**
          * @brief Signal for dbugging informing
          *
