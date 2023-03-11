@@ -74,22 +74,26 @@ else {
 
 SOURCES += abstract_device.cpp \
     client.cpp \
+    rtu_device.cpp \
     server_internal_data.cpp \
     rtu_client.cpp \
     rtu_server.cpp \
     server.cpp \
     tcp_client.cpp \
+    tcp_device.cpp \
     tcp_server.cpp \
     types.cpp
 
 HEADERS += global.h \
     abstract_device.h \
     client.h \
+    rtu_device.h \
     server_internal_data.h \
     rtu_client.h \
     rtu_server.h \
     server.h \
     tcp_client.h \
+    tcp_device.h \
     tcp_server.h \
     types.h
 
