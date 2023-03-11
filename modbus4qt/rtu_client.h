@@ -183,7 +183,7 @@ class MODBUS4QT_EXPORT RtuClient : public Client, public RTUDevice
          */
         virtual QByteArray readResponse_() override;
 
-        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
+        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
 
         /**
          * @brief

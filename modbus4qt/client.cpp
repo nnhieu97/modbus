@@ -92,7 +92,7 @@ Client::readCoils(quint16 regStart, quint16 regQty, QVector<bool>& values)
 
     ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequestToServer_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
 
     if (isOk)
     {
@@ -138,7 +138,7 @@ Client::readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& valu
 
     ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequestToServer_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
 
     if (isOk)
     {
@@ -240,7 +240,7 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
 
     ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequestToServer_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
 
     if (isOk)
     {
@@ -303,7 +303,7 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
 
     ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequestToServer_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
 
     if (isOk)
     {
@@ -421,7 +421,7 @@ bool Client::writeHoldingRegisters(quint16 regStart, const QVector<quint16>& val
 //-----------------------------------------------------------------------------
 
 bool
-Client::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
+Client::sendRequest_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
 {
     QByteArray adu = prepareADU_(requestPDU, requestPDUSize);
 
@@ -517,7 +517,7 @@ bool
 Client::sendRequestToServer_(const ProtocolDataUnit &pdu, int pduSize)
 {
     ProtocolDataUnit responsePDU;
-    return sendRequestToServer_(pdu, pduSize, &responsePDU);
+    return sendRequest_(pdu, pduSize, &responsePDU);
 }
 
 //-----------------------------------------------------------------------------

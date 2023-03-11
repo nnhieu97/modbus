@@ -130,7 +130,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru true если запрос прошел успешно; false в случае возникновения ошибки
          *
          */
-        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU);
+        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU);
 
         /**
          * @brief sendRequestToServer_

@@ -330,7 +330,7 @@ RtuClient::readResponse_()
 //-----------------------------------------------------------------------------
 
 bool
-RtuClient::sendRequestToServer_(const ProtocolDataUnit &requestPDU, int requestPDUSize, ProtocolDataUnit *responsePDU)
+RtuClient::sendRequest_(const ProtocolDataUnit &requestPDU, int requestPDUSize, ProtocolDataUnit *responsePDU)
 {
     if (inSilenceState_)
     {
@@ -351,7 +351,7 @@ RtuClient::sendRequestToServer_(const ProtocolDataUnit &requestPDU, int requestP
         return false;
     }
 
-    bool result = Client::sendRequestToServer_(requestPDU, requestPDUSize, responsePDU);
+    bool result = Client::sendRequest_(requestPDU, requestPDUSize, responsePDU);
 
     startSilence_();
 

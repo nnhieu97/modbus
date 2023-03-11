@@ -252,7 +252,7 @@ TcpClient::readResponse_()
 //-----------------------------------------------------------------------------
 
 bool
-TcpClient::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
+TcpClient::sendRequest_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
 {
     if (autoConnect_ && !isConnected())
     {
@@ -264,7 +264,7 @@ TcpClient::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestP
         }
     }
 
-    bool result = Client::sendRequestToServer_(requestPDU, requestPDUSize, responsePDU);
+    bool result = Client::sendRequest_(requestPDU, requestPDUSize, responsePDU);
     return  result;
 }
 

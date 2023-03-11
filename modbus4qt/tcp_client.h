@@ -94,7 +94,7 @@ class MODBUS4QT_EXPORT TcpClient : public Client, public TCPDevice
         */
         quint16 getNewTransactionID_();
 
-        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
+        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
 
     public:
 
