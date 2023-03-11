@@ -29,6 +29,7 @@
 #include <QWaitCondition>
 
 #include "abstract_device.h"
+#include "memory_utils.h"
 
 namespace modbus4qt
 {
@@ -118,74 +119,6 @@ AbstractDevice::getRegistersFromBuffer(const QByteArray& buffer, quint16 regQty)
 
 //-----------------------------------------------------------------------------
 
-quint8
-AbstractDevice::hi(quint16 word)
-{
-    quint8* bytes = (quint8*)&word;
-
-    quint16 test = 1; // * 0x0001 *
-    if (*((quint8*)&test) == 0)
-    {
-        return bytes[0];	// big endian (network/motorolla)
-    }
-    else
-    {
-        return bytes[1];	// little endian (intel)
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-quint16
-AbstractDevice::host2net(quint16 word)
-{
-    quint16 test = 1; // * 0x0001 *
-    if (*((quint8*)&test) == 0)
-    {
-        return word;		// big endian (network/motorolla)
-    }
-    else
-    {
-        return swap(word);	// little endian (intel)
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-quint8
-AbstractDevice::lo(quint16 word)
-{
-    quint8* bytes = (quint8*)&word;
-
-    quint16 test = 1; // * 0x0001 *
-    if (*((quint8*)&test) == 0)
-    {
-        return bytes[1];	// big endian (network/motorolla)
-    }
-    else
-    {
-        return bytes[0];	// little endian (intel)
-    }
-}
-
-//-----------------------------------------------------------------------------
-
-quint16
-AbstractDevice::net2host(quint16 word)
-{
-    quint16 test = 1; // * 0x0001 *
-    if (*((quint8*)&test) == 0)
-    {
-        return word;		// big endian (network/motorolla)
-    }
-    else
-    {
-        return swap(word);	// little endian (intel)
-    }
-}
-
-//-----------------------------------------------------------------------------
-
 void
 AbstractDevice::putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& values)
 {
@@ -250,17 +183,6 @@ AbstractDevice::putRegistersIntoBuffer(quint8* buffer, const QVector<quint16>& d
     }
 }
 
-//-----------------------------------------------------------------------------
-
-quint16
-AbstractDevice::swap(quint16 word)
-{
-    quint16 result = lo(word);
-    result = result << 8;
-    result += hi(word);
-
-    return result;
-}
 
 //-----------------------------------------------------------------------------
 

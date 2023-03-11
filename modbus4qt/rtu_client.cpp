@@ -23,11 +23,12 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "rtu_client.h"
-
 #include <QDebug>
 #include <QMutex>
 #include <QWaitCondition>
+
+#include "rtu_client.h"
+#include "memory_utils.h"
 
 namespace modbus4qt
 {

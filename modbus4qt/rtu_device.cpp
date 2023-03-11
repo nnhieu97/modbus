@@ -1,6 +1,7 @@
-#include "rtu_device.h"
-
 #include <QDebug>
+
+#include "rtu_device.h"
+#include "memory_utils.h"
 
 namespace modbus4qt
 {

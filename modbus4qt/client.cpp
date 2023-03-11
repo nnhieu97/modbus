@@ -23,13 +23,14 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "client.h"
-
 #include <QDataStream>
 #include <QIODevice>
 #include <QVector>
 
 #include <QDebug>
+
+#include "client.h"
+#include "memory_utils.h"
 
 namespace modbus4qt
 {
