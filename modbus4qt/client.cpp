@@ -44,6 +44,14 @@ Client::Client(QObject *parent) :
 {
 }
 
+QString Client::lastErrorMessage()
+{
+    QString result = errorMessage_;
+    errorMessage_ = "";
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------
 
 bool
@@ -314,6 +322,46 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
     }
 
     return isOk;
+}
+
+int Client::readTimeout() const
+{
+    return readTimeout_;
+}
+
+void Client::setReadTimeOut(int readTimeout)
+{
+    readTimeout_ = readTimeout;
+}
+
+void Client::setUnitID(quint8 unitID)
+{
+    unitID_ = unitID;
+}
+
+void Client::setWriteTimeOut(int writeTimeout)
+{
+    writeTimeout_ = writeTimeout;
+}
+
+bool Client::writeCoil(quint16 regNo, bool value)
+{
+    return writeSingleCoil(regNo, value);
+}
+
+bool Client::writeCoils(quint16 regStart, const QVector<bool>& values)
+{
+    return writeMultipleCoils(regStart, values);
+}
+
+bool Client::writeHoldingRegister(quint16 regAddress, quint16 value)
+{
+    return writeSingleRegister(regAddress, value);
+}
+
+bool Client::writeHoldingRegisters(quint16 regStart, const QVector<quint16>& values)
+{
+    return writeMultipleRegisters(regStart, values);
 }
 
 //-----------------------------------------------------------------------------
@@ -625,6 +673,16 @@ Client::writeSingleRegister(quint16 regAddress, quint16 value)
     requestPDUSize = 5;
 
     return sendRequestToServer_(requestPDU, requestPDUSize);
+}
+
+int Client::writeTimeout() const
+{
+    return writeTimeout_;
+}
+
+quint8 Client::unitID() const
+{
+    return unitID_;
 }
 
 //-----------------------------------------------------------------------------

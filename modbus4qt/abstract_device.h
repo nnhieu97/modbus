@@ -29,7 +29,6 @@
 #include <QObject>
 
 #include "global.h"
-#include "types.h"
 
 namespace modbus4qt
 {

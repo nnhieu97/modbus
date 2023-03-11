@@ -169,13 +169,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru Сообщение о последней возникшей ошибке
          *
          */
-        QString lastErrorMessage()
-        {
-            QString result = errorMessage_;
-            errorMessage_ = "";
-
-            return result;
-        }
+        QString lastErrorMessage();
 
         /**
          * @brief
@@ -385,10 +379,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en Value for reading timeout
          * @ru Время ожидания ответа от сервера
          */
-        int readTimeout() const
-        {
-            return readTimeout_;
-        }
+        int readTimeout() const;
 
         /**
          * @brief
@@ -399,10 +390,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en readTimeout - new value for reading timeout, ms
          * @ru readTimeout - максимальное время ожидания ответа от сервера, мс
          */
-        void setReadTimeOut(int readTimeout)
-        {
-            readTimeout_ = readTimeout;
-        }
+        void setReadTimeOut(int readTimeout);
 
         /**
          * @brief
@@ -413,10 +401,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en unitID - server device unit id
          * @ru unitID - адрес устройства сервера
          */
-        void setUnitID(quint8 unitID)
-        {
-            unitID_ = unitID;
-        }
+        void setUnitID(quint8 unitID);
 
         /**
          * @brief
@@ -427,10 +412,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en readTimeout - new value for reading timeout, ms
          * @ru readTimeout - максимальное время ожидания ответа от сервера, мс
          */
-        void setWriteTimeOut(int writeTimeout)
-        {
-            writeTimeout_ = writeTimeout;
-        }
+        void setWriteTimeOut(int writeTimeout);
 
         /**
          * @brief
@@ -452,10 +434,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en It is alias of writeSingleCoil() method for convinience.
          * @ru Этот метод является псевдонимом метода writeSingleCoil().
          */
-        bool writeCoil(quint16 regNo, bool value)
-        {
-            return writeSingleCoil(regNo, value);
-        }
+        bool writeCoil(quint16 regNo, bool value);
 
         /**
          * @brief
@@ -477,10 +456,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en It is alias of writeMultipleCoils() method for convinience.
          * @ru Этот метод является псевдонимом метода writeMultipleCoils().
          */
-        bool writeCoils(quint16 regStart, const QVector<bool>& values)
-        {
-            return writeMultipleCoils(regStart, values);
-        }
+        bool writeCoils(quint16 regStart, const QVector<bool>& values);
 
         /**
          * @brief
@@ -503,10 +479,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru Этот метод является псевдонимом метода writeSingleRegister().
          *
          */
-        bool writeHoldingRegister(quint16 regAddress, quint16 value)
-        {
-            return writeSingleRegister(regAddress, value);
-        }
+        bool writeHoldingRegister(quint16 regAddress, quint16 value);
 
         /**
          * @brief
@@ -529,10 +502,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @ru Этот метод является псевдонимом метода writeMultipleRegisters().
          *
          */
-        bool writeHoldingRegisters(quint16 regStart, const QVector<quint16>& values)
-        {
-            return writeMultipleRegisters(regStart, values);
-        }
+        bool writeHoldingRegisters(quint16 regStart, const QVector<quint16>& values);
 
         /**
          * @brief
@@ -666,10 +636,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en Value for reading timeout
          * @ru Время ожидания передачи данных серверу
          */
-        int writeTimeout() const
-        {
-            return writeTimeout_;
-        }
+        int writeTimeout() const;
 
         /**
          * @brief
@@ -680,10 +647,7 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
          * @en Server unit id
          * @ru Адрес устройства сервера
          */
-        quint8 unitID() const
-        {
-            return unitID_;
-        }
+        quint8 unitID() const;
 
         /**
          * @brief
