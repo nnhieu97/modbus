@@ -3,6 +3,13 @@
 
 #include <cstdint>
 
+union WordRec
+{
+    uint16_t word;
+    uint8_t bytes[2];
+};
+
+
 /**
   * @brief
   * @en Retrun hi byte of word

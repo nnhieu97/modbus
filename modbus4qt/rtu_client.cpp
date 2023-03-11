@@ -295,7 +295,7 @@ RtuClient::processADU_(const QByteArray &buf)
 
     ErrorCodes errorCode;
 
-    if (!preparePDUForRTU(buf, pdu, errorCode))
+    if (!preparePDU(buf, pdu, errorCode))
     {
         switch (errorCode)
         {

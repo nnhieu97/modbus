@@ -178,12 +178,6 @@ class AbstractDevice : public QObject
         };
         Q_ENUM(Exceptions)
 
-        union WordRec
-        {
-            uint16_t word;
-            uint8_t bytes[2];
-        };
-
         /**
          * Constants which defines the format of a modbus frame. The example is
          * shown for a Modbus RTU/ASCII frame. Note that the Modbus PDU is not
@@ -424,7 +418,6 @@ class AbstractDevice : public QObject
          * @ru data - массив значений регистров
          */
         void putRegistersIntoBuffer(quint8* buffer, const QVector<quint16>& data);
-
 
         /**
           * @brief

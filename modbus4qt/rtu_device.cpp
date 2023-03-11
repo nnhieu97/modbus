@@ -99,7 +99,7 @@ RTUDevice::crc16(const QByteArray& buf)
 //-----------------------------------------------------------------------------
 
 bool
-RTUDevice::preparePDUForRTU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& pdu, AbstractDevice::ErrorCodes& errorCode)
+RTUDevice::preparePDU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& pdu, AbstractDevice::ErrorCodes& errorCode)
 {
     errorCode = AbstractDevice::NO_ERROR;
 
@@ -137,7 +137,7 @@ RTUDevice::preparePDUForRTU(const QByteArray& buf, AbstractDevice::ProtocolDataU
         adu.pdu.data[i - 2] = tempBuf[i];
     }
 
-    AbstractDevice::WordRec aduCRC;
+    WordRec aduCRC;
     aduCRC.bytes[0] = tempBuf[tempBufSize - 2];
     aduCRC.bytes[1] = tempBuf[tempBufSize - 1];
 

@@ -42,7 +42,7 @@ class RTUDevice
         //! \param buf - array with data readed, should contain ADU record
         //! \return Protocol data unit
         //!
-        bool preparePDUForRTU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& pdu, AbstractDevice::ErrorCodes& errorCode);
+        bool preparePDU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& pdu, AbstractDevice::ErrorCodes& errorCode);
 
         //!
         //! \brief Calculate the checksum of the data buffer for the crc16 algorithm

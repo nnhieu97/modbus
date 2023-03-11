@@ -23,11 +23,11 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-
-#include "tcp_client.h"
-
 #include <QDateTime>
 #include <QDebug>
+
+#include "tcp_client.h"
+#include "memory_utils.h"
 
 namespace modbus4qt
 {
