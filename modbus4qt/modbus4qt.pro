@@ -83,8 +83,7 @@ SOURCES += abstract_device.cpp \
     server.cpp \
     tcp_client.cpp \
     tcp_device.cpp \
-    tcp_server.cpp \
-    types.cpp
+    tcp_server.cpp
 
 HEADERS += global.h \
     abstract_device.h \
@@ -98,8 +97,7 @@ HEADERS += global.h \
     server.h \
     tcp_client.h \
     tcp_device.h \
-    tcp_server.h \
-    types.h
+    tcp_server.h
 
 #------------------------------------------------------------------------------
 # Install directives
