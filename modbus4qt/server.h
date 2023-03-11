@@ -66,7 +66,16 @@ class Server : public AbstractDevice
         //!
         //! \brief process incoming modbus request
         //!
+        //! К моменту обработки запроса все данные уже должны быть прочитаны.
+        //! Следовательно надо на вход подавать буфер с прочитанными данными.
+        //!
         void processIncomingRequest();
+
+        //!
+        //! \brief Send response to client
+        //! \return
+        //!
+        bool sendResponse();
 
     protected:
 
@@ -104,6 +113,9 @@ class Server : public AbstractDevice
         //!
         quint8 unitID_;
 
+        //!
+        //! \brief Server internal data
+        //!
         ServerInternalData* internalData_ = nullptr;
 
 };

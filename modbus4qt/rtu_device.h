@@ -10,6 +10,8 @@ class RTUDevice
 {
     public:
 
+        #pragma pack(push, 1)
+
         //!
         //! \brief Application data unit for MODBUS over serial line
         //!
@@ -36,6 +38,9 @@ class RTUDevice
             //!
             uint16_t crc;
         };
+
+        #pragma pack(pop)
+
 
         //!
         //! \brief Process Modbus-RTU application data unit and return protocol data unit

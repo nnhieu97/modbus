@@ -10,6 +10,8 @@ class TCPDevice
 {
     public:
 
+        #pragma pack(push, 1)
+
         //!
         //! \brief The TCPApplicationDataUnit struct
         //!
@@ -71,6 +73,8 @@ class TCPDevice
             */
             uint8_t unitId;
         };
+
+        #pragma pack(pop)
 };
 
 }
