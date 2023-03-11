@@ -438,7 +438,7 @@ class AbstractDevice : public QObject
           * @en Hi byte of word
           * @ru Старший байт двухбайтного целого числа
           */
-        static quint8 hi(quint16 word);
+        quint8 hi(quint16 word);
 
         /**
           * @brief
@@ -453,7 +453,7 @@ class AbstractDevice : public QObject
           * @en Low byte of word
           * @ru Младший байт двухбайтного целого числа
           */
-        static quint8 lo(quint16 word);
+        quint8 lo(quint16 word);
 
         /**
           * @brief
@@ -468,7 +468,7 @@ class AbstractDevice : public QObject
           * @en Word with swapped bytes
           * @ru Слово с переставленными байтами
           */
-        static quint16 swap(quint16 word);
+        quint16 swap(quint16 word);
 
         /**
           * @brief
@@ -483,7 +483,7 @@ class AbstractDevice : public QObject
           * @en Two bytes word with net byte order
           * @ru Двухбайтное слово с сетевым порядком байт
           */
-        static quint16 host2net(quint16 word);
+        quint16 host2net(quint16 word);
 
         /**
           * @brief
@@ -498,7 +498,7 @@ class AbstractDevice : public QObject
           * @en Two bytes word with local byte order
           * @ru Двухбайтное слово с локальным порядком байт
           */
-        static quint16 net2host(quint16 word);
+        quint16 net2host(quint16 word);
 
         /**
           * @brief
@@ -510,7 +510,6 @@ class AbstractDevice : public QObject
           * @ru time - время задержки в миллисекундах
           */
         void wait(int time);
-
 
         /**
          * @brief
