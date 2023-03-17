@@ -33,13 +33,8 @@ namespace modbus4qt
 
 class RtuServer : public Server
 {
-    Q_OBJECT
     public:
-        explicit RtuServer(QObject *parent = 0);
-
-    signals:
-
-    public slots:
+        explicit RtuServer();
 
 };
 

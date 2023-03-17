@@ -26,6 +26,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "modbus4qt/server_internal_data.h"
 #include <QMainWindow>
 
 #include <modbus4qt/tcp_server.h>

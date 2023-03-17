@@ -1,5 +1,9 @@
 #include "memory_utils.h"
 
+namespace modbus4qt
+{
+
+
 //-----------------------------------------------------------------------------
 
 uint8_t
@@ -37,7 +41,7 @@ host2net(uint16_t word)
 //-----------------------------------------------------------------------------
 
 uint8_t
-lo(uint16_t word)
+low(uint16_t word)
 {
     uint8_t* bytes = (uint8_t*)&word;
 
@@ -73,12 +77,15 @@ net2host(uint16_t word)
 uint16_t
 swap(uint16_t word)
 {
-    uint16_t result = lo(word);
+    uint16_t result = low(word);
     result = result << 8;
     result += hi(word);
 
     return result;
 }
+
+} // namespace modbus4qt
+
 
 //-----------------------------------------------------------------------------
 // EOF

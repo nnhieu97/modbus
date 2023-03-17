@@ -677,7 +677,7 @@ MainWindow::writeCoils()
     }
     else
     {
-        result = mbClient_->writeSingleCoil(coilStart_->value(), coilValue_->value() == 1);
+        result = mbClient_->writeCoil(coilStart_->value(), coilValue_->value() == 1);
     }
 
     if (!result)
@@ -707,7 +707,7 @@ MainWindow::writeHoldingRegisters()
     }
     else
     {
-        result = mbClient_->writeSingleRegister(holdRegStart_->value(), holdRegValue_->value());
+        result = mbClient_->writeHoldingRegister(holdRegStart_->value(), holdRegValue_->value());
         if (!result)
             errorMessage(tr("Cannot write holding register(s)!"));
         else

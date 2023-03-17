@@ -26,14 +26,12 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <QObject>
-
 #include <QMap>
 #include <QSet>
 
 #include "global.h"
 
-#include "abstract_device.h"
+#include "device.h"
 
 class QIODevice;
 
@@ -45,23 +43,21 @@ class ServerInternalData;
 //!
 //! \brief Abtract modbus server
 //!
-class Server : public AbstractDevice
+class Server : public Device
 {
-    Q_OBJECT
-
     public:
 
         //!
         //! \brief Default constructor
         //! \param parent - parent object
         //!
-        explicit Server(QObject *parent = 0);
+        explicit Server();
 
-        explicit Server(ServerInternalData* internalData, QObject *parent = 0);
+        explicit Server(ServerInternalData* internalData);
 
         void setInternalData(ServerInternalData* internalData);
 
-    public slots :
+    public : ///slots :
 
         //!
         //! \brief process incoming modbus request
