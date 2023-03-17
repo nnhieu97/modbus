@@ -24,10 +24,11 @@
 *****************************************************************************/
 
 #include <QDateTime>
+#include <QTcpSocket>
 #include <QDebug>
 
-#include "tcp_client.h"
 #include "memory_utils.h"
+#include "tcp_client.h"
 
 namespace modbus4qt
 {
@@ -35,20 +36,14 @@ namespace modbus4qt
 //-----------------------------------------------------------------------------
 
 TcpClient::TcpClient(QObject *parent) :
-    Client(parent)
-    , connectTimeOut_(DEFAULT_TIMEOUT)
-    , lastTransactionID_(0)
+    Client(parent),
+    autoConnect_(true),
+    connectTimeOut_(DEFAULT_TIMEOUT),
+    serverAddress_(QHostAddress("127.0.0.1"))
 {
-    autoConnect_		= true;
-    port_				= DEFAULT_TCP_PORT;
-    serverAddress_		= QHostAddress("127.0.0.1");
     unitID_				= IGNORE_UNIT_ID;
 
-    ioDevice_ = new QTcpSocket(this);
-    tcpSocket_ = dynamic_cast<QTcpSocket*>(ioDevice_);
-
-//    onResponseError = nullptr;
-//    onResponseMismatch = nullptr;
+    ioDevice_ = tcpSocket_;
 }
 
 //-----------------------------------------------------------------------------
@@ -64,7 +59,7 @@ TcpClient::connectToServer(int timeout)
         return false;
     }
 
-    lastTransactionID_ = 0;
+    transactionID_ = 0;
 
     return true;
 }
@@ -77,35 +72,21 @@ TcpClient::disconnectFromServer()
     tcpSocket_->disconnectFromHost();
 }
 
-////-----------------------------------------------------------------------------
-
-//void
-//TcpClient::doResponseError_(quint8 functionCode, quint8 errorCode, const ResponseBuffer& responseBuffer)
-//{
-//}
-
 //-----------------------------------------------------------------------------
 
-//void
-//TcpClient::doResponseMismatch_(quint8 requestFunctionCode, quint8 responseFunctionCode, const ResponseBuffer& responseBuffer)
-//{
-//}
-
-//-----------------------------------------------------------------------------
-
-quint16
-TcpClient::getNewTransactionID_()
+uint16_t
+TcpClient::nextTransactionID_()
 {
-    if (lastTransactionID_ == 0xFFFF)
+    if (transactionID_ == 0xFFFF)
     {
-        lastTransactionID_ = 0;
+        transactionID_ = 0;
     }
     else
     {
-        ++lastTransactionID_;
+        ++transactionID_;
     }
 
-    return lastTransactionID_;
+    return transactionID_;
 }
 
 //-----------------------------------------------------------------------------
@@ -119,7 +100,7 @@ TcpClient::getServerAddress() const
 //-----------------------------------------------------------------------------
 
 bool
-TcpClient::isAutoConnect() const
+TcpClient::autoConnect() const
 {
     return autoConnect_;
 }
@@ -134,125 +115,32 @@ TcpClient::isConnected() const
 
 //-----------------------------------------------------------------------------
 
-QByteArray
-TcpClient::prepareADU_(const ProtocolDataUnit& pdu, int pduSize)
+void
+TcpClient::onUnitDebugMessage_(const QString& msg)
 {
-    QByteArray result;
-
-    getNewTransactionID_();
-
-    result.append((char*)&lastTransactionID_, 2);
-
-    result.append('\x0');
-    result.append('\x0');
-
-    result[4] = ((pduSize+1) >> 8) & 0xFF;
-    result[5] = (pduSize+1) & 0xFF;
-
-    result.append(unitID_);
-
-    result.insert(7, (char*)&pdu, pduSize);
-
-    qDebug() << "ADU: " << result.toHex();
-    qDebug() << "ADU size: " << result.size();
-
-    return result;
+    emit debugMessage(QString("[Server: %1] %2").arg(serverAddress_.toString()).arg(msg));
 }
 
 //-----------------------------------------------------------------------------
 
-AbstractDevice::ProtocolDataUnit
-TcpClient::processADU_(const QByteArray& buf)
+void
+TcpClient::onUnitErrorMessage_(const QString& msg)
 {
-    qDebug() << "ADU: " << buf.toHex();
-    qDebug() << "ADU size: " << buf.size();
-
-    QByteArray tempBuf(buf);
-
-    // For any case we should check size of recieved data to protect memory
-    //
-    // На всякий случай проверяем размер полученных данных, чтобы не ничего не испортить
-    //
-    if (tempBuf.size() > int(sizeof(TcpDataHeader)+sizeof(TCPApplicationDataUnit)))
-        tempBuf.resize(sizeof(TcpDataHeader)+sizeof(TCPApplicationDataUnit));
-
-    int tempBufSize = tempBuf.size();
-
-    // Minimum ADU size can be 9 bytes: 2 byte for Transaction ID, 2 bytes for Protocol ID,
-    // 2 byte for Length, 1 byte for address, 2 byte for minimum PDU
-    //
-    // Минимальный размер ADU может быть 9 байт: 2 байт транзакция ИД, 2 байт Протокол ИД,
-    // 2 байт длина, 1 байт адрес и 2 байта PDU
-    //
-    if (tempBufSize < 9)
-    {
-        emit errorMessage(unitID_, tr("Wrong application data unit recieved!"));
-        tempBuf.resize(9);
-        tempBufSize = 9;
-    }
-
-    TcpDataHeader header;
-
-    WordRec headerTID;
-    headerTID.bytes[0] = tempBuf[0];
-    headerTID.bytes[1] = tempBuf[1];
-
-    header.transactionId = headerTID.word;
-
-    WordRec headerPID;
-    headerPID.bytes[0] = tempBuf[2];
-    headerPID.bytes[1] = tempBuf[3];
-
-    header.protocolId = headerPID.word;
-
-    WordRec headerLength;
-    headerLength.bytes[0] = tempBuf[4];
-    headerLength.bytes[1] = tempBuf[5];
-
-    header.recLength = headerLength.word;
-
-    header.unitId = tempBuf[6];
-
-    TCPApplicationDataUnit adu;
-
-    adu.unitId = tempBuf[6];
-    adu.pdu.functionCode = tempBuf[7];
-
-    for (int i = 8; i < tempBufSize; ++i)
-        adu.pdu.data[i - 8] = tempBuf[i];
-
-#ifndef QT_NO_DEBUG
-    // If we want to print PDU into log file we should remove first 7 byte
-    // After that we have pdu in tempBuf
-    //
-    tempBuf.remove(0, 7);
-    qDebug() << "PDU: " << tempBuf.toHex();
-    qDebug() << "PDU size: " << tempBuf.size();
-#endif
-
-    return adu.pdu;
+    emit debugMessage(QString("[Server: %1] %2").arg(serverAddress_.toString()).arg(msg));
 }
 
 //-----------------------------------------------------------------------------
 
-QByteArray
-TcpClient::readResponse_()
+void
+TcpClient::onUnitInfoMessage_(const QString& msg)
 {
-    QByteArray inArray;
-    inArray.append(ioDevice_->readAll());
-
-    while (ioDevice_->bytesAvailable() || ioDevice_->waitForReadyRead(connectTimeOut_))
-    {
-        inArray.append(ioDevice_->readAll());
-    }
-
-    return inArray;
+    emit debugMessage(QString("[Server: %1] %2").arg(serverAddress_.toString()).arg(msg));
 }
 
 //-----------------------------------------------------------------------------
 
 bool
-TcpClient::sendRequest_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
+TcpClient::sendDataToServer_(const QByteArray& request)
 {
     if (autoConnect_ && !isConnected())
     {
@@ -264,8 +152,35 @@ TcpClient::sendRequest_(const ProtocolDataUnit& requestPDU, int requestPDUSize, 
         }
     }
 
-    bool result = Client::sendRequest_(requestPDU, requestPDUSize, responsePDU);
-    return  result;
+    bool result = Client::sendDataToServer_(request);
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+TcpClient::sendRequestToServer_(const ProtocolDataUnit& requestPDU, int requestPDUSize)
+{
+    QByteArray adu = prepareADU_(requestPDU, requestPDUSize);
+
+    return sendDataToServer_(adu);
+}
+
+//-----------------------------------------------------------------------------
+
+bool TcpClient::readResponseFromServer_(ProtocolDataUnit& pdu)
+{
+    QByteArray inArray;
+
+    if (!readDataFromServer_(inArray))
+    {
+        return false;
+    }
+
+    pdu = getPduFromAdu_(inArray);
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -279,7 +194,7 @@ TcpClient::setAutoConnect(bool autoConnect)
 //-----------------------------------------------------------------------------
 
 void
-TcpClient::setServerAddress(const QHostAddress& serverAddress)
+TcpClient::setServerAddress(const QHostAddress& serverAddress, int port)
 {
     if (serverAddress != serverAddress_)
     {
@@ -289,6 +204,8 @@ TcpClient::setServerAddress(const QHostAddress& serverAddress)
         }
 
         serverAddress_ = serverAddress;
+
+        setServerPort(port);
     }
 }
 

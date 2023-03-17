@@ -26,126 +26,190 @@
 #ifndef MODBUS_TCP_CLIENT_H
 #define MODBUS_TCP_CLIENT_H
 
+#include <QHostAddress>
 
 #include "client.h"
 #include "tcp_device.h"
 
-#include <QHostAddress>
-#include <QTcpSocket>
-#include <QVector>
 
 namespace modbus4qt
 {
 
-//! Класс MODBUS/Tcp клиента
-class MODBUS4QT_EXPORT TcpClient : public Client, public TCPDevice
+//!
+//! \brief The MODBUS/TCP client class
+//!
+class TcpClient : public Client, public TCPDevice
 {
     Q_OBJECT
 
-    private: // Закрытые поля класса
-
-        //! Использовать или нет режим автоматического подключения к серверу
-        /**
-            @ru Значение по умолчанию: истина
-        */
-        bool autoConnect_;
-
-        //! Максимальное время ожидания подключения к серверу в милисекундах
-        /**
-          Значение по умолчанию CONNECTION_TIMEOUT 3000 ms (3 сек).
-        */
-        int connectTimeOut_;
-
-
-        //! Номер TCP порта для связи с сервером
-        /**
-            Значение по умолчанию: 502
-            Исходное объявление: property Port default MB_PORT;
-        */
-        int port_;
-
-        //! IP адрес сервера
-        /**
-            Значение по умполчанию 127.0.0.1
-        */
-        QHostAddress serverAddress_;
-
-        //! Внутренняя переменная для хранения указателя на ioDevice.
-        /**
-          Используется для обеспечения возможности вызова методов TcpSocket,
-          экземпляром которого является ioDevice в контексте данного класса.
-        */
-        QTcpSocket* tcpSocket_;
-
-        //! Номер последней транзакции
-        /**
-            Исходное объявление: FLastTransactionID: Word;
-        */
-        quint16 lastTransactionID_;
-
-    private:
-        //! Возвращает номер следующей транзакции
-        /**
-            Увеличивает номер последней транзакции на единицу и возщвращает полученное значение.
-            Если номер транзакции рhttp://ru.wikipedia.org/wiki/%C1%EE%E4авен 0xFFFF, то возвращает 0.
-
-            Готовность: полностью готова <br>
-            Исходное объявление: function GetNewTransactionID: Word;
-        */
-        quint16 getNewTransactionID_();
-
-        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU) override;
-
     public:
 
-        //! Конструктор по умолчанию
-        /**
-            Инициализирует внутренние переменные экземпляра класса.
+        //!
+        //! \brief TcpClient - default constructor
+        //! \param parent - Qt parent object
+        //!
+        explicit TcpClient(QObject* parent = nullptr);
 
-            Готовность: почти готов <br>
-            Исходное объявление: {$IFNDEF DMB_INDY10} constructor Create(AOwner: TComponent); override; {$ENDIF}
+        //!
+        //! \brief Connect to server
+        //! \param timeout - time to wait connection
+        //! \return true in success; false otherwise
+        //!
+        bool connectToServer(int timeout = DEFAULT_TIMEOUT);
 
-            @todo Присвоить значения указателям обработчиков ошибок
-        */
-        explicit TcpClient(QObject *parent = 0);
+        //!
+        //! \brief Disconnect from server
+        //!
+        void disconnectFromServer();
 
-        //! Выполняет подключение к серверу
-        virtual bool connectToServer(int timeout = DEFAULT_TIMEOUT);
+        //!
+        //! \brief Reterun value for auto connect mode
+        //! \return true if auto connest is on; flase otherwise
+        //!
+        bool autoConnect() const;
 
-        //! Отключается от сервера
-        virtual void disconnectFromServer();
-
-        //! Возвращает значение режима автоматического подключения к серверу
-        bool isAutoConnect() const;
-
-        //! Проверяет наличие подключения к серверу
-        /**
-            Возвращает true, если клиент подключен к серверу. false - в противном случае.
-        */
+        //!
+        //! \brief Return state of connection with server
+        //! \return true if connected; false otherwise
+        //!
         virtual bool isConnected() const;
 
-        //! Возвращает текущее значение адреса сервера
+        //!
+        //! \brief Return server address
+        //! \return Server address
+        //!
         QHostAddress getServerAddress() const;
 
-        //! Устанавливает режим автоматического подключения к серверу
+        //!
+        //! \brief Set auto connect mode
+        //! \param autoConnect - new value for mode
+        //!
         void setAutoConnect(bool autoConnect = true);
 
         //! Устанавливает адрес и порт сервера для подключения
         /**
             Если ранее было установлено соединение с другим сервером, то соединение будет закрыто.
         */
-        void setServerAddress(const QHostAddress& getServerAddress);
 
+        //!
+        //! \brief Set server address and port
+        //! \param serverAddress - new server address
+        //! \param port - new server port
+        //!
+        //! If connection established it'll be clesed
+        //!
+        void setServerAddress(const QHostAddress& serverAddress, const int port = DEFAULT_TCP_PORT);
+
+        //!
+        //! \brief Set server port
+        //! \param port - new server port
+        //!
+        //! If connection established it'll be clesed
+        //!
         void setServerPort(const int& port);
 
-        // Client interface
-    protected:
+    signals:
 
-        virtual QByteArray prepareADU_(const ProtocolDataUnit& pdu, int pduSize) override;
+        //!
+        //! \brief dataReaded signal emits after data reading.
+        //!
+        void dataReaded();
 
-        virtual ProtocolDataUnit processADU_(const QByteArray& buf) override;
+        //!
+        //! \brief Signal for debugging informing
+        //! \param unitID - unit ID of server device
+        //! \param msg - message with debug information
+        //!
+        void unitDebugMessage_(quint8 unitID, const QString& msg);
 
-        virtual QByteArray readResponse_() override;
+        //!
+        //! \brief Signal for informing about errors
+        //! \param unitID - unit ID of server device
+        //! \param msg - message with error description
+        //!
+        void unitErrorMessage_(quint8 unitID, const QString& msg);
+
+        //!
+        //! \brief Signal for general informing
+        //! \param unitID - unit ID of server device
+        //! \param msg - message
+        //!
+        void unitInfoMessage_(quint8 unitID, const QString& msg);
+
+
+    protected : // fields
+
+        //!
+        //! \brief Flag showing if we should use auto connect
+        //!
+        bool autoConnect_;
+
+        //!
+        //! \brief Connection timeout
+        //!
+        int connectTimeOut_;
+
+        //!
+        //! \brief Server address
+        //!
+        QHostAddress serverAddress_;
+
+    protected : // methods
+
+        //!
+        //! \brief Calculate and return next transaction ID
+        //! \return Next transaction ID
+        //!
+        //! Internal value for transaction ID also will be set.
+        //!
+        uint16_t nextTransactionID_();
+
+        //!
+        //! \brief Read response from server, extract PDU from ADU and return it
+        //! \param pdu - var to response pdu
+        //! \return true in success; false otherwise
+        //!
+        virtual bool readResponseFromServer_(ProtocolDataUnit& pdu) override;
+
+        //!
+        //! \brief Prepare ADU and send request to modbus server
+        //! \param requestPDU - PDU for request
+        //! \param requestPDUSize - PDU size
+        //! \return true in success; false otherwise
+        //!
+        virtual bool sendRequestToServer_(const ProtocolDataUnit& requestPDU,  int requestPDUSize) override;
+
+        //!
+        //! \brief Send data to modbus serve
+        //! \param request - data to be sent
+        //! \return true in success; false otherwise
+        //!
+        virtual bool sendDataToServer_(const QByteArray& request) override;
+
+
+    private slots:
+
+        //!
+        //! \brief Process unitDebugMessage_() signal, add server address to message and emit debugMessage()
+        //! \param unitID - unit ID
+        //! \param msg - message
+        //!
+        void onUnitDebugMessage_(const QString& msg);
+
+        //!
+        //! \brief Process unitErrorMessage_() signal, add server address to message and emit errorMessage()
+        //! \param unitID - unit ID
+        //! \param msg - message
+        //!
+        void onUnitErrorMessage_(const QString& msg);
+
+        //!
+        //! \brief Process unitInfoMessage_() signal, add server address to message and emit infoMessage()
+        //! \param unitID - unit ID
+        //! \param msg - message
+        //!
+        void onUnitInfoMessage_(const QString& msg);
+
 };
 
 } // namespace modbus

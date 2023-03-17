@@ -34,15 +34,15 @@ namespace modbus4qt
 
 //-----------------------------------------------------------------------------
 
-Server::Server(QObject *parent)
-    : AbstractDevice(parent)
+Server::Server()
+    : Device()
 {
 }
 
 //-----------------------------------------------------------------------------
 
-Server::Server(ServerInternalData* internalData, QObject* parent)
-    : AbstractDevice(parent),
+Server::Server(ServerInternalData* internalData)
+    : Device(),
       internalData_(internalData)
 {
 }
@@ -73,6 +73,14 @@ Server::processIncomingRequest()
     // Execute MB function.  If not valid ExceptionCode = 4, 5, 6; Send modbus exception response.
 
     // Send modbus response
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Server::sendResponse()
+{
+
 }
 
 //-----------------------------------------------------------------------------

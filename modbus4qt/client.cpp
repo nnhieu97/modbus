@@ -23,33 +23,95 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
+#include <QByteArray>
 #include <QDataStream>
 #include <QIODevice>
 #include <QVector>
 
 #include <QDebug>
 
-#include "client.h"
 #include "memory_utils.h"
+#include "client.h"
 
 namespace modbus4qt
 {
 
-Client::Client(QObject *parent) :
-    AbstractDevice(parent),
+Client::Client(QObject* parent) :
+    QObject(parent),
     ioDevice_(NULL),
     readTimeout_(DEFAULT_TIMEOUT),
-    writeTimeout_(DEFAULT_TIMEOUT),
-    unitID_(0)
+    writeTimeout_(DEFAULT_TIMEOUT)
 {
 }
 
-QString Client::lastErrorMessage()
-{
-    QString result = errorMessage_;
-    errorMessage_ = "";
+//-----------------------------------------------------------------------------
 
-    return result;
+bool
+Client::modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize, Device::ProtocolDataUnit& responsePDU)
+{
+    if (!sendRequestToServer_(requestPDU, requestPDUSize))
+    {
+        return false;
+    }
+
+    if (readResponseFromServer_(responsePDU) && (requestPDU.functionCode == responsePDU.functionCode))
+    {
+        return true;
+    }
+    else
+    {
+        uint8_t functionCode = static_cast<uint8_t>(requestPDU.functionCode);
+
+        if ((functionCode | 0x80) == functionCode)
+        {
+            switch (functionCode - 0x80)
+            {
+                case static_cast<uint8_t>(Device::Exceptions::ILLEGAL_FUNCTION) :
+                    emit errorMessage(tr("Illegal function!"));
+                break;
+                case static_cast<uint8_t>(Device::Exceptions::ILLEGAL_DATA_ADDRESS) :
+                    emit errorMessage(tr("Illegal data address"));
+                break;
+                case static_cast<uint8_t>(Device::Exceptions::ILLEGAL_DATA_VALUE) :
+                    emit errorMessage(tr("Illegal data value!"));
+                break;
+                case static_cast<uint8_t>(Device::Exceptions::SERVER_DEVICE_FAILURE) :
+                    emit errorMessage(tr("Server device failure!"));
+                break;
+                case static_cast<uint8_t>(Device::Exceptions::ACKNOWLEDGE) :
+                    emit errorMessage(tr("Acknowledge!"));
+                break;
+                case static_cast<uint8_t>(Device::Exceptions::SERVER_DEVICE_BUSY) :
+                    emit errorMessage(tr("Server device busy!"));
+                break;
+                case static_cast<uint8_t>(Device::Exceptions::MEMORY_PARITY_ERROR) :
+                    emit errorMessage(tr("Memory parity error!"));
+                break;
+                case static_cast<uint8_t>(Device::Exceptions::GATEWAY_PATH_NOT_AVAILABLE) :
+                    emit errorMessage(tr("Gateway path not available!"));
+                break;
+                case static_cast<uint8_t>(Device::Exceptions::GATEWAY_TARGET_DEVICE_FAILED_TO_RESPONSE) :
+                    emit errorMessage(tr("Gateway target device failed to response!"));
+                break;
+                default :
+                    emit errorMessage(tr("Unknown error!"));
+            }
+        }
+        else
+        {
+            emit errorMessage(tr("Response mismatch!"));
+        }
+        return false;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Client::modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize)
+{
+    Device::ProtocolDataUnit responsePDU;
+    return modbusTransaction(requestPDU, requestPDUSize, responsePDU);
 }
 
 //-----------------------------------------------------------------------------
@@ -68,61 +130,17 @@ Client::readCoil(quint16 regNo, bool& value)
 //-----------------------------------------------------------------------------
 
 bool
-Client::readCoils(quint16 regStart, quint16 regQty, QVector<bool>& values)
+Client::readCoils(uint16_t regStart, uint16_t regQty, QVector<bool>& values)
 {
-    ProtocolDataUnit requestPDU;
+    Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::READ_COILS;
+    requestPDU.functionCode = Device::Functions::READ_COILS;
 
     // Start address
+    //
     requestPDU.data[0] = hi(regStart);
-    requestPDU.data[1] = lo(regStart);
-
-    if (regQty > MAX_COILS_FOR_READ)
-    {
-        regQty = MAX_COILS_FOR_READ;
-    }
-
-    // Quantity of registers
-    requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = lo(regQty);
-
-    requestPDUSize = 5;
-
-    ProtocolDataUnit responsePDU;
-
-    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
-
-    if (isOk)
-    {
-        // Quantity of readed bytes, not coils!
-        int bytesReaded = responsePDU.data[0];
-
-        // Copy data from pdu to buffer for process
-        QByteArray coilsBuffer((const char*)responsePDU.data + 1, bytesReaded);
-        qDebug() << "Coils buffer: " << coilsBuffer.toHex();
-
-        // Process buffer and read coils values from it
-        values = getCoilsFromBuffer(coilsBuffer, regQty);
-    }
-
-    return isOk;
-}
-
-//-----------------------------------------------------------------------------
-
-bool
-Client::readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& values)
-{
-    ProtocolDataUnit requestPDU;
-    int requestPDUSize = 0;
-
-    requestPDU.functionCode = Functions::READ_DESCRETE_INPUTS;
-
-    // Start address
-    requestPDU.data[0] = hi(regStart);
-    requestPDU.data[1] = lo(regStart);
+    requestPDU.data[1] = low(regStart);
 
     if (regQty > MAX_COILS_FOR_READ)
     {
@@ -132,25 +150,27 @@ Client::readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& valu
     // Quantity of registers
     //
     requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = lo(regQty);
+    requestPDU.data[3] = low(regQty);
 
     requestPDUSize = 5;
 
-    ProtocolDataUnit responsePDU;
+    Device::ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = modbusTransaction(requestPDU, requestPDUSize, responsePDU);
 
     if (isOk)
     {
         // Quantity of readed bytes, not coils!
+        //
         int bytesReaded = responsePDU.data[0];
 
         // Copy data from pdu to buffer for process
+        //
         QByteArray coilsBuffer((const char*)responsePDU.data + 1, bytesReaded);
-        qDebug() << "Descrete inputs buffer: " << coilsBuffer.toHex();
 
         // Process buffer and read coils values from it
-        values = getCoilsFromBuffer(coilsBuffer, regQty);
+        //
+        values = Device::getCoilsFromBuffer(coilsBuffer, regQty);
     }
 
     return isOk;
@@ -158,50 +178,94 @@ Client::readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& valu
 
 //-----------------------------------------------------------------------------
 
-//bool
-//Client::readDouble(quint16 regNo, double& value)
-//{
-//    QVector<quint16> buf(sizeof(value));
+bool
+Client::readDataFromServer_(QByteArray& response)
+{
+    if (!ioDevice_->waitForReadyRead(readTimeout_))
+    {
+        emit errorMessage(tr("Read timeout, error: %1").arg(ioDevice_->errorString()));
 
-//    bool result = readHoldingRegisters(regNo, sizeof(value), buf);
+        return false;
+    }
 
-//    if (result)
-//    {
-//        memcpy(buf.data(), &value, sizeof(value));
-//    }
-//    else
-//    {
-//        value = 0.0;
-//    }
+    response.clear();
 
-//    return result;
-//}
+    response.append(ioDevice_->readAll());
+    while (ioDevice_->bytesAvailable() || ioDevice_->waitForReadyRead(readTimeout_))
+    {
+        response.append(ioDevice_->readAll());
+    }
 
-//-----------------------------------------------------------------------------
-
-//bool
-//Client::readDWord(quint16 regNo, quint32& value)
-//{
-//    QVector<quint16> buf(sizeof(value));
-
-//    bool result = readHoldingRegisters(regNo, sizeof(value), buf);
-
-//    if (result)
-//    {
-//        memcpy(buf.data(), &value, sizeof(value));
-//    }
-//    else
-//    {
-//        value = 0;
-//    }
-
-//    return result;
-//}
+    return true;
+}
 
 //-----------------------------------------------------------------------------
 
 bool
-Client::readHoldingRegister(quint16 regNo, quint16& value)
+Client::readDescreteInput(uint16_t regNo, bool& value)
+{
+    QVector<bool> data(1);
+
+    bool result = readDescreteInputs(regNo, 1, data);
+    value = data[0];
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Client::readDescreteInputs(uint16_t regStart, uint16_t regQty, QVector<bool>& values)
+{
+    Device::ProtocolDataUnit requestPDU;
+    int requestPDUSize = 0;
+
+    requestPDU.functionCode = Device::Functions::READ_DESCRETE_INPUTS;
+
+    // Start address
+    //
+    requestPDU.data[0] = hi(regStart);
+    requestPDU.data[1] = low(regStart);
+
+    if (regQty > MAX_COILS_FOR_READ)
+    {
+        regQty = MAX_COILS_FOR_READ;
+    }
+
+    // Quantity of registers
+    //
+    requestPDU.data[2] = hi(regQty);
+    requestPDU.data[3] = low(regQty);
+
+    requestPDUSize = 5;
+
+    Device::ProtocolDataUnit responsePDU;
+
+    bool isOk = modbusTransaction(requestPDU, requestPDUSize, responsePDU);
+
+    if (isOk)
+    {
+        // Quantity of readed bytes, not registers!
+        //
+        int bytesReaded = responsePDU.data[0];
+
+        // Copy data from pdu to buffer for process
+        //
+        QByteArray coilsBuffer((const char*)responsePDU.data + 1, bytesReaded);
+
+        // Process buffer and read coils values from it
+        //
+        values = Device::getCoilsFromBuffer(coilsBuffer, regQty);
+    }
+
+    return isOk;
+}
+
+
+//-----------------------------------------------------------------------------
+
+bool
+Client::readHoldingRegister(uint16_t regNo, quint16& value)
 {
     QVector<quint16> data(1);
 
@@ -214,33 +278,36 @@ Client::readHoldingRegister(quint16 regNo, quint16& value)
 //-----------------------------------------------------------------------------
 
 bool
-Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& values)
+Client::readHoldingRegisters(uint16_t regStart, uint16_t regQty, QVector<uint16_t>& values)
 {
-    ProtocolDataUnit requestPDU;
+    Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::READ_HOLDING_REGISTERS;
+    requestPDU.functionCode = Device::Functions::READ_HOLDING_REGISTERS;
 
     // Start address
+    //
     requestPDU.data[0] = hi(regStart);
-    requestPDU.data[1] = lo(regStart);
+    requestPDU.data[1] = low(regStart);
 
     if (regQty > MAX_REGISTERS_FOR_READ)
     {
-        emit infoMessage(tr("Maxixmum registers quantity (125 items) for reading exceeded. Only allowed quantity will be readed!"));
+        emit infoMessage(tr("Maxixmum registers quantity (%1 items) for reading exceeded.\n"
+                            "Only %1 items will be readed!").arg(MAX_REGISTERS_FOR_READ));
+
         regQty = MAX_REGISTERS_FOR_READ;
     }
 
     // Quantity of registers
     //
     requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = lo(regQty);
+    requestPDU.data[3] = low(regQty);
 
     requestPDUSize = 5;
 
-    ProtocolDataUnit responsePDU;
+    Device::ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = modbusTransaction(requestPDU, requestPDUSize, responsePDU);
 
     if (isOk)
     {
@@ -251,11 +318,10 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
         // Copy data from pdu to buffer for process
         //
         QByteArray registersBuffer((const char*)responsePDU.data + 1, bytesReaded);
-        qDebug() << "Registers buffer: " << registersBuffer.toHex();
 
         // Process buffer and read registers values from it
         //
-        values = getRegistersFromBuffer(registersBuffer, regQty);
+        values = Device::getRegistersFromBuffer(registersBuffer, regQty);
     }
 
     return isOk;
@@ -264,7 +330,7 @@ Client::readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>&
 //-----------------------------------------------------------------------------
 
 bool
-Client::readInputRegister(quint16 regNo, quint16& value)
+Client::readInputRegister(uint16_t regNo, uint16_t& value)
 {
     QVector<quint16> data(1);
     bool result = false;
@@ -278,32 +344,36 @@ Client::readInputRegister(quint16 regNo, quint16& value)
 //-----------------------------------------------------------------------------
 
 bool
-Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& values)
+Client::readInputRegisters(uint16_t regStart, uint16_t regQty, QVector<quint16>& values)
 {
-    ProtocolDataUnit requestPDU;
+    Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::READ_INPUT_REGISTERS;
+    requestPDU.functionCode = Device::Functions::READ_INPUT_REGISTERS;
 
     // Start address
+    //
     requestPDU.data[0] = hi(regStart);
-    requestPDU.data[1] = lo(regStart);
+    requestPDU.data[1] = low(regStart);
 
     if (regQty > MAX_REGISTERS_FOR_READ)
     {
-        //emit infoMessage(tr("Maxixmum registers quantity for reading exceeded. Only allowed quantity will be readed!"));
+        emit infoMessage(tr("Maxixmum registers quantity (%1 items) for reading exceeded.\n"
+                            "Only %1 items will be readed!").arg(MAX_REGISTERS_FOR_READ));
+
         regQty = MAX_REGISTERS_FOR_READ;
     }
 
     // Quantity of registers
+    //
     requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = lo(regQty);
+    requestPDU.data[3] = low(regQty);
 
     requestPDUSize = 5;
 
-    ProtocolDataUnit responsePDU;
+    Device::ProtocolDataUnit responsePDU;
 
-    bool isOk = sendRequest_(requestPDU, requestPDUSize, &responsePDU);
+    bool isOk = modbusTransaction(requestPDU, requestPDUSize, responsePDU);
 
     if (isOk)
     {
@@ -314,473 +384,300 @@ Client::readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& v
         // Copy data from pdu to buffer for process
         //
         QByteArray registersBuffer((const char*)responsePDU.data + 1, bytesReaded);
-        qDebug() << "Registers buffer: " << registersBuffer.toHex();
 
         // Process buffer and read registers values from it
         //
-        values = getRegistersFromBuffer(registersBuffer, regQty);
+        values = Device::getRegistersFromBuffer(registersBuffer, regQty);
     }
 
     return isOk;
 }
 
-int Client::readTimeout() const
+//-----------------------------------------------------------------------------
+
+int
+Client::readTimeout() const
 {
     return readTimeout_;
 }
 
-void Client::setReadTimeOut(int readTimeout)
+//-----------------------------------------------------------------------------
+
+void
+Client::setReadTimeOut(int readTimeout)
 {
     readTimeout_ = readTimeout;
 }
 
-void Client::setUnitID(quint8 unitID)
-{
-    unitID_ = unitID;
-}
+//-----------------------------------------------------------------------------
 
-void Client::setWriteTimeOut(int writeTimeout)
+void
+Client::setWriteTimeOut(int writeTimeout)
 {
     writeTimeout_ = writeTimeout;
 }
 
-bool Client::writeCoil(quint16 regNo, bool value)
-{
-    return writeSingleCoil(regNo, value);
-}
-
-bool Client::writeCoils(quint16 regStart, const QVector<bool>& values)
-{
-    return writeMultipleCoils(regStart, values);
-}
-
-bool Client::writeHoldingRegister(quint16 regAddress, quint16 value)
-{
-    return writeSingleRegister(regAddress, value);
-}
-
-bool Client::writeHoldingRegisters(quint16 regStart, const QVector<quint16>& values)
-{
-    return writeMultipleRegisters(regStart, values);
-}
-
-//-----------------------------------------------------------------------------
-
-//bool
-//Client::readSingle(quint16 regNo, float& value /* Single*/)
-//{
-//    QVector<quint16> buf(sizeof(value));
-
-//    bool result = readHoldingRegisters(regNo, sizeof(value), buf);
-
-//    if (result)
-//    {
-//        memcpy(buf.data(), &value, sizeof(value));
-//    }
-//    else
-//    {
-//        value = 0;
-//    }
-
-//    return result;
-//}
-
-//-----------------------------------------------------------------------------
-
-//QString
-//Client::readString(quint16 /*regNo*/, quint16 /*length*/)
-//{
-///*
-//    function TIdModbusClient.ReadString(const RegNo: Word; const ALength: Word): String;
-//    var
-//      BlockCount: Word;
-//      Data: array of Word;
-//      i: Integer;
-//    begin
-//      Result := '';
-//      BlockCount := Round((ALength / 2) + 0.1);
-//      SetLength(Data, BlockCount);
-//      FillChar(Data[0], BlockCount, 0);
-
-//      if ReadHoldingRegisters(RegNo, BlockCount, Data) then
-//      begin
-//        for i := 0 to (BlockCount - 1) do
-//        begin
-//          Result := Result + Chr(WordRec(Data[i]).Hi);
-//          if (Length(Result) < ALength) then
-//            Result := Result + Chr(WordRec(Data[i]).Lo);
-//        end;
-//      end;
-//    end;
-//*/
-//    QString result;
-
-//    return result;
-//}
-
 //-----------------------------------------------------------------------------
 
 bool
-Client::sendRequest_(const ProtocolDataUnit& requestPDU, int requestPDUSize, ProtocolDataUnit* responsePDU)
+Client::userDefinedFunction(uint8_t function, const QVector<uint8_t>& data, QVector<uint8_t>& retData)
 {
-    QByteArray adu = prepareADU_(requestPDU, requestPDUSize);
+    Device::ProtocolDataUnit pdu;
 
-    qDebug() << "Sending data: " << adu.toHex();
+    int pduSize = 0;
 
-    qint64 bytesWritten = ioDevice_->write(adu);
-    if (bytesWritten <= 0)
+    pdu.functionCode = function;
+
+    for (quint16 i = 0; (i < data.size()) && (i < PDU_DATA_MAX_SIZE); ++i)
     {
-        emit errorMessage(tr("Failed to write data for unit %2, error: %1").arg(ioDevice_->errorString()).arg(unitID_));
-        return false;
-    }
-    else if (bytesWritten < adu.size())
-    {
-        emit errorMessage(tr("Failed to write all data unit %2, error: %1").arg(ioDevice_->errorString()).arg(unitID_));
-        return false;
-    }
-    else if (!ioDevice_->waitForBytesWritten(writeTimeout_))
-    {
-        qDebug() << "Write timeout!";
-        emit errorMessage(tr("Write timeout for unit #%2, error: %1").arg(ioDevice_->errorString()).arg(unitID_));
-        return false;
+        pdu.data[i] = data[i];
     }
 
-    qDebug() << "Read timeout: " << readTimeout_ << " ms";
+    pduSize = 1 + data.size();
 
-    bool result = ioDevice_->waitForReadyRead(readTimeout_);
-    if (!result)
+    Device::ProtocolDataUnit replyPdu;
+
+    bool isOk = modbusTransaction(pdu, pduSize, replyPdu);
+
+    if (!isOk)
     {
-        emit errorMessage(tr("Read timeout for unit #%2, error: %1").arg(ioDevice_->errorString()).arg(unitID_));
         return false;
-    }
-
-    QByteArray inArray = readResponse_();
-
-    qDebug() << "Readed data: " << inArray.toHex();
-
-    *responsePDU = processADU_(inArray);
-
-    if (requestPDU.functionCode == responsePDU->functionCode)
-    {
-        return true;
     }
     else
     {
-        quint8 functionCode = static_cast<quint8>(requestPDU.functionCode);
+        retData.clear();
 
-        if ((functionCode | 0x80) == functionCode)
+        for (int i = 0; i < PDU_DATA_MAX_SIZE; ++i)
         {
-            switch (functionCode - 0x80)
-            {
-                case static_cast<quint8>(Exceptions::ILLEGAL_FUNCTION) :
-                    emit errorMessage(tr("Illegal function for unit #%1!").arg(unitID_));
-                break;
-                case static_cast<quint8>(Exceptions::ILLEGAL_DATA_ADDRESS) :
-                    emit errorMessage(tr("Illegal data address for unit #%1!").arg(unitID_));
-                break;
-                case static_cast<quint8>(Exceptions::ILLEGAL_DATA_VALUE) :
-                    emit errorMessage(tr("Illegal data value for unit #%1!").arg(unitID_));
-                break;
-                case static_cast<quint8>(Exceptions::SERVER_DEVICE_FAILURE) :
-                    emit errorMessage(tr("Server device failure for unit #%1!").arg(unitID_));
-                break;
-                case static_cast<quint8>(Exceptions::ACKNOWLEDGE) :
-                    emit errorMessage(tr("Acknowledge for unit #%1!").arg(unitID_));
-                break;
-                case static_cast<quint8>(Exceptions::SERVER_DEVICE_BUSY) :
-                    emit errorMessage(tr("Server device at #%1 busy!").arg(unitID_));
-                break;
-                case static_cast<quint8>(Exceptions::MEMORY_PARITY_ERROR) :
-                    emit errorMessage(tr("Memory parity error in unit #%1!").arg(unitID_));
-                break;
-                case static_cast<quint8>(Exceptions::GATEWAY_PATH_NOT_AVAILABLE) :
-                    emit errorMessage(tr("Gateway path not available for unit #%1!").arg(unitID_));
-                break;
-                case static_cast<quint8>(Exceptions::GATEWAY_TARGET_DEVICE_FAILED_TO_RESPONSE) :
-                    emit errorMessage(tr("Gateway target device failed to response for unit #%1!").arg(unitID_));
-                break;
-                default :
-                    emit errorMessage(tr("Unknown error for unit #%1!").arg(unitID_));
-            }
+            retData.append(pdu.data[i]);
         }
-        else
-        {
-            emit errorMessage(tr("Response mismatch for unit #%1!").arg(unitID_));
-        }
+
+        return true;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Client::userDefinedFunction(uint8_t function, uint8_t subFunction, const QVector<uint8_t>& data, QVector<uint8_t>& retData)
+{
+    Device::ProtocolDataUnit pdu;
+
+    int pduSize = 0;
+
+    pdu.functionCode = function;
+    pdu.data[0] = subFunction;
+
+    for (quint16 i = 0; (i < data.size()) && (i < (PDU_DATA_MAX_SIZE - 1)); ++i)
+    {
+        pdu.data[i + 1] = data[i];
+    }
+
+    pduSize = 2 + data.size();
+
+    Device::ProtocolDataUnit responsePDU;
+
+    bool isOk = modbusTransaction(pdu, pduSize, responsePDU);
+
+    if (!isOk)
+    {
         return false;
     }
-}
-
-//-----------------------------------------------------------------------------
-
-bool
-Client::sendRequest_(const ProtocolDataUnit &pdu, int pduSize)
-{
-    ProtocolDataUnit responsePDU;
-    return sendRequest_(pdu, pduSize, &responsePDU);
-}
-
-//-----------------------------------------------------------------------------
-
-bool
-Client::writeMultipleCoils(quint16 regStart, const QVector<bool>& values)
-{
-    ProtocolDataUnit requestPDU;
-    int requestPDUSize = 0;
-
-    requestPDU.functionCode = Functions::WRITE_MULTIPLE_COILS;
-
-    // Start address
-    requestPDU.data[0] = hi(regStart);
-    requestPDU.data[1] = lo(regStart);
-
-    int regQty = values.size();
-    if (regQty > MAX_COILS_FOR_WRITE)
+    else
     {
-        // emit infoMessage();
-        regQty = MAX_COILS_FOR_WRITE;
+        retData.clear();
+
+        for (int i = 0; i < PDU_DATA_MAX_SIZE; ++i)
+        {
+            retData.append(responsePDU.data[i]);
+        }
+
+        return true;
     }
-
-    // Quantity of values to write
-    requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = lo(regQty);
-
-    // Bytes needed for values to write
-    requestPDU.data[4] = (regQty + 7) / 8;
-
-    // Values
-    putCoilsIntoBuffer(requestPDU.data + 5, values);
-
-    // PDU size: 6 bytes + bytes needed for values to write
-    requestPDUSize = 6 + requestPDU.data[4];
-
-    return sendRequest_(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
 
-bool
-Client::writeMultipleRegisters(quint16 regStart, const QVector<quint16> &values)
+bool Client::writeCoil(uint16_t regNo, bool value)
 {
-    ProtocolDataUnit requestPDU;
+    Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WRITE_MULTIPLE_REGISTERS;
-
-    // Start address
-    requestPDU.data[0] = hi(regStart);
-    requestPDU.data[1] = lo(regStart);
-
-    int regQty = values.size();
-    if (regQty > MAX_REGISTERS_FOR_WRITE)
-    {
-        // emit infoMessage();
-        regQty = MAX_REGISTERS_FOR_WRITE;
-    }
-
-    // Quantity of values to write
-    requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = lo(regQty);
-
-    // Bytes needed for values to write
-    requestPDU.data[4] = regQty * 2;
-
-    // Values
-    putRegistersIntoBuffer(requestPDU.data + 5, values);
-
-    // PDU size: 6 bytes + bytes needed for values to write
-    requestPDUSize = 6 + requestPDU.data[4];
-
-    return sendRequest_(requestPDU, requestPDUSize);
-}
-
-//-----------------------------------------------------------------------------
-
-bool
-Client::writeSingleCoil(quint16 regAddress, bool value)
-{
-    ProtocolDataUnit requestPDU;
-    int requestPDUSize = 0;
-
-    requestPDU.functionCode = Functions::WRITE_SINGLE_COIL;
+    requestPDU.functionCode = Device::Functions::WRITE_SINGLE_COIL;
 
     // Coil address
-    requestPDU.data[0] = hi(regAddress);
-    requestPDU.data[1] = lo(regAddress);
+    //
+    requestPDU.data[0] = hi(regNo);
+    requestPDU.data[1] = low(regNo);
 
     // 0xFF00 - on, 0x0000 - off
     // All other values will be ignored
     // See: Modbus Protocol Specification v1.1b3, p. 17
 
     if (value)
+    {
         requestPDU.data[2] = 255;
+    }
     else
+    {
         requestPDU.data[2] = 0;
+    }
 
     requestPDU.data[3] = 0;
-
     requestPDUSize = 5;
 
-    return sendRequest_(requestPDU, requestPDUSize);
+    return modbusTransaction(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
 
-//bool
-//Client::writeDouble(quint16 regNo, double value)
-//{
-//    QVector<quint16> buf(sizeof(value));
-
-////	quint16* ptr = quint16*(&value);
-//    memcpy(&value, buf.data(), sizeof(value));
-
-//    return writeHoldingRegisters(regNo, buf);;
-//}
-
-//-----------------------------------------------------------------------------
-
-//bool
-//Client::writeDWord(quint16 regNo, quint32 value)
-//{
-//    QVector<quint16> buf(sizeof(value));
-
-//    quint16* ptr = (quint16*)(&value);
-//    for (unsigned int i = 0; i < sizeof(value); ++i)
-//        buf[i] = ptr[i];
-
-//    return writeHoldingRegisters(regNo, buf);;
-//}
-
-
-//-----------------------------------------------------------------------------
-
 bool
-Client::writeSingleRegister(quint16 regAddress, quint16 value)
+Client::writeCoils(uint16_t regStart, const QVector<bool>& values)
 {
-    ProtocolDataUnit requestPDU;
+    Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
 
-    requestPDU.functionCode = Functions::WRITE_SINGLE_REGISTER;
+    requestPDU.functionCode = Device::Functions::WRITE_MULTIPLE_COILS;
+
+    // Start address
+    //
+    requestPDU.data[0] = hi(regStart);
+    requestPDU.data[1] = low(regStart);
+
+    int regQty = values.size();
+
+    if (regQty > MAX_COILS_FOR_WRITE)
+    {
+        emit infoMessage(tr("Maxixmum coils quantity (%1 items) for writing exceeded.\n"
+                            "Only %1 items will be writed!").arg(MAX_COILS_FOR_WRITE));
+
+        regQty = MAX_COILS_FOR_WRITE;
+    }
+
+    // Quantity of values to write
+    //
+    requestPDU.data[2] = hi(regQty);
+    requestPDU.data[3] = low(regQty);
+
+    // Bytes needed for values to write
+    //
+    requestPDU.data[4] = (regQty + 7) / 8;
+
+    // Values
+    //
+    Device::putCoilsIntoBuffer(values, requestPDU.data + 5);
+
+    // PDU size: 6 bytes + bytes needed for values to write
+    //
+    requestPDUSize = 6 + requestPDU.data[4];
+
+    return modbusTransaction(requestPDU, requestPDUSize);
+}
+
+
+//-----------------------------------------------------------------------------
+
+bool
+Client::sendDataToServer_(const QByteArray& request)
+{
+    int64_t bytesWritten = ioDevice_->write(request);
+
+    if (bytesWritten <= 0)
+    {
+        emit errorMessage(tr("Failed to write data, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+    else if (bytesWritten < request.size())
+    {
+        emit errorMessage(tr("Failed to write all data, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+    else if (!ioDevice_->waitForBytesWritten(writeTimeout_))
+    {
+        qDebug() << "Write timeout!";
+        emit errorMessage(tr("Write timeout, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Client::writeHoldingRegister(uint16_t regAddress, uint16_t value)
+{
+    Device::ProtocolDataUnit requestPDU;
+    int requestPDUSize = 0;
+
+    requestPDU.functionCode = Device::Functions::WRITE_SINGLE_REGISTER;
 
     // Register address
+    //
     requestPDU.data[0] = hi(regAddress);
-    requestPDU.data[1] = lo(regAddress);
+    requestPDU.data[1] = low(regAddress);
 
     // Register value
+    //
     requestPDU.data[2] = hi(value);
-    requestPDU.data[3] = lo(value);
+    requestPDU.data[3] = low(value);
 
     requestPDUSize = 5;
 
-    return sendRequest_(requestPDU, requestPDUSize);
+    return modbusTransaction(requestPDU, requestPDUSize);
 }
 
-int Client::writeTimeout() const
+//-----------------------------------------------------------------------------
+
+bool
+Client::writeHoldingRegisters(uint16_t regStart, const QVector<uint16_t>& values)
+{
+    Device::ProtocolDataUnit requestPDU;
+    int requestPDUSize = 0;
+
+    requestPDU.functionCode = Device::Functions::WRITE_MULTIPLE_REGISTERS;
+
+    // Start address
+    //
+    requestPDU.data[0] = hi(regStart);
+    requestPDU.data[1] = low(regStart);
+
+    int regQty = values.size();
+
+    if (regQty > MAX_REGISTERS_FOR_WRITE)
+    {
+        emit infoMessage(tr("Maxixmum holding registers quantity (%1 items) for writing exceeded.\n"
+                            "Only %1 items will be writed!").arg(MAX_REGISTERS_FOR_WRITE));
+
+        regQty = MAX_REGISTERS_FOR_WRITE;
+    }
+
+    // Quantity of values to write
+    //
+    requestPDU.data[2] = hi(regQty);
+    requestPDU.data[3] = low(regQty);
+
+    // Bytes needed for values to write
+    //
+    requestPDU.data[4] = regQty * 2;
+
+    // Values
+    //
+    Device::putRegistersIntoBuffer(values, requestPDU.data + 5);
+
+    // PDU size: 6 bytes + bytes needed for values to write
+    //
+    requestPDUSize = 6 + requestPDU.data[4];
+
+    return modbusTransaction(requestPDU, requestPDUSize);
+}
+
+//-----------------------------------------------------------------------------
+
+int
+Client::writeTimeout() const
 {
     return writeTimeout_;
-}
-
-quint8 Client::unitID() const
-{
-    return unitID_;
-}
-
-//-----------------------------------------------------------------------------
-
-//bool
-//Client::writeSingle(quint16 regNo, float value)
-//{
-//    QVector<quint16> buf(sizeof(value));
-
-//    quint16* ptr = (quint16*)(&value);
-//    for (unsigned int i = 0; i < sizeof(value); ++i)
-//        buf[i] = ptr[i];
-
-//    return writeHoldingRegisters(regNo, buf);;
-//}
-
-//-----------------------------------------------------------------------------
-
-//bool
-//Client::writeString(quint16 /*regNo*/, const QString& text)
-//{
-//    bool result = false;
-
-//    if (!text.isEmpty())
-//    {
-//        // do some work
-//    }
-
-//    return result;
-//}
-
-//-----------------------------------------------------------------------------
-
-bool
-Client::userDefinedFunction(quint8 function, const QVector<quint8>& data, QVector<quint8>& retData)
-{
-//    ProtocolDataUnit pdu;
-
-//    int pduSize = 0;
-
-//    pdu.functionCode = function;
-
-//    for (quint16 i = 0; (i < data.size()) && (i < PDUDataMaxSize); ++i)
-//    {
-//        pdu.data[i] = data[i];
-//    }
-
-//    pduSize = 1 + data.size();
-
-//    ProtocolDataUnit replyPdu;
-//    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
-
-//    if (!isOk)
-//    {
-//        return false;
-//    }
-//    else
-//    {
-//        retData.clear();
-//        for (int i = 0; i < PDUDataMaxSize; ++i)
-//        {
-//            retData.append(pdu.data[i]);
-//        }
-
-//        return true;
-//    }
-}
-
-//-----------------------------------------------------------------------------
-
-bool
-Client::userDefinedFunction(quint8 function, quint8 subFunction, const QVector<quint8>& data, QVector<quint8>& retData)
-{
-//    ProtocolDataUnit pdu;
-
-//    int pduSize = 0;
-
-//    pdu.functionCode = function;
-//    pdu.data[0] = subFunction;
-
-//    for (quint16 i = 0; (i < data.size()) && (i < (PDUDataMaxSize - 1)); ++i)
-//        pdu.data[i + 1] = data[i];
-
-//    pduSize = 2 + data.size();
-
-//    ProtocolDataUnit replyPdu;
-//    bool isOk = sendRequestToServer_(pdu, pduSize, &replyPdu);
-
-//    if (!isOk)
-//        return false;
-//    else
-//    {
-//        retData.clear();
-//        for (int i = 0; i < PDUDataMaxSize; ++i)
-//            retData.append(replyPdu.data[i]);
-
-//        return true;
-//    }
 }
 
 //-----------------------------------------------------------------------------

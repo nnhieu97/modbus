@@ -28,8 +28,8 @@
 namespace modbus4qt
 {
 
-TcpServer::TcpServer(QObject* parent)
-    : Server(parent)
+TcpServer::TcpServer()
+    : Server()
 {
 
 }

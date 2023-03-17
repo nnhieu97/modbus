@@ -28,689 +28,170 @@
 
 #include <QObject>
 
-#include "abstract_device.h"
+#include "device.h"
 
 class QIODevice;
 
 namespace modbus4qt
 {
 
-/**
-* @brief
-* @en Abtract modbus client
-* @ru Абстрактный клиент протокола modbus
-*
-* @en
-* After call method of data exchange with server forms protocol data unit, and after
-* that call method to form application data unit. Formed block will be sent through
-* input-output device.
-*
-* When data sended client waits for a answer and process it after reciveing.
-* First process of data recieved will be done in descendant class.
-*
-* Descendant class must realize abstract methods prepareADU_() and processADU_().
-* Also it is important to initialize ioDevice_ field with address of real object resposible
-* for data exchange.
-*
-* @ru
-* При вызове метода обмена данными с сервером формирует блок данных протокола
-* (Protocol Data Unit) после чего вызывает метод формирования блока данных
-* приложения (Apllication Data Unit) класса-потомка. Сформированный блок данных
-* передается в устройство ввода-вывода.
-*
-* После отправки данных серверу ожидает ответа и разбирает полученный ответ.
-* Первичная обработка полученного блока данных и выделение полученного блока
-* данных протокола происходит в классе-потомке.
-*
-* Класс-потомок должен релизовать абстрактные методы prepareADU_(),
-* processADU_(), а также правильно инициализировать указатель ioDevice_,
-* присвоив его значение указателю на экземпляр реального объекта, отвечающего
-* за обмен данными.
-*
-*/
-class MODBUS4QT_EXPORT Client : public AbstractDevice
+//!
+//! \brief The Client class is abtract modbus client
+//!
+class Client : public QObject
 {
     Q_OBJECT
 
-    protected:
-
-        /**
-         * @brief
-         * @en Message about last error occured. Cleared by errorMessage()
-         * @ru Текст сообщения о последней возникшей ошибке. Очищается при вызове метода errorMessage()
-         *
-         * @sa errorMessage();
-         */
-        QString errorMessage_;
-
-        /**
-         * @brief
-         * @en IO device for data exchange with server
-         * @ru Устройство ввода-вывода, через которое идет обмен данными с сервером
-         */
-        QIODevice* ioDevice_;
-
-        /**
-         * @brief
-         * @en Maximum allowed timeout for server responce.
-         * @ru Максимальное время ожидания чтения данных от сервера.
-         *
-         * @en Default value 5000 ms (5 sec).
-         * @ru Значение по умолчанию 5000 мс (5 с).
-         */
-        int readTimeout_;
-
-        /**
-         * @brief
-         * @en Maximum allowed timeout for sending data to server
-         * @ru Максимальное время ожидания запси данных на сервер.
-         *
-         * @en Default value 5000 ms (5 sec).
-         * @ru Значение по умолчанию 5000 мс (5 с).
-         */
-        int writeTimeout_;
-
-        /**
-         * @brief
-         * @en Identifier number of server device using for data exchange
-         * @ru Идентификатор устройства-сервера, с которым производится обмен данными
-         */
-        quint8 unitID_;
-
-    protected :
-
-        /**
-         * @brief sendRequestToServer_
-         * @param requestPDU
-         * @param requestPDUSize
-         * @param responsePDU
-         *
-         * @return
-         * @en true if request is successfull; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize, ProtocolDataUnit* responsePDU);
-
-        /**
-         * @brief sendRequestToServer_
-         * @param requestPDU
-         * @param requestPDUSize
-         *
-         * @return
-         * @en true if request is successfull; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         * @en It is short version. You can use it if no need to analize reply.
-         * @ru Это сокращенная версия. Используется для операций записи, где нет
-         * необходимости в анализе ответа от сервера.
-         */
-        virtual bool sendRequest_(const ProtocolDataUnit& requestPDU,  int requestPDUSize);
-
     public:
-        /**
-         * @brief
-         * @en Default constructor
-         * @ru Конструктор по умолчанию
-         *
-         * @param
-         * @en parent - parent object
-         * @ru parent - указатель на объект-родитель.
-         */
-        explicit Client(QObject *parent = 0);
+        //!
+        //! \brief Client - default constructor
+        //! \param parent - parent object
+        //!
+        explicit Client(QObject* parent = nullptr);
 
-        /**
-         * @brief
-         * @en Return last error message and clear it
-         * @ru Возвращает значение строки, содержащей сообщение о последней ошибке и очищает его
-         *
-         * @return
-         * @en Last error message
-         * @ru Сообщение о последней возникшей ошибке
-         *
-         */
-        QString lastErrorMessage();
+        //!
+        //! \brief Read single coil value from server
+        //! \param regNo - coil address
+        //! \param value - var to store result
+        //! \return true in success; false otherwise
+        //!
+        bool readCoil(uint16_t regNo, bool& value);
 
-        /**
-         * @brief
-         * @en Read single value from coil
-         * @ru Читает значение из регистра дискретного вывода
-         *
-         * @param
-         * @en regNo - coil address
-         * @ru regNo - адрес регистра
-         *
-         * @param
-         * @en value - result will be putted here
-         * @ru value - переменная для получения результата чтения
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool readCoil(quint16 regNo, bool& value);
+        //!
+        //! \brief Read array of coils values from server
+        //! \param regStart - address of first coil
+        //! \param regQty - quantity of coils reading
+        //! \param values - array for readed values
+        //! \return true in success; false otherwise
+        //!
+        bool readCoils(uint16_t regStart, uint16_t regQty, QVector<bool>& values);
 
-        /**
-         * @brief
-         * @en Read array of values from coils
-         * @ru Читает массив значений из регистров дискретного вывода
-         *
-         * @param regNo
-         * @en regNo - address of first coil
-         * @ru regNo - адрес регистра, с которого необходимо начать чтение
-         *
-         * @param
-         * @en regQty - quantity of coils reading
-         * @ru regQty - количество читаемых значений регистров
-         *
-         * @param
-         * @en values - array for values readed
-         * @ru values - массив для прочитанных значений
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool readCoils(quint16 regStart, quint16 regQty, QVector<bool>& values);
+        //!
+        //! \brief Read single descrete inputs value from server
+        //! \param regNo - coil address
+        //! \param value - var to store result
+        //! \return true in success; false otherwise
+        //!
+        bool readDescreteInput(uint16_t regNo, bool& value);
 
-        /**
-         * @brief
-         * @en Read array of values from descrete inputs
-         * @ru Читает массив значений из регистров дискретного ввода
-         *
-         * @param
-         * @en regStart - address of first register
-         * @ru regStart - адрес регистра, с которого необходимо начать чтение
-         *
-         * @param
-         * @en regQty - quantity of inputs reading
-         * @ru regQty - количество читаемых значений регистров
-         *
-         * @param
-         * @en values - array for values readed
-         * @ru values - массив для прочитанных значений
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool readDescreteInputs(quint16 regStart, quint16 regQty, QVector<bool>& values);
+        //!
+        //! \brief Read array of descrete inputs values from server
+        //! \param regStart - address of first coil
+        //! \param regQty - quantity of coils reading
+        //! \param values - array for readed values
+        //! \return true in success; false otherwise
+        //!
+        bool readDescreteInputs(uint16_t regStart, uint16_t regQty, QVector<bool>& values);
 
-//        /**
-//         * @brief readDouble
-//         * @param regNo
-//         * @param value
-//         * @return
-//         */
-//        bool readDouble(quint16 regNo, double& value);
+        //!
+        //! \brief Read holding register value from server
+        //! \param regNo - holding register address
+        //! \param value - var to store result
+        //! \return true in success; false otherwise
+        //!
+        bool readHoldingRegister(uint16_t regNo, quint16& value);
 
-//        /**
-//         * @brief readDWord
-//         * @param regNo
-//         * @param value
-//         * @return
-//         */
-//        bool readDWord(quint16 regNo, quint32& value);
+        //!
+        //! \brief Read array of holding registers values from server
+        //! \param regStart - address of first coil
+        //! \param regQty - quantity of coils reading
+        //! \param values - array for readed values
+        //! \return true in success; false otherwise
+        //!
+        bool readHoldingRegisters(uint16_t regStart, uint16_t regQty, QVector<uint16_t>& values);
 
-//        /**
-//         * @brief readFloat
-//         * @param regNo
-//         * @param value
-//         * @return
-//         *
-//         * @sa readSingle()
-//         */
-//        bool readFloat(quint16 regNo, float& value);
+        //!
+        //! \brief Read input register value from server
+        //! \param regNo - holding register address
+        //! \param value - var to store result
+        //! \return true in success; false otherwise
+        //!
+        bool readInputRegister(uint16_t regNo, uint16_t& value);
 
-        /**
-         * @brief
-         * @en Read value from holding register
-         * @ru Читает значение из регистра вывода
-         *
-         * @param regNo
-         * @en regNo - address of register
-         * @ru regNo - адрес регистра
-         *
-         * @param
-         * @en value - readed value
-         * @ru value - прочитанное значение
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool readHoldingRegister(quint16 regNo, quint16& value);
+        //!
+        //! \brief Read array of input registers values from server
+        //! \param regStart - address of first coil
+        //! \param regQty - quantity of coils reading
+        //! \param values - array for readed values
+        //! \return true in success; false otherwise
+        //!
+        //!
+        bool readInputRegisters(uint16_t regStart, uint16_t regQty, QVector<quint16>& values);
 
-        /**
-         * @brief
-         * @en Read array of values from holding registers
-         * @ru Читает массив значений из регистров вывода
-         *
-         * @param
-         * @en regStart - address of first register
-         * @ru regStart - адрес регистра, с которого необходимо начать чтение
-         *
-         * @param
-         * @en regQty - quantity of registers reading
-         * @ru regQty - количество читаемых значений регистров
-         *
-         * @param
-         * @en values - array for values readed
-         * @ru values - массив для прочитанных значений
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool readHoldingRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& values);
-
-        /**
-         * @brief
-         * @en Read value from input register
-         * @ru Читает значение из регистра ввода
-         *
-         * @param regNo
-         * @en regNo - address of register
-         * @ru regNo - адрес регистра
-         *
-         * @param
-         * @en value - readed value
-         * @ru value - прочитанное значение
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool readInputRegister(quint16 regNo, quint16& value);
-
-        /**
-         * @brief
-         * @en Read array of values from input registers
-         * @ru Читает массив значений из регистров ввода
-         *
-         * @param regNo
-         * @en regStart - address of first register
-         * @ru regStart - адрес регистра, с которого необходимо начать чтение
-         *
-         * @param
-         * @en regQty - quantity of registers reading
-         * @ru regQty - количество читаемых значений регистров
-         *
-         * @param
-         * @en values - array for values readed
-         * @ru values - массив для прочитанных значений
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool readInputRegisters(quint16 regStart, quint16 regQty, QVector<quint16>& values);
-
-        /**
-         * @brief
-         * Read response from slave device
-         *
-         * @return
-         * Readed data array
-         *
-         * As timeout processing is differ for RTU and TCP we need to implement
-         * method in descendance.
-         */
-        virtual QByteArray readResponse_() = 0;
-
-
-//        /**
-//         * @brief readSingle
-//         * @param regNo
-//         * @param value
-//         * @return
-//         *            @sa readFloat()
-//         */
-//        bool readSingle(quint16 regNo, float& value /* Single*/);
-
-//        /**
-//         * @brief readString
-//         * @param regNo
-//         * @param length
-//         * @return
-//         */
-//        QString readString(quint16 regNo, quint16 length);
-
-        /**
-         * @brief
-         * @en Return value for reading timeout
-         * @ru Возвращает время ожидания ответа от сервера
-         *
-         * @return
-         * @en Value for reading timeout
-         * @ru Время ожидания ответа от сервера
-         */
+        //!
+        //! \brief Return value for reading timeout
+        //! \return Value for reading timeout
+        //!
         int readTimeout() const;
 
-        /**
-         * @brief
-         * @en Set new value for reading timeout
-         * @ru Устанавливает время ожидания ответа от сервера
-         *
-         * @param
-         * @en readTimeout - new value for reading timeout, ms
-         * @ru readTimeout - максимальное время ожидания ответа от сервера, мс
-         */
+        //!
+        //! \brief Set new value for reading timeout
+        //! \param readTimeout - new value for reading timeout, ms
+        //!
         void setReadTimeOut(int readTimeout);
 
-        /**
-         * @brief
-         * @en Set current value of server unit ID
-         * @ru Устанавливает текущее значение адреса устройства сервера, с которым идет обмен данными
-         *
-         * @param
-         * @en unitID - server device unit id
-         * @ru unitID - адрес устройства сервера
-         */
-        void setUnitID(quint8 unitID);
-
-        /**
-         * @brief
-         * @en Set new value for reading timeout
-         * @ru Устанавливает время ожидания ответа от сервера
-         *
-         * @param
-         * @en readTimeout - new value for reading timeout, ms
-         * @ru readTimeout - максимальное время ожидания ответа от сервера, мс
-         */
+        //!
+        //! \brief Set new value for writing timeout
+        //! \param writeTimeout - new value for writing timeout, ms
+        //!
         void setWriteTimeOut(int writeTimeout);
 
-        /**
-         * @brief
-         * @en Write value to coil
-         * @ru Записывает значение в дискретный выход
-         *
-         * @param regNo
-         * @en regNo - address of coil
-         * @ru regNo - адрес выхода, в который производится запись
-         *
-         * @param
-         * @en value - value to write
-         * @ru value - записываемое значение
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         * @en It is alias of writeSingleCoil() method for convinience.
-         * @ru Этот метод является псевдонимом метода writeSingleCoil().
-         */
-        bool writeCoil(quint16 regNo, bool value);
+        //!
+        //! \brief Send user defined function command to server
+        //! \param function - function code
+        //! \param data - extra data to be sent
+        //! \param retData - data returned from server
+        //! \return true in success; false otherwise
+        //!
+        bool userDefinedFunction(uint8_t function, const QVector<uint8_t>& data, QVector<uint8_t>& retData);
 
-        /**
-         * @brief
-         * @en Write array of values to coils
-         * @ru Записывает массив значений в дискретные выходы
-         *
-         * @param
-         * @en regStart - address of first coil
-         * @ru regStart - адрес выхода, с которого необходимо начать запись
-         *
-         * @param
-         * @en values - array for values to write
-         * @ru values - массив записываемых значений
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         * @en It is alias of writeMultipleCoils() method for convinience.
-         * @ru Этот метод является псевдонимом метода writeMultipleCoils().
-         */
-        bool writeCoils(quint16 regStart, const QVector<bool>& values);
+        //!
+        //! \brief Send user defined function command to server
+        //! \param function - function code
+        //! \param subFunction - subfinction code
+        //! \param data - extra data to be sent
+        //! \param retData - data returned from server
+        //! \return true in success; false otherwise
+        //!
+        bool userDefinedFunction(uint8_t function, uint8_t subFunction, const QVector<uint8_t>& data, QVector<uint8_t>& retData);
 
-        /**
-         * @brief
-         * @en Write value to holding register
-         * @ru Записывает значение в регистр вывода
-         *
-         * @param
-         * @en regAddress - address of register
-         * @ru regAddress - адрес регистра
-         *
-         * @param
-         * @en value - value to write
-         * @ru value - записываемое значение
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         * @en It is alias of writeSingleRegister() method for convinience.
-         * @ru Этот метод является псевдонимом метода writeSingleRegister().
-         *
-         */
-        bool writeHoldingRegister(quint16 regAddress, quint16 value);
+        //!
+        //! \brief Write coil value to server
+        //! \param regNo - address of the coil
+        //! \param value - value to write
+        //! \return true in success; false otherwise
+        //!
+        bool writeCoil(uint16_t regNo, bool value);
 
-        /**
-         * @brief
-         * @en Write array of values to holding registers
-         * @ru Записывает массив значений в регистры вывода
-         *
-         * @param
-         * @en regStart - address of first register
-         * @ru regStart - адрес регистра, с которого необходимо начать запись
-         *
-         * @param
-         * @en values - array for values to write
-         * @ru values - массив записываемых значений
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         * @en It is alias of writeMultipleRegisters() method for convinience.
-         * @ru Этот метод является псевдонимом метода writeMultipleRegisters().
-         *
-         */
-        bool writeHoldingRegisters(quint16 regStart, const QVector<quint16>& values);
+        //!
+        //! \brief Write array of coils values to server
+        //! \param regStart - address of first coil
+        //! \param values - array for values to write
+        //! \return true in success; false otherwise
+        //!
+        bool writeCoils(uint16_t regStart, const QVector<bool>& values);
 
-        /**
-         * @brief
-         * @en Write array of values to coils
-         * @ru Записывает массив значений в дискретные выходы
-         *
-         * @param
-         * @en regStart - address of first coil
-         * @ru regStart - адрес выхода, с которого необходимо начать запись
-         *
-         * @param
-         * @en values - array for values to write
-         * @ru values - массив записываемых значений
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool writeMultipleCoils(quint16 regStart, const QVector<bool>& values);
+        //!
+        //! \brief Write holding register value to server
+        //! \param regNo - address of the holding register
+        //! \param value - value to write
+        //! \return true in success; false otherwise
+        //!
+        bool writeHoldingRegister(uint16_t regAddress, uint16_t value);
 
-        /**
-         * @brief
-         * @en Write array of values to holding registers
-         * @ru Записывает массив значений в регистры вывода
-         *
-         * @param
-         * @en regStart - address of first register
-         * @ru regStart - адрес регистра, с которого необходимо начать запись
-         *
-         * @param
-         * @en values - array for values to write
-         * @ru values - массив записываемых значений
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool writeMultipleRegisters(quint16 regStart, const QVector<quint16>& values);
+        //!
+        //! \brief Write array of holding registers value to server
+        //! \param regStart - address of first coil
+        //! \param values - array for values to write
+        //! \return true in success; false otherwise
+        //!
+        bool writeHoldingRegisters(uint16_t regStart, const QVector<uint16_t>& values);
 
-        //        /**
-//         * @brief writeDouble
-//         * @param regNo
-//         * @param value
-//         * @return
-//         */
-//        bool writeDouble(quint16 regNo, double value);
-
-//        /**
-//         * @brief writeDWord
-//         * @param regNo
-//         * @param value
-//         * @return
-//         */
-//        bool writeDWord(quint16 regNo, quint32 value);
-
-//        /**
-//         * @brief writeFloat
-//         * @param regNo
-//         * @param value
-//         * @return
-//         */
-//        bool writeFloat(quint16 regNo, float value)
-//        {
-//            return writeSingle(regNo, value);
-//        }
-
-        /**
-         * @brief
-         * @en Write value to coil
-         * @ru Записывает значение в дискретный выход
-         *
-         * @param
-         * @en regAddress - address of coil
-         * @ru regAddress - адрес выхода, в который производится запись
-         *
-         * @param
-         * @en value - value to write
-         * @ru value - записываемое значение
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool writeSingleCoil(quint16 regAddress, bool value);
-
-        /**
-         * @brief
-         * @en Write value to holding register
-         * @ru Записывает значение в регистр вывода
-         *
-         * @param
-         * @en regAddress - address of register
-         * @ru regAddress - адрес регистра
-         *
-         * @param
-         * @en value - value to write
-         * @ru value - записываемое значение
-         *
-         * @return
-         * @en true in success; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         *
-         */
-        bool writeSingleRegister(quint16 regAddress, quint16 value);
-
-//        /**
-//         * @brief writeSingle
-//         * @param regNo
-//         * @param value
-//         * @return
-//         */
-//        bool writeSingle(quint16 regNo, float value /* Single*/);
-
-//        /**
-//         * @brief writeString
-//         * @param regNo
-//         * @param text
-//         * @return
-//         */
-//        bool writeString(quint16 regNo, const QString& text);
-
-        /**
-         * @brief
-         * @en Return value for writing timeout
-         * @ru Возвращает время ожидания передачи данных серверу
-         *
-         * @return
-         * @en Value for reading timeout
-         * @ru Время ожидания передачи данных серверу
-         */
+        //!
+        //! \brief Return value of writing timeout
+        //! \return Value of writing timeout
+        //!
         int writeTimeout() const;
-
-        /**
-         * @brief
-         * @en Return current value of server unit ID
-         * @ru Возвращает текущее значение адреса устройства сервера, с которым идет обмен данными
-         *
-         * @return
-         * @en Server unit id
-         * @ru Адрес устройства сервера
-         */
-        quint8 unitID() const;
-
-        /**
-         * @brief
-         * @en Send user defined function command to server
-         * @ru Отправляет на сервер команду функции, определяемой пользователем (производителем)
-         *
-         * @param
-         * @en function - Function code
-         * @ru function - Код функции
-         *
-         * @param
-         * @en data - Extra data to be sended to server
-         * @ru data - Дополнительные данные, передаваемые серверу
-         *
-         * @param
-         * @en retData - Vector to plase data returned from server
-         * @ru retData - Массив, в который будет помещены данные, полученные от сервера
-         *
-         * @return
-         * @en true if function successfull; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         */
-        bool userDefinedFunction(quint8 function, const QVector<quint8>& data, QVector<quint8>& retData);
-
-        /**
-         * @brief
-         * @en Send user defined function command to server
-         * @ru Отправляет на сервер команду функции, определяемой пользователем (производителем)
-         *
-         * @param
-         * @en function - Function code
-         * @ru function - Код функции
-         *
-         * @param
-         * @en subFunction - Sub function code
-         * @ru subFunction - Код подфункции
-         *
-         * @param
-         * @en data - Extra data to be sended to server
-         * @ru data - Дополнительные данные, передаваемые серверу
-         *
-         * @param
-         * @en retData - Vector to plase data returned from server
-         * @ru retData - Массив, в который будет помещены данные, полученные от сервера
-         *
-         * @return
-         * @en true if function successfull; false otherwise
-         * @ru true если запрос прошел успешно; false в случае возникновения ошибки
-         */
-        bool userDefinedFunction(quint8 function, quint8 subFunction, const QVector<quint8>& data, QVector<quint8>& retData);
 
     signals:
 
@@ -732,46 +213,73 @@ class MODBUS4QT_EXPORT Client : public AbstractDevice
         //!
         void infoMessage(const QString& msg);
 
-        /**
-         * @brief Signal for dbugging informing
-         *
-         * @param
-         * @en unitID - unit ID of device
-         * @en unitID - адрес устройства, при обмене данными с которым произошла ошибка
-         *
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
-        void debugMessage(quint8 unitID, const QString& msg);
+    protected: // fields
 
+        //!
+        //! \brief Device for data exchange with server
+        //!
+        QIODevice* ioDevice_;
 
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
-         *
-         * @param
-         * @en unitID - unit ID of device
-         * @en unitID - адрес устройства, при обмене данными с которым произошла ошибка
-         *
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
-        void errorMessage(quint8 unitID, const QString& msg);
+        //!
+        //! \brief Read timeout
+        //!
+        int readTimeout_;
 
-        /**
-         * @brief
-         * @en Signal for informing about error occured
-         * @ru Сигнал для сообщения о возникновении ошибки
-         *
-         * @param
-         * @en unitID - unit ID of device
-         * @en unitID - адрес устройства, при обмене данными с которым произошла ошибка
-         *
-         * @en msg - Message with error description
-         * @ru msg - Строка с описанием ошибки
-         */
-        void infoMessage(quint8 unitID, const QString& msg);
+        //!
+        //! \brief Write timeout
+        //!
+        int writeTimeout_;
+
+    protected : // methods
+
+        //!
+        //! \brief Do modbus transeaction: send request PDU to server and read response PDU
+        //! \param requestPDU - request PDU
+        //! \param requestPDUSize - request PDU size
+        //! \param responsePDU - response PDU
+        //! \return true in success; false otherwise
+        //!
+        bool modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize, Device::ProtocolDataUnit& responsePDU);
+
+        //!
+        //! \brief Do modbus transeaction: send request PDU to server and read response PDU
+        //! \param requestPDU - request PDU
+        //! \param requestPDUSize - request PDU size
+        //! \return true in success; false otherwise
+        //!
+        //! It is short version to use when we does not need analize response from server
+        //!
+        bool modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize);
+
+        //!
+        //! \brief Read data from server
+        //! \param response - array for data readed from server
+        //! \return true in success; false otherwise
+        //!
+        virtual bool readDataFromServer_(QByteArray& response);
+
+        //!
+        //! \brief Read response from server, extract PDU from ADU and return it
+        //! \param pdu - var to response pdu
+        //! \return true in success; false otherwise
+        //!
+        virtual bool readResponseFromServer_(Device::ProtocolDataUnit& pdu) = 0;
+
+        //!
+        //! \brief Send data to modbus server
+        //! \param request - data to be sent
+        //! \return true in success; false otherwise
+        //!
+        virtual bool sendDataToServer_(const QByteArray& request);
+
+        //!
+        //! \brief Prepare ADU and send request to modbus server
+        //! \param requestPDU - PDU for request
+        //! \param requestPDUSize - PDU size
+        //! \return true in success; false otherwise
+        //!
+        virtual bool sendRequestToServer_(const Device::ProtocolDataUnit& requestPDU,  int requestPDUSize) = 0;
+
 };
 
 } // namespace modbus4qt

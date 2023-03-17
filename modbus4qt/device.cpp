@@ -23,13 +23,13 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include <QDebug>
 #include <QByteArray>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
+#include <QVector>
 
-#include "abstract_device.h"
 #include "memory_utils.h"
+
+#include "device.h"
 
 namespace modbus4qt
 {
@@ -37,8 +37,7 @@ namespace modbus4qt
 
 //-----------------------------------------------------------------------------
 
-AbstractDevice::AbstractDevice(QObject *parent)
-    : QObject(parent)
+Device::Device()
 {
 
 }
@@ -46,7 +45,7 @@ AbstractDevice::AbstractDevice(QObject *parent)
 //-----------------------------------------------------------------------------
 
 QVector<bool>
-AbstractDevice::getCoilsFromBuffer(const QByteArray& buffer, quint16 regQty)
+Device::getCoilsFromBuffer(const QByteArray& buffer, uint16_t regQty)
 {
     QVector<bool> coils(regQty);
     coils.fill(false);
@@ -59,12 +58,15 @@ AbstractDevice::getCoilsFromBuffer(const QByteArray& buffer, quint16 regQty)
     */
 
     // For every byte from buffer
+    //
     for(int i = 0; i < buffer.size(); ++i)
     {
-        quint8 bitMask = 1;
+        uint8_t bitMask = 1;
+
         bool breakFlag = false;
 
         //  For every bit from bytes
+        //
         for (int j = 0; j < 8; ++j)
         {
             int coilNum = i * 8 + j;
@@ -72,6 +74,7 @@ AbstractDevice::getCoilsFromBuffer(const QByteArray& buffer, quint16 regQty)
             if (coilNum == regQty)
             {
                 breakFlag = true;
+
                 break;
             }
 
@@ -96,19 +99,47 @@ AbstractDevice::getCoilsFromBuffer(const QByteArray& buffer, quint16 regQty)
     return coils;
 }
 
+
 //-----------------------------------------------------------------------------
 
-QVector<quint16>
-AbstractDevice::getRegistersFromBuffer(const QByteArray& buffer, quint16 regQty)
+Device::ProtocolDataUnit
+Device::getPduFromAdu_(const QByteArray &adu)
 {
-    QVector<quint16> regValues(regQty);
+    ProtocolDataUnit pdu;
+
+    ErrorCodes errorCode;
+
+    if (!extractPDU(adu, pdu, errorCode))
+    {
+        switch (errorCode)
+        {
+            case TOO_SHORT_ADU :
+                errorMessage_ = QObject::tr("Application data unit recieved less then 5 bytes!");
+            break;
+
+            case CRC_MISMATCH :
+                errorMessage_ = QObject::tr("CRC mismatch!");
+            break;
+            default: ; // default is empty
+        }
+    }
+
+    return pdu;
+}
+
+//-----------------------------------------------------------------------------
+
+QVector<uint16_t>
+Device::getRegistersFromBuffer(const QByteArray& buffer, uint16_t regQty)
+{
+    QVector<uint16_t> regValues(regQty);
     regValues.fill(0);
 
     const char* charBuffer = buffer.constData();
 
-    const quint16* ptr = (const quint16*)charBuffer;
+    const uint16_t* ptr = (const quint16*)charBuffer;
 
-    for (quint16 i = 0; i < regQty; ++i)
+    for (uint16_t i = 0; i < regQty; ++i)
     {
         regValues[i] = net2host(*ptr);
         ++ptr;
@@ -119,13 +150,25 @@ AbstractDevice::getRegistersFromBuffer(const QByteArray& buffer, quint16 regQty)
 
 //-----------------------------------------------------------------------------
 
-void
-AbstractDevice::putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& values)
+QString
+Device::lastErrorMessage()
 {
-    quint8 bitMask = 1;
-    quint8* ptr = buffer;
+    QString result = errorMessage_;
+    errorMessage_ = "";
 
-    int regQty = values.size();
+    return result;
+
+}
+
+//-----------------------------------------------------------------------------
+
+void
+Device::putCoilsIntoBuffer(const QVector<bool>& data, uint8_t* buffer)
+{
+    uint8_t bitMask = 1;
+    uint8_t* ptr = buffer;
+
+    int regQty = data.size();
 
     // Clear the buffer
     //
@@ -138,7 +181,7 @@ AbstractDevice::putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& values)
     //
     for(int i = 0; i < regQty; ++i)
     {
-        if (values[i] != 0)
+        if (data[i] != 0)
         {
             *ptr |= bitMask;
         }
@@ -167,11 +210,11 @@ AbstractDevice::putCoilsIntoBuffer(quint8* buffer, const QVector<bool>& values)
 //-----------------------------------------------------------------------------
 
 void
-AbstractDevice::putRegistersIntoBuffer(quint8* buffer, const QVector<quint16>& data)
+Device::putRegistersIntoBuffer(const QVector<quint16>& data, uint8_t* buffer)
 {
-    quint16* ptr = (quint16*)buffer;
+    uint16_t* ptr = (uint16_t*)buffer;
 
-    for (quint16 i = 0; i < data.size(); ++i)
+    for (uint16_t i = 0; i < data.size(); ++i)
     {
         *ptr = host2net(data[i]);
         ++ptr;
@@ -181,19 +224,6 @@ AbstractDevice::putRegistersIntoBuffer(quint8* buffer, const QVector<quint16>& d
             break;
         }
     }
-}
-
-
-//-----------------------------------------------------------------------------
-
-void
-AbstractDevice::wait(int time)
-{
-    QMutex mutex;
-    mutex.lock();
-
-    QWaitCondition pause;
-    pause.wait(&mutex, time);
 }
 
 //-----------------------------------------------------------------------------

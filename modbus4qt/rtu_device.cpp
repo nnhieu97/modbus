@@ -1,5 +1,7 @@
 #include <QDebug>
 
+#include "qmutex.h"
+#include "qwaitcondition.h"
 #include "rtu_device.h"
 #include "memory_utils.h"
 
@@ -68,7 +70,70 @@ const int8_t table_crc_lo[] = {
     '\x43', '\x83', '\x41', '\x81', '\x80', '\x40'
 };
 
+//-----------------------------------------------------------------------------
 
+RTUDevice::RTUDevice(const QString& portName,
+                     const QSerialPort::BaudRate& baudRate,
+                     const QSerialPort::DataBits& dataBits,
+                     const QSerialPort::StopBits& stopBits,
+                     const QSerialPort::Parity& parity) :
+    portName_(portName),
+    baudRate_(baudRate),
+    dataBits_(dataBits),
+    stopBits_(stopBits),
+    parity_(parity)
+{
+    serialPort_ = new QSerialPort;
+    serialPort_->setPortName(portName_);
+
+    setSilenceTime_();
+}
+
+//-----------------------------------------------------------------------------
+
+RTUDevice::~RTUDevice()
+{
+    serialPort_->close();
+    serialPort_->deleteLater();
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+RTUDevice::configurePort_()
+{
+    if (!serialPort_->isOpen())
+    {
+        errorMessage_ =  QObject::tr("Cannot configure port %1. The port is not open!").arg(portName_);
+        return false;
+    }
+
+    if (!serialPort_->setBaudRate(baudRate_))
+    {
+        errorMessage_ = serialPort_->errorString();
+        return false;
+    }
+
+    if (!serialPort_->setDataBits(dataBits_))
+    {
+        errorMessage_ = serialPort_->errorString();
+        return false;
+    }
+
+    if (!serialPort_->setStopBits(stopBits_))
+    {
+        errorMessage_ = serialPort_->errorString();
+        return false;
+    }
+
+    if (!serialPort_->setParity(parity_))
+    {
+        errorMessage_ = serialPort_->errorString();
+        return false;
+    }
+
+    return true;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -99,9 +164,9 @@ RTUDevice::crc16(const QByteArray& buf)
 //-----------------------------------------------------------------------------
 
 bool
-RTUDevice::preparePDU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& pdu, AbstractDevice::ErrorCodes& errorCode)
+RTUDevice::extractPDU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& errorCode)
 {
-    errorCode = AbstractDevice::NO_ERROR;
+    errorCode = NO_ERROR;
 
     qDebug() << "ADU: " << buf.toHex();
     qDebug() << "ADU size: " << buf.size();
@@ -121,7 +186,7 @@ RTUDevice::preparePDU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& p
     //
     if (tempBufSize < 5)
     {
-        errorCode = AbstractDevice::TOO_SHORT_ADU;
+        errorCode = TOO_SHORT_ADU;
 
         tempBuf.resize(5);
         tempBufSize = 5;
@@ -159,7 +224,7 @@ RTUDevice::preparePDU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& p
     //
     if (recievedCRC != calculatedCRC)
     {
-        errorCode = AbstractDevice::CRC_MISMATCH;
+        errorCode = CRC_MISMATCH;
     }
 
 #ifndef QT_NO_DEBUG
@@ -173,7 +238,7 @@ RTUDevice::preparePDU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& p
 
     pdu = adu.pdu;
 
-    if (errorCode == AbstractDevice::NO_ERROR)
+    if (errorCode == NO_ERROR)
     {
         return true;
     }
@@ -183,6 +248,232 @@ RTUDevice::preparePDU(const QByteArray& buf, AbstractDevice::ProtocolDataUnit& p
     }
 }
 
+//-----------------------------------------------------------------------------
+
+bool
+RTUDevice::openPort()
+{
+    if (serialPort_->isOpen())
+    {
+        serialPort_->close();
+
+    }
+
+    bool result = serialPort_->open(QIODevice::ReadWrite);
+
+    if (!result)
+    {
+        errorMessage_ = serialPort_->errorString();
+        serialPort_->close();
+        return false;
+    }
+    else
+    {
+        result = configurePort_();
+
+        if (!result)
+        {
+            serialPort_->close();
+        }
+    }
+
+    if (!result)
+    {
+        errorMessage_ = QObject::tr("Error while opening and configuring port!");
+    }
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+QString
+RTUDevice::portName() const
+{
+    return portName_;
+}
+
+//-----------------------------------------------------------------------------
+
+QByteArray
+RTUDevice::prepareADU_(const ProtocolDataUnit &pdu, int pduSize)
+{
+    /*
+     * <------------------------ MODBUS SERIAL LINE PDU (1) ------------------->
+     *              <----------- MODBUS PDU (1') ---------------->
+     *  +-----------+---------------+----------------------------+-------------+
+     *  | Address   | Function Code | Data                       | CRC/LRC     |
+     *  +-----------+---------------+----------------------------+-------------+
+     *  |           |               |                                   |
+     * (2)        (3/2')           (3')                                (4)
+     *
+     * (1)  ... MB_SER_PDU_SIZE_MAX = 256
+     * (2)  ... MB_SER_PDU_ADDR_OFF = 0
+     * (3)  ... MB_SER_PDU_PDU_OFF  = 1
+     * (4)  ... MB_SER_PDU_SIZE_CRC = 2
+     *
+     * (1') ... MB_PDU_SIZE_MAX     = 253
+     * (2') ... MB_PDU_FUNC_OFF     = 0
+     * (3') ... MB_PDU_DATA_OFF     = 1
+     */
+
+    QByteArray result;
+
+    result[0] = unitID_;
+
+    result.insert(1, (char*)&pdu, pduSize);
+
+    quint16 crc = host2net(crc16(result));
+    result.append((char*)&crc, 2);
+
+    qDebug() << "ADU: " << result.toHex();
+    qDebug() << "ADU size: " << result.size();
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------
+
+QSerialPort*
+RTUDevice::serialPort() const
+{
+    return serialPort_;
+}
+
+
+//-----------------------------------------------------------------------------
+
+void
+RTUDevice::setBaudRate(QSerialPort::BaudRate baudRate)
+{
+    if (baudRate_ != baudRate)
+    {
+        baudRate_ = baudRate;
+        setSilenceTime_();
+
+        if (serialPort_->isOpen())
+        {
+            serialPort_->setBaudRate(baudRate_);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
+RTUDevice::setDataBits(QSerialPort::DataBits dataBits)
+{
+    if (dataBits_ != dataBits)
+    {
+        dataBits_ = dataBits;
+
+        if (serialPort_->isOpen())
+        {
+            serialPort_->setDataBits(dataBits_);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
+RTUDevice::setParity(QSerialPort::Parity parity)
+{
+    if (parity_ != parity)
+    {
+        parity_ = parity;
+
+        if (serialPort_->isOpen())
+        {
+            serialPort_->setParity(parity_);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
+RTUDevice::setPortName(const QString& portName)
+{
+    if (portName != portName_)
+    {
+        if (serialPort_->isOpen())
+        {
+            serialPort_->close();
+        }
+
+        portName_ = portName;
+        serialPort_->setPortName(portName_);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
+RTUDevice::setSilenceTime_()
+{
+    if (baudRate_ > QSerialPort::Baud19200)
+    {
+        silenceTime_ = 2; // 2 ms > 1750 microseconds
+    }
+    else
+    {
+        // For each byte we should transmit 11 bits
+        // We have to calculate time in seconds,
+        // power it by 1000 and add 1 for any cases
+        //
+        silenceTime_ = ((11.0 / baudRate_ ) * 3.5) * 1000 + 1;
+    }
+
+//    qDebug() << QString("Silence time: %1 ms").arg(silenceTime_);
+//    emit infoMessage(tr("Silence time: %1 ms").arg(silenceTime_));
+}
+//-----------------------------------------------------------------------------
+
+void
+RTUDevice::setStopBits(QSerialPort::StopBits stopBits)
+{
+    if (stopBits_ != stopBits)
+    {
+        stopBits_ = stopBits;
+
+        if (serialPort_->isOpen())
+        {
+            serialPort_->setStopBits(stopBits_);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
+RTUDevice::setUnitID(quint8 unitID)
+{
+    unitID_ = unitID;
+}
+
+//-----------------------------------------------------------------------------
+
+uint8_t
+RTUDevice::unitID() const
+{
+    return unitID_;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+RTUDevice::wait(int time)
+{
+    QMutex mutex;
+    mutex.lock();
+
+    QWaitCondition pause;
+    pause.wait(&mutex, time);
+}
+
+
+//-----------------------------------------------------------------------------
 
 } // namespace modbus4qt
 

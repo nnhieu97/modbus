@@ -33,9 +33,8 @@ namespace modbus4qt
 
 class TcpServer : public Server
 {
-    Q_OBJECT
     public:
-        TcpServer(QObject* parent);
+        TcpServer();
 };
 
 }

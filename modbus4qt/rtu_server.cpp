@@ -28,8 +28,8 @@
 namespace modbus4qt
 {
 
-RtuServer::RtuServer(QObject *parent) :
-    Server(parent)
+RtuServer::RtuServer() :
+    Server()
 {
 }
 
