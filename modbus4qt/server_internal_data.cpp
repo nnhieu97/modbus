@@ -114,6 +114,11 @@ ServerInternalData::coils()
     return &coils_;
 }
 
+const QMap<quint16, bool>& ServerInternalData::descreteInputs() const
+{
+    return descreteInputs_;
+}
+
 //-----------------------------------------------------------------------------
 
 } // namespace modbus4qt

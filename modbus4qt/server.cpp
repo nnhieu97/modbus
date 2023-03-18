@@ -24,7 +24,7 @@
 *****************************************************************************/
 
 #include <QIODevice>
-
+#include <memory>
 #include "device.h"
 #include "server_internal_data.h"
 #include "server.h"
@@ -89,11 +89,31 @@ Server::setWriteTimeout(int writeTimeout)
 bool
 Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int pduSize)
 {
+
+    // Validate data address. If not valid (ExceptionCode = 2;) Send modbus exception response.
+
+
     // Validate function code. If not valid (ExceptionCode = 1;) Send modbus exception response.
+    using FNC = modbus4qt::Device::Functions;
+    const QVector<uint8_t> avaliableCodes = {FNC::READ_COILS, FNC::READ_DESCRETE_INPUTS,
+                                            FNC::READ_HOLDING_REGISTERS, FNC::READ_INPUT_REGISTERS,
+                                            FNC::WRITE_SINGLE_COIL, FNC::WRITE_SINGLE_REGISTER,
+                                            FNC::WRITE_MULTIPLE_COILS, FNC::WRITE_MULTIPLE_REGISTERS};
+    if (std::find(avaliableCodes.cbegin(), avaliableCodes.cend(), requestPDU.functionCode) != avaliableCodes.cend()){
+
+    }
+    else{
+
+        //If not valid (ExceptionCode = 1;)
+    }
+
+
 
     // Validate data address. If not valid (ExceptionCode = 2;) Send modbus exception response.
 
     // Validate data value.  If not valid (ExceptionCode = 3;) Send modbus exception response.
+
+
 
     // Execute MB function.  If not valid (ExceptionCode = 4, 5, 6;) Send modbus exception response.
 
