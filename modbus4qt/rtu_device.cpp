@@ -428,6 +428,7 @@ RTUDevice::setSilenceTime_()
 //    qDebug() << QString("Silence time: %1 ms").arg(silenceTime_);
 //    emit infoMessage(tr("Silence time: %1 ms").arg(silenceTime_));
 }
+
 //-----------------------------------------------------------------------------
 
 void
@@ -447,22 +448,6 @@ RTUDevice::setStopBits(QSerialPort::StopBits stopBits)
 //-----------------------------------------------------------------------------
 
 void
-RTUDevice::setUnitID(quint8 unitID)
-{
-    unitID_ = unitID;
-}
-
-//-----------------------------------------------------------------------------
-
-uint8_t
-RTUDevice::unitID() const
-{
-    return unitID_;
-}
-
-//-----------------------------------------------------------------------------
-
-void
 RTUDevice::wait(int time)
 {
     QMutex mutex;
@@ -471,7 +456,6 @@ RTUDevice::wait(int time)
     QWaitCondition pause;
     pause.wait(&mutex, time);
 }
-
 
 //-----------------------------------------------------------------------------
 

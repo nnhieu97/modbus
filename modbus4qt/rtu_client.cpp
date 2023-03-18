@@ -198,7 +198,7 @@ RtuClient::readResponseFromServer_(ProtocolDataUnit& pdu)
 {
     QByteArray inArray;
 
-    if (!readDataFromServer_(inArray))
+    if (!readAduFromServer_(inArray))
     {
         return false;
     }

@@ -41,7 +41,7 @@ TcpClient::TcpClient(QObject *parent) :
     connectTimeOut_(DEFAULT_TIMEOUT),
     serverAddress_(QHostAddress("127.0.0.1"))
 {
-    unitID_				= IGNORE_UNIT_ID;
+    unitID_	= IGNORE_UNIT_ID;
 
     ioDevice_ = tcpSocket_;
 }
@@ -173,7 +173,7 @@ bool TcpClient::readResponseFromServer_(ProtocolDataUnit& pdu)
 {
     QByteArray inArray;
 
-    if (!readDataFromServer_(inArray))
+    if (!readAduFromServer_(inArray))
     {
         return false;
     }

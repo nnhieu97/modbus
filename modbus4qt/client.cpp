@@ -47,7 +47,7 @@ Client::Client(QObject* parent) :
 //-----------------------------------------------------------------------------
 
 bool
-Client::modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize, Device::ProtocolDataUnit& responsePDU)
+Client::modbusClientTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize, Device::ProtocolDataUnit& responsePDU)
 {
     if (!sendRequestToServer_(requestPDU, requestPDUSize))
     {
@@ -108,10 +108,33 @@ Client::modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int reques
 //-----------------------------------------------------------------------------
 
 bool
-Client::modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize)
+Client::modbusClientTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize)
 {
     Device::ProtocolDataUnit responsePDU;
-    return modbusTransaction(requestPDU, requestPDUSize, responsePDU);
+    return modbusClientTransaction(requestPDU, requestPDUSize, responsePDU);
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Client::readAduFromServer_(QByteArray& response)
+{
+    if (!ioDevice_->waitForReadyRead(readTimeout_))
+    {
+        emit errorMessage(tr("Read timeout, error: %1").arg(ioDevice_->errorString()));
+
+        return false;
+    }
+
+    response.clear();
+
+    response.append(ioDevice_->readAll());
+    while (ioDevice_->bytesAvailable() || ioDevice_->waitForReadyRead(readTimeout_))
+    {
+        response.append(ioDevice_->readAll());
+    }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -156,11 +179,11 @@ Client::readCoils(uint16_t regStart, uint16_t regQty, QVector<bool>& values)
 
     Device::ProtocolDataUnit responsePDU;
 
-    bool isOk = modbusTransaction(requestPDU, requestPDUSize, responsePDU);
+    bool isOk = modbusClientTransaction(requestPDU, requestPDUSize, responsePDU);
 
     if (isOk)
     {
-        // Quantity of readed bytes, not coils!
+        // Quantity of recieved bytes in PDU, not coils!
         //
         int bytesReaded = responsePDU.data[0];
 
@@ -174,29 +197,6 @@ Client::readCoils(uint16_t regStart, uint16_t regQty, QVector<bool>& values)
     }
 
     return isOk;
-}
-
-//-----------------------------------------------------------------------------
-
-bool
-Client::readDataFromServer_(QByteArray& response)
-{
-    if (!ioDevice_->waitForReadyRead(readTimeout_))
-    {
-        emit errorMessage(tr("Read timeout, error: %1").arg(ioDevice_->errorString()));
-
-        return false;
-    }
-
-    response.clear();
-
-    response.append(ioDevice_->readAll());
-    while (ioDevice_->bytesAvailable() || ioDevice_->waitForReadyRead(readTimeout_))
-    {
-        response.append(ioDevice_->readAll());
-    }
-
-    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -241,11 +241,11 @@ Client::readDescreteInputs(uint16_t regStart, uint16_t regQty, QVector<bool>& va
 
     Device::ProtocolDataUnit responsePDU;
 
-    bool isOk = modbusTransaction(requestPDU, requestPDUSize, responsePDU);
+    bool isOk = modbusClientTransaction(requestPDU, requestPDUSize, responsePDU);
 
     if (isOk)
     {
-        // Quantity of readed bytes, not registers!
+        // Quantity of readed bytes in PDU, not registers!
         //
         int bytesReaded = responsePDU.data[0];
 
@@ -307,11 +307,11 @@ Client::readHoldingRegisters(uint16_t regStart, uint16_t regQty, QVector<uint16_
 
     Device::ProtocolDataUnit responsePDU;
 
-    bool isOk = modbusTransaction(requestPDU, requestPDUSize, responsePDU);
+    bool isOk = modbusClientTransaction(requestPDU, requestPDUSize, responsePDU);
 
     if (isOk)
     {
-        // Quantity of readed bytes, not registers!
+        // Quantity of readed bytes in PDU, not registers!
         //
         int bytesReaded = responsePDU.data[0];
 
@@ -373,11 +373,11 @@ Client::readInputRegisters(uint16_t regStart, uint16_t regQty, QVector<quint16>&
 
     Device::ProtocolDataUnit responsePDU;
 
-    bool isOk = modbusTransaction(requestPDU, requestPDUSize, responsePDU);
+    bool isOk = modbusClientTransaction(requestPDU, requestPDUSize, responsePDU);
 
     if (isOk)
     {
-        // Quantity of readed bytes, not registers!
+        // Quantity of readed bytes in PDU, not registers!
         //
         int bytesReaded = responsePDU.data[0];
 
@@ -399,6 +399,33 @@ int
 Client::readTimeout() const
 {
     return readTimeout_;
+}
+
+
+//-----------------------------------------------------------------------------
+
+bool
+Client::sendDataToServer_(const QByteArray& request)
+{
+    int64_t bytesWritten = ioDevice_->write(request);
+
+    if (bytesWritten <= 0)
+    {
+        emit errorMessage(tr("Failed to write data, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+    else if (bytesWritten < request.size())
+    {
+        emit errorMessage(tr("Failed to write all data, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+    else if (!ioDevice_->waitForBytesWritten(writeTimeout_))
+    {
+        emit errorMessage(tr("Write timeout, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -437,7 +464,7 @@ Client::userDefinedFunction(uint8_t function, const QVector<uint8_t>& data, QVec
 
     Device::ProtocolDataUnit replyPdu;
 
-    bool isOk = modbusTransaction(pdu, pduSize, replyPdu);
+    bool isOk = modbusClientTransaction(pdu, pduSize, replyPdu);
 
     if (!isOk)
     {
@@ -477,7 +504,7 @@ Client::userDefinedFunction(uint8_t function, uint8_t subFunction, const QVector
 
     Device::ProtocolDataUnit responsePDU;
 
-    bool isOk = modbusTransaction(pdu, pduSize, responsePDU);
+    bool isOk = modbusClientTransaction(pdu, pduSize, responsePDU);
 
     if (!isOk)
     {
@@ -526,7 +553,7 @@ bool Client::writeCoil(uint16_t regNo, bool value)
     requestPDU.data[3] = 0;
     requestPDUSize = 5;
 
-    return modbusTransaction(requestPDU, requestPDUSize);
+    return modbusClientTransaction(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -571,35 +598,7 @@ Client::writeCoils(uint16_t regStart, const QVector<bool>& values)
     //
     requestPDUSize = 6 + requestPDU.data[4];
 
-    return modbusTransaction(requestPDU, requestPDUSize);
-}
-
-
-//-----------------------------------------------------------------------------
-
-bool
-Client::sendDataToServer_(const QByteArray& request)
-{
-    int64_t bytesWritten = ioDevice_->write(request);
-
-    if (bytesWritten <= 0)
-    {
-        emit errorMessage(tr("Failed to write data, error: %1").arg(ioDevice_->errorString()));
-        return false;
-    }
-    else if (bytesWritten < request.size())
-    {
-        emit errorMessage(tr("Failed to write all data, error: %1").arg(ioDevice_->errorString()));
-        return false;
-    }
-    else if (!ioDevice_->waitForBytesWritten(writeTimeout_))
-    {
-        qDebug() << "Write timeout!";
-        emit errorMessage(tr("Write timeout, error: %1").arg(ioDevice_->errorString()));
-        return false;
-    }
-
-    return true;
+    return modbusClientTransaction(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -624,7 +623,7 @@ Client::writeHoldingRegister(uint16_t regAddress, uint16_t value)
 
     requestPDUSize = 5;
 
-    return modbusTransaction(requestPDU, requestPDUSize);
+    return modbusClientTransaction(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -669,7 +668,7 @@ Client::writeHoldingRegisters(uint16_t regStart, const QVector<uint16_t>& values
     //
     requestPDUSize = 6 + requestPDU.data[4];
 
-    return modbusTransaction(requestPDU, requestPDUSize);
+    return modbusClientTransaction(requestPDU, requestPDUSize);
 }
 
 //-----------------------------------------------------------------------------

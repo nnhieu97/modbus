@@ -331,6 +331,19 @@ class Device
         //!
         static void putRegistersIntoBuffer(const QVector<quint16>& data, uint8_t* buffer);
 
+        //!
+        //! \brief Set current value of unit ID
+        //! \param unitID - new unit ID
+        //!
+        void setUnitID(quint8 unitID);
+
+        //!
+        //! \brief Return current value of unit ID
+        //! \return unit id
+        //!
+        uint8_t unitID() const;
+
+
     protected :
 
         //!
