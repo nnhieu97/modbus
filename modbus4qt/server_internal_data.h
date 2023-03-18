@@ -16,6 +16,7 @@ namespace modbus4qt {
 class ServerInternalData : public QObject
 {
         Q_OBJECT
+
     public:
 
         //!
@@ -92,7 +93,13 @@ class ServerInternalData : public QObject
         //!
         void addInputRegisters(quint16 startIndex, quint16 endIndex);
 
-        QMap<quint16, bool>* coils();
+        const QMap<quint16, bool>& coils();
+
+        const QMap<quint16, bool>& descreteInputs() const;
+
+        const QMap<quint16, quint16>& holdingRegisters() const;
+
+        const QMap<quint16, quint16>& inputRegisters() const;
 
     signals:
 

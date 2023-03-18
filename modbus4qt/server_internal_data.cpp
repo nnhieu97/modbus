@@ -108,15 +108,26 @@ ServerInternalData::addInputRegisters(quint16 startIndex, quint16 endIndex)
 
 //-----------------------------------------------------------------------------
 
-QMap<quint16, bool>*
+const QMap<quint16, bool>&
 ServerInternalData::coils()
 {
-    return &coils_;
+    return coils_;
 }
 
-const QMap<quint16, bool>& ServerInternalData::descreteInputs() const
+const QMap<quint16, bool>&
+ServerInternalData::descreteInputs() const
 {
     return descreteInputs_;
+}
+
+const QMap<quint16, quint16>& ServerInternalData::holdingRegisters() const
+{
+    return holdingRegisters_;
+}
+
+const QMap<quint16, quint16>& ServerInternalData::inputRegisters() const
+{
+    return inputRegisters_;
 }
 
 //-----------------------------------------------------------------------------

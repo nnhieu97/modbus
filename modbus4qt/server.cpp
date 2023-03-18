@@ -91,7 +91,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
 {
 
     // Validate data address. If not valid (ExceptionCode = 2;) Send modbus exception response.
-
+    QByteArray response;
 
     // Validate function code. If not valid (ExceptionCode = 1;) Send modbus exception response.
     using FNC = modbus4qt::Device::Functions;
@@ -100,26 +100,54 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
                                             FNC::WRITE_SINGLE_COIL, FNC::WRITE_SINGLE_REGISTER,
                                             FNC::WRITE_MULTIPLE_COILS, FNC::WRITE_MULTIPLE_REGISTERS};
     if (std::find(avaliableCodes.cbegin(), avaliableCodes.cend(), requestPDU.functionCode) != avaliableCodes.cend()){
+        // prepere response pdu
+        // send it to client
+        switch(requestPDU.functionCode)
+        {
+            case FNC::READ_COILS:
+            case FNC::WRITE_SINGLE_COIL:
+            case FNC::WRITE_MULTIPLE_COILS:
+                if (internalData_->coils().isEmpty())
+                {
+                    response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
+                }
+            break;
+            case FNC::READ_DESCRETE_INPUTS:
+                if (internalData_->descreteInputs().isEmpty())
+                {
+                    response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
+                }
+            break;
+            case FNC::READ_HOLDING_REGISTERS:
+                if (internalData_->holdingRegisters().isEmpty())
+                {
+                    response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
+                }
+            break;
+            case FNC::READ_INPUT_REGISTERS:
+                if (internalData_->inputRegisters().isEmpty())
+                {
+                    response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
+                }
+            break;
+            default : ;// is empty
+        }
 
     }
     else{
-
+        response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
+        return false;
         //If not valid (ExceptionCode = 1;)
     }
 
-
-
-    // Validate data address. If not valid (ExceptionCode = 2;) Send modbus exception response.
-
     // Validate data value.  If not valid (ExceptionCode = 3;) Send modbus exception response.
-
+    if
 
 
     // Execute MB function.  If not valid (ExceptionCode = 4, 5, 6;) Send modbus exception response.
 
     // All's goos. Do some work & send modbus response
     //
-    QByteArray response;
     sendDataToClient_(response);
 
     return true;
