@@ -158,18 +158,6 @@ class RTUDevice : public Device
         //!
         void setStopBits(QSerialPort::StopBits stopBits);
 
-        //!
-        //! \brief Set current value of unit ID
-        //! \param unitID - new unit ID
-        //!
-        void setUnitID(quint8 unitID);
-
-        //!
-        //! \brief Return current value of unit ID
-        //! \return unit id
-        //!
-        uint8_t unitID() const;
-
         /**
           * @brief
           * @en Wait time milliseconds

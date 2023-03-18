@@ -23,16 +23,63 @@
 * If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
+#include <QTcpServer>
+#include <QTcpSocket>
+
 #include "tcp_server.h"
 
 namespace modbus4qt
 {
 
-TcpServer::TcpServer()
-    : Server()
+//-----------------------------------------------------------------------------
+
+TcpServer::TcpServer(QObject* parent)
+    : Server(parent)
 {
-
+    connect(tcpServer_, SIGNAL(newConnection()), this, SLOT(incomingConnection()));
 }
 
+//-----------------------------------------------------------------------------
+
+bool
+TcpServer::startServer()
+{
+    if (!tcpServer_->listen(QHostAddress::Any, port_))
+    {
+        // inform about error...
+
+        return false;
+    }
+
+    return true;
 }
 
+//-----------------------------------------------------------------------------
+
+void
+TcpServer::incomingConnection(qintptr socketId)
+{
+    // socket'll be destroyed after connection closed
+    //
+    tcpSocket_ = new QTcpSocket(this);
+    tcpSocket_->setSocketDescriptor(socketId);
+
+    ioDevice_ = tcpSocket_;
+
+    connect(tcpSocket_, SIGNAL(disconnected()), this, SLOT(connectionClosed()));
+}
+
+//-----------------------------------------------------------------------------
+
+void
+TcpServer::connectionClosed()
+{
+    ioDevice_ = nullptr;
+}
+
+//-----------------------------------------------------------------------------
+
+} // namespace modbus4qt
+
+//-----------------------------------------------------------------------------
+// EOF

@@ -26,6 +26,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <QObject>
 #include <QMap>
 #include <QSet>
 
@@ -43,7 +44,7 @@ class ServerInternalData;
 //!
 //! \brief Abtract modbus server
 //!
-class Server : public Device
+class Server : public QObject
 {
     public:
 
@@ -51,33 +52,63 @@ class Server : public Device
         //! \brief Default constructor
         //! \param parent - parent object
         //!
-        explicit Server();
+        explicit Server(QObject* parent = nullptr);
 
-        explicit Server(ServerInternalData* internalData);
+        explicit Server(ServerInternalData* internalData, QObject* parent = nullptr);
 
         void setInternalData(ServerInternalData* internalData);
 
-    public : ///slots :
+        int readTimeout() const;
+
+        void setReadTimeout(int readTimeout);
+
+        int writeTimeout() const;
+
+        void setWriteTimeout(int writeTimeout);
+
+    signals:
 
         //!
-        //! \brief process incoming modbus request
+        //! \brief Signal for debugging informing
+        //! \param msg - Debug message
         //!
-        //! К моменту обработки запроса все данные уже должны быть прочитаны.
-        //! Следовательно надо на вход подавать буфер с прочитанными данными.
-        //!
-        void processIncomingRequest();
+        void debugMessage(const QString& msg);
 
         //!
-        //! \brief Send response to client
-        //! \return
+        //! \brief Signal for informing about error occured
+        //! \param msg - Message with error description
         //!
-        bool sendResponse();
+        void errorMessage(const QString& msg);
 
-    protected:
+        //!
+        //! \brief Signal for general purposes informing
+        //! \param msg - message
+        //!
+        void infoMessage(const QString& msg);
 
-        virtual ProtocolDataUnit processADU_(const QByteArray& buf) = 0;
+    protected :
 
-    private:
+        virtual bool checkReciever_(const QByteArray& adu) = 0;
+
+        bool modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int pduSize);
+
+        virtual bool processClientRequest_(const QByteArray& requestAdu, const Device::ProtocolDataUnit& requestPdu, int pduSize) = 0;
+
+        //!
+        //! \brief Send data to modbus client
+        //! \param request - data to be sent
+        //! \return true in success; false otherwise
+        //!
+        virtual bool sendDataToClient_(const QByteArray& response);
+
+    protected slots :
+
+        //!
+        //! \brief Read data from client, if we a proper reciever then do server modbus transaction
+        //!
+        virtual void readClientRequest_();
+
+    protected :
 
         //!
         //! \brief Read device to read data from
@@ -105,15 +136,9 @@ class Server : public Device
         int writeTimeout_;
 
         //!
-        //! \brief Identifier number of server
-        //!
-        quint8 unitID_;
-
-        //!
         //! \brief Server internal data
         //!
         ServerInternalData* internalData_ = nullptr;
-
 };
 
 } // namespace modbus4qt

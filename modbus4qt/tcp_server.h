@@ -27,14 +27,34 @@
 #define TCPSERVER_H
 
 #include "server.h"
+#include "tcp_device.h"
+
+class QTcpServer;
 
 namespace modbus4qt
 {
 
-class TcpServer : public Server
+class TcpServer : public Server, public TCPDevice
 {
-    public:
-        TcpServer();
+    Q_OBJECT
+
+    public :
+        TcpServer(QObject* parent = nullptr);
+
+        bool startServer();
+
+    protected : // fields
+
+        QTcpServer* tcpServer_;
+
+    protected : // methods
+
+        void incomingConnection(qintptr socketId);
+
+    protected slots :
+
+        void connectionClosed();
+
 };
 
 }

@@ -25,6 +25,7 @@
 
 #include <QIODevice>
 
+#include "device.h"
 #include "server_internal_data.h"
 #include "server.h"
 
@@ -34,53 +35,131 @@ namespace modbus4qt
 
 //-----------------------------------------------------------------------------
 
-Server::Server()
-    : Device()
+Server::Server(QObject* parent) :
+    QObject(parent)
 {
+    connect(ioDevice_, SIGNAL(readyRead()), this, SLOT(readClientRequest_()));
 }
 
 //-----------------------------------------------------------------------------
 
-Server::Server(ServerInternalData* internalData)
-    : Device(),
-      internalData_(internalData)
+Server::Server(ServerInternalData* internalData, QObject* parent) :
+    QObject(parent),
+    internalData_(internalData)
 {
+    internalData_->setParent(this);
+
+    connect(ioDevice_, SIGNAL(readyRead()), this, SLOT(readClientRequest_()));
+}
+
+//-----------------------------------------------------------------------------
+
+int
+Server::readTimeout() const
+{
+    return readTimeout_;
 }
 
 //-----------------------------------------------------------------------------
 
 void
-Server::processIncomingRequest()
+Server::setReadTimeout(int readTimeout)
 {
-    QByteArray inArray;
+    readTimeout_ = readTimeout;
+}
 
-    // Read all and after wait at least silence time for RTU Server
-    //
-    inArray.append(ioDevice_->readAll());
+//-----------------------------------------------------------------------------
 
-    //! \todo Think about silence time!
-    while (ioDevice_->bytesAvailable()) // || ioDevice_->waitForReadyRead(silenceTime_ * 2))
-    {
-        inArray.append(ioDevice_->readAll());
-    }
+int
+Server::writeTimeout() const
+{
+    return writeTimeout_;
+}
 
-    // Validate function code. If not valid ExceptionCode = 1; Send modbus exception response.
+//-----------------------------------------------------------------------------
 
-    // Validate data address. If not valid ExceptionCode = 2; Send modbus exception response.
-
-    // Validate data value.  If not valid ExceptionCode = 3; Send modbus exception response.
-
-    // Execute MB function.  If not valid ExceptionCode = 4, 5, 6; Send modbus exception response.
-
-    // Send modbus response
+void
+Server::setWriteTimeout(int writeTimeout)
+{
+    writeTimeout_ = writeTimeout;
 }
 
 //-----------------------------------------------------------------------------
 
 bool
-Server::sendResponse()
+Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int pduSize)
 {
+    // Validate function code. If not valid (ExceptionCode = 1;) Send modbus exception response.
 
+    // Validate data address. If not valid (ExceptionCode = 2;) Send modbus exception response.
+
+    // Validate data value.  If not valid (ExceptionCode = 3;) Send modbus exception response.
+
+    // Execute MB function.  If not valid (ExceptionCode = 4, 5, 6;) Send modbus exception response.
+
+    // All's goos. Do some work & send modbus response
+    //
+    QByteArray response;
+    sendDataToClient_(response);
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+
+bool
+Server::sendDataToClient_(const QByteArray& response)
+{
+    int64_t bytesWritten = ioDevice_->write(response);
+
+    if (bytesWritten <= 0)
+    {
+        emit errorMessage(tr("Failed to write data, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+    else if (bytesWritten < response.size())
+    {
+        emit errorMessage(tr("Failed to write all data, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+    else if (!ioDevice_->waitForBytesWritten(writeTimeout_))
+    {
+        emit errorMessage(tr("Write timeout, error: %1").arg(ioDevice_->errorString()));
+        return false;
+    }
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+
+void
+Server::readClientRequest_()
+{
+    QByteArray inArray;
+
+    //! \todo Think about silence time! See #37
+    //
+    inArray.append(ioDevice_->readAll());
+
+    while (ioDevice_->bytesAvailable() || ioDevice_->waitForReadyRead(readTimeout_))
+    {
+        inArray.append(ioDevice_->readAll());
+    }
+
+    if (checkReciever_(inArray))
+    {
+        // We are reciever in incoming packet
+        // Do some work
+
+        Device::ProtocolDataUnit requestPdu;
+        int pduSize = 0;
+
+        if (processClientRequest_(inArray, requestPdu, pduSize))
+        {
+            modbusServerTransaction(requestPdu, pduSize);
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -89,6 +168,7 @@ void
 Server::setInternalData(ServerInternalData* internalData)
 {
     internalData_ = internalData;
+    internalData_->setParent(this);
 }
 
 //-----------------------------------------------------------------------------

@@ -233,30 +233,30 @@ class Client : public QObject
     protected : // methods
 
         //!
-        //! \brief Do modbus transeaction: send request PDU to server and read response PDU
+        //! \brief Do modbus transaction: send request PDU to server and read response PDU
         //! \param requestPDU - request PDU
         //! \param requestPDUSize - request PDU size
         //! \param responsePDU - response PDU
         //! \return true in success; false otherwise
         //!
-        bool modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize, Device::ProtocolDataUnit& responsePDU);
+        bool modbusClientTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize, Device::ProtocolDataUnit& responsePDU);
 
         //!
-        //! \brief Do modbus transeaction: send request PDU to server and read response PDU
+        //! \brief Do modbus transaction: send request PDU to server and read response PDU
         //! \param requestPDU - request PDU
         //! \param requestPDUSize - request PDU size
         //! \return true in success; false otherwise
         //!
         //! It is short version to use when we does not need analize response from server
         //!
-        bool modbusTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize);
+        bool modbusClientTransaction(const Device::ProtocolDataUnit& requestPDU, int requestPDUSize);
 
         //!
         //! \brief Read data from server
         //! \param response - array for data readed from server
         //! \return true in success; false otherwise
         //!
-        virtual bool readDataFromServer_(QByteArray& response);
+        virtual bool readAduFromServer_(QByteArray& response);
 
         //!
         //! \brief Read response from server, extract PDU from ADU and return it

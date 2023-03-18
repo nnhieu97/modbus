@@ -28,9 +28,41 @@
 namespace modbus4qt
 {
 
-RtuServer::RtuServer() :
-    Server()
+RtuServer::RtuServer(const QString& portName,
+                     QSerialPort::BaudRate baudRate,
+                     QSerialPort::DataBits dataBits,
+                     QSerialPort::StopBits stopBits,
+                     QSerialPort::Parity parity,
+                     QObject* parent) :
+    Server(parent),
+    RTUDevice(portName, baudRate, dataBits, stopBits, parity)
 {
+    ioDevice_ = serialPort_;
+
+    connect(this, SIGNAL(unitDebugMessage_(QString&)), this, SLOT(onUnitDebugMessage_(QString&)));
+    connect(this, SIGNAL(unitErrorMessage_(QString&)), this, SLOT(onUnitErrorMessage_(QString&)));
+    connect(this, SIGNAL(unitInfoMessage_(QString&)), this, SLOT(onUnitInfoMessage_(QString&)));
+
+}
+
+bool RtuServer::configurePort_()
+{
+
+}
+
+void RtuServer::onUnitDebugMessage_(const QString& msg)
+{
+
+}
+
+void RtuServer::onUnitErrorMessage_(const QString& msg)
+{
+
+}
+
+void RtuServer::onUnitInfoMessage_(const QString& msg)
+{
+
 }
 
 
