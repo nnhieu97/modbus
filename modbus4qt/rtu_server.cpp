@@ -45,24 +45,39 @@ RtuServer::RtuServer(const QString& portName,
 
 }
 
+//-----------------------------------------------------------------------------
+
 bool RtuServer::configurePort_()
 {
+    bool result = RTUDevice::configurePort_();
 
+    if (!result)
+    {
+        emit errorMessage(lastErrorMessage());
+    }
+
+    return result;
 }
+
+//-----------------------------------------------------------------------------
 
 void RtuServer::onUnitDebugMessage_(const QString& msg)
 {
-
+    emit debugMessage(QString("[UnitID: %1] %2").arg(unitID_).arg(msg));
 }
+
+//-----------------------------------------------------------------------------
 
 void RtuServer::onUnitErrorMessage_(const QString& msg)
 {
-
+    emit errorMessage(QString("[UnitID: %1] %2").arg(unitID_).arg(msg));
 }
+
+//-----------------------------------------------------------------------------
 
 void RtuServer::onUnitInfoMessage_(const QString& msg)
 {
-
+    emit infoMessage(QString("[UnitID: %1] %2").arg(unitID_).arg(msg));
 }
 
 
