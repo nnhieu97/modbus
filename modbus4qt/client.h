@@ -64,7 +64,7 @@ class Client : public QObject
         //! \param values - array for readed values
         //! \return true in success; false otherwise
         //!
-        bool readCoils(uint16_t regStart, uint16_t regQty, QVector<bool>& values);
+        bool readCoils(uint16_t regStart, uint16_t nCoils, QVector<bool>& values);
 
         //!
         //! \brief Read single descrete inputs value from server
@@ -81,7 +81,7 @@ class Client : public QObject
         //! \param values - array for readed values
         //! \return true in success; false otherwise
         //!
-        bool readDescreteInputs(uint16_t regStart, uint16_t regQty, QVector<bool>& values);
+        bool readDescreteInputs(uint16_t regStart, uint16_t nCoils, QVector<bool>& values);
 
         //!
         //! \brief Read holding register value from server
@@ -89,7 +89,7 @@ class Client : public QObject
         //! \param value - var to store result
         //! \return true in success; false otherwise
         //!
-        bool readHoldingRegister(uint16_t regNo, quint16& value);
+        bool readHoldingRegister(uint16_t regNo, uint16_t& value);
 
         //!
         //! \brief Read array of holding registers values from server
@@ -98,7 +98,7 @@ class Client : public QObject
         //! \param values - array for readed values
         //! \return true in success; false otherwise
         //!
-        bool readHoldingRegisters(uint16_t regStart, uint16_t regQty, QVector<uint16_t>& values);
+        bool readHoldingRegisters(uint16_t regStart, uint16_t nRegs, QVector<uint16_t>& values);
 
         //!
         //! \brief Read input register value from server
@@ -116,7 +116,7 @@ class Client : public QObject
         //! \return true in success; false otherwise
         //!
         //!
-        bool readInputRegisters(uint16_t regStart, uint16_t regQty, QVector<quint16>& values);
+        bool readInputRegisters(uint16_t regStart, uint16_t nRegs, QVector<uint16_t>& values);
 
         //!
         //! \brief Return value for reading timeout
