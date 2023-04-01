@@ -181,7 +181,7 @@ Device::putCoilsIntoBuffer(const QVector<bool>& data, uint8_t* buffer)
     //
     for(int i = 0; i < regQty; ++i)
     {
-        if (data[i] != 0)
+        if (data[i] != false)
         {
             *ptr |= bitMask;
         }
