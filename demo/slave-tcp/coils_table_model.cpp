@@ -87,32 +87,24 @@ int CoilsTableModel::rowCount(const QModelIndex& parent) const
 
 //------------------------------------------------------------------------------
 
-//bool
-//CoilsTableModel::setData(const QModelIndex& parent, const QVariant& value, int role)
-//{
-//}
-
-void
-CoilsTableModel::addRows(int rows)
+bool
+CoilsTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    int position;
-    if (coilsData_->size() == 0){
-        position = 0;
-    }
-    else {
-        position = coilsData_->lastKey()+1;
-    }
 
-    for (int row=0; row<rows; ++row)
-    {
-        coilsData_->insert(position, 0);
-        ++position;
-    }
 }
 
-//Функция для добавления данных в существующие колонки
+//------------------------------------------------------------------------------
 
-//Функция для связывания CoilsTabelModel и ServerInternalData
+bool
+CoilsTableModel::insertRows(int row, int count, const QModelIndex& parent)
+{
+    for (int i = 0; i < count; ++i)
+    {
+        coilsData_->insert(i + row, 0);
+    }
+
+    return true;
+}
 
 //------------------------------------------------------------------------------
 // EOF

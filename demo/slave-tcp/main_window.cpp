@@ -117,7 +117,10 @@ MainWindow::addCoils()
 
     if (addCellsDialog.exec() == QDialog::Accepted)
     {
-        coilsTableModel_->addRows(addCellsDialog.cellsQuantity());
+        for (int i = 0; i < addCellsDialog.cellsQuantity(); ++i)
+        {
+            coilsTableModel_->insertRow(i);
+        }
     }
 }
 
