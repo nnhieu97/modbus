@@ -114,9 +114,10 @@ void
 MainWindow::addCoils()
 {
     AddCellsDialog addCellsDialog;
+
     if (addCellsDialog.exec() == QDialog::Accepted)
     {
-        serverInternalData_->addCoils(addCellsDialog.startAddress(), addCellsDialog.cellsQuantity());
+        coilsTableModel_->addRows(addCellsDialog.cellsQuantity());
     }
 }
 
