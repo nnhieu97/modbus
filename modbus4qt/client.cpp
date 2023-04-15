@@ -153,7 +153,7 @@ Client::readCoil(quint16 regNo, bool& value)
 //-----------------------------------------------------------------------------
 
 bool
-Client::readCoils(uint16_t regStart, uint16_t regQty, QVector<bool>& values)
+Client::readCoils(uint16_t regStart, uint16_t nCoils, QVector<bool>& values)
 {
     Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
@@ -165,15 +165,15 @@ Client::readCoils(uint16_t regStart, uint16_t regQty, QVector<bool>& values)
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = low(regStart);
 
-    if (regQty > MAX_COILS_FOR_READ)
+    if (nCoils > MAX_COILS_FOR_READ)
     {
-        regQty = MAX_COILS_FOR_READ;
+        nCoils = MAX_COILS_FOR_READ;
     }
 
     // Quantity of registers
     //
-    requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = low(regQty);
+    requestPDU.data[2] = hi(nCoils);
+    requestPDU.data[3] = low(nCoils);
 
     requestPDUSize = 5;
 
@@ -193,7 +193,7 @@ Client::readCoils(uint16_t regStart, uint16_t regQty, QVector<bool>& values)
 
         // Process buffer and read coils values from it
         //
-        values = Device::getCoilsFromBuffer(coilsBuffer, regQty);
+        values = Device::getCoilsFromBuffer(coilsBuffer, nCoils);
     }
 
     return isOk;
@@ -215,7 +215,7 @@ Client::readDescreteInput(uint16_t regNo, bool& value)
 //-----------------------------------------------------------------------------
 
 bool
-Client::readDescreteInputs(uint16_t regStart, uint16_t regQty, QVector<bool>& values)
+Client::readDescreteInputs(uint16_t regStart, uint16_t nCoils, QVector<bool>& values)
 {
     Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
@@ -227,15 +227,15 @@ Client::readDescreteInputs(uint16_t regStart, uint16_t regQty, QVector<bool>& va
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = low(regStart);
 
-    if (regQty > MAX_COILS_FOR_READ)
+    if (nCoils > MAX_COILS_FOR_READ)
     {
-        regQty = MAX_COILS_FOR_READ;
+        nCoils = MAX_COILS_FOR_READ;
     }
 
     // Quantity of registers
     //
-    requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = low(regQty);
+    requestPDU.data[2] = hi(nCoils);
+    requestPDU.data[3] = low(nCoils);
 
     requestPDUSize = 5;
 
@@ -255,7 +255,7 @@ Client::readDescreteInputs(uint16_t regStart, uint16_t regQty, QVector<bool>& va
 
         // Process buffer and read coils values from it
         //
-        values = Device::getCoilsFromBuffer(coilsBuffer, regQty);
+        values = Device::getCoilsFromBuffer(coilsBuffer, nCoils);
     }
 
     return isOk;
@@ -265,9 +265,9 @@ Client::readDescreteInputs(uint16_t regStart, uint16_t regQty, QVector<bool>& va
 //-----------------------------------------------------------------------------
 
 bool
-Client::readHoldingRegister(uint16_t regNo, quint16& value)
+Client::readHoldingRegister(uint16_t regNo, uint16_t& value)
 {
-    QVector<quint16> data(1);
+    QVector<uint16_t> data(1);
 
     bool result = readHoldingRegisters(regNo, 1, data);
     value = data[0];
@@ -278,7 +278,7 @@ Client::readHoldingRegister(uint16_t regNo, quint16& value)
 //-----------------------------------------------------------------------------
 
 bool
-Client::readHoldingRegisters(uint16_t regStart, uint16_t regQty, QVector<uint16_t>& values)
+Client::readHoldingRegisters(uint16_t regStart, uint16_t nRegs, QVector<uint16_t>& values)
 {
     Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
@@ -290,18 +290,18 @@ Client::readHoldingRegisters(uint16_t regStart, uint16_t regQty, QVector<uint16_
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = low(regStart);
 
-    if (regQty > MAX_REGISTERS_FOR_READ)
+    if (nRegs > MAX_REGISTERS_FOR_READ)
     {
         emit infoMessage(tr("Maxixmum registers quantity (%1 items) for reading exceeded.\n"
                             "Only %1 items will be readed!").arg(MAX_REGISTERS_FOR_READ));
 
-        regQty = MAX_REGISTERS_FOR_READ;
+        nRegs = MAX_REGISTERS_FOR_READ;
     }
 
     // Quantity of registers
     //
-    requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = low(regQty);
+    requestPDU.data[2] = hi(nRegs);
+    requestPDU.data[3] = low(nRegs);
 
     requestPDUSize = 5;
 
@@ -321,7 +321,7 @@ Client::readHoldingRegisters(uint16_t regStart, uint16_t regQty, QVector<uint16_
 
         // Process buffer and read registers values from it
         //
-        values = Device::getRegistersFromBuffer(registersBuffer, regQty);
+        values = Device::getRegistersFromBuffer(registersBuffer, nRegs);
     }
 
     return isOk;
@@ -332,7 +332,7 @@ Client::readHoldingRegisters(uint16_t regStart, uint16_t regQty, QVector<uint16_
 bool
 Client::readInputRegister(uint16_t regNo, uint16_t& value)
 {
-    QVector<quint16> data(1);
+    QVector<uint16_t> data(1);
     bool result = false;
 
     result = readInputRegisters(regNo, 1, data);
@@ -344,7 +344,7 @@ Client::readInputRegister(uint16_t regNo, uint16_t& value)
 //-----------------------------------------------------------------------------
 
 bool
-Client::readInputRegisters(uint16_t regStart, uint16_t regQty, QVector<quint16>& values)
+Client::readInputRegisters(uint16_t regStart, uint16_t nRegs, QVector<uint16_t>& values)
 {
     Device::ProtocolDataUnit requestPDU;
     int requestPDUSize = 0;
@@ -356,18 +356,18 @@ Client::readInputRegisters(uint16_t regStart, uint16_t regQty, QVector<quint16>&
     requestPDU.data[0] = hi(regStart);
     requestPDU.data[1] = low(regStart);
 
-    if (regQty > MAX_REGISTERS_FOR_READ)
+    if (nRegs > MAX_REGISTERS_FOR_READ)
     {
         emit infoMessage(tr("Maxixmum registers quantity (%1 items) for reading exceeded.\n"
                             "Only %1 items will be readed!").arg(MAX_REGISTERS_FOR_READ));
 
-        regQty = MAX_REGISTERS_FOR_READ;
+        nRegs = MAX_REGISTERS_FOR_READ;
     }
 
     // Quantity of registers
     //
-    requestPDU.data[2] = hi(regQty);
-    requestPDU.data[3] = low(regQty);
+    requestPDU.data[2] = hi(nRegs);
+    requestPDU.data[3] = low(nRegs);
 
     requestPDUSize = 5;
 
@@ -387,7 +387,7 @@ Client::readInputRegisters(uint16_t regStart, uint16_t regQty, QVector<quint16>&
 
         // Process buffer and read registers values from it
         //
-        values = Device::getRegistersFromBuffer(registersBuffer, regQty);
+        values = Device::getRegistersFromBuffer(registersBuffer, nRegs);
     }
 
     return isOk;
@@ -455,7 +455,7 @@ Client::userDefinedFunction(uint8_t function, const QVector<uint8_t>& data, QVec
 
     pdu.functionCode = function;
 
-    for (quint16 i = 0; (i < data.size()) && (i < PDU_DATA_MAX_SIZE); ++i)
+    for (int16_t i = 0; (i < data.size()) && (i < PDU_DATA_MAX_SIZE); ++i)
     {
         pdu.data[i] = data[i];
     }
@@ -495,7 +495,7 @@ Client::userDefinedFunction(uint8_t function, uint8_t subFunction, const QVector
     pdu.functionCode = function;
     pdu.data[0] = subFunction;
 
-    for (quint16 i = 0; (i < data.size()) && (i < (PDU_DATA_MAX_SIZE - 1)); ++i)
+    for (int16_t i = 0; (i < data.size()) && (i < (PDU_DATA_MAX_SIZE - 1)); ++i)
     {
         pdu.data[i + 1] = data[i];
     }

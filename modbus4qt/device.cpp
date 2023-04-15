@@ -45,9 +45,9 @@ Device::Device()
 //-----------------------------------------------------------------------------
 
 QVector<bool>
-Device::getCoilsFromBuffer(const QByteArray& buffer, uint16_t regQty)
+Device::getCoilsFromBuffer(const QByteArray& buffer, uint16_t nCoils)
 {
-    QVector<bool> coils(regQty);
+    QVector<bool> coils(nCoils);
     coils.fill(false);
 
     /*
@@ -71,7 +71,7 @@ Device::getCoilsFromBuffer(const QByteArray& buffer, uint16_t regQty)
         {
             int coilNum = i * 8 + j;
 
-            if (coilNum == regQty)
+            if (coilNum == nCoils)
             {
                 breakFlag = true;
 
@@ -130,16 +130,16 @@ Device::getPduFromAdu_(const QByteArray &adu)
 //-----------------------------------------------------------------------------
 
 QVector<uint16_t>
-Device::getRegistersFromBuffer(const QByteArray& buffer, uint16_t regQty)
+Device::getRegistersFromBuffer(const QByteArray& buffer, uint16_t nRegs)
 {
-    QVector<uint16_t> regValues(regQty);
+    QVector<uint16_t> regValues(nRegs);
     regValues.fill(0);
 
     const char* charBuffer = buffer.constData();
 
     const uint16_t* ptr = (const quint16*)charBuffer;
 
-    for (uint16_t i = 0; i < regQty; ++i)
+    for (uint16_t i = 0; i < nRegs; ++i)
     {
         regValues[i] = net2host(*ptr);
         ++ptr;

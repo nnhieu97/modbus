@@ -291,17 +291,17 @@ class Device
         //!
         //! \brief Process coils data readed from server and return values of coils as array
         //! \param buffer - data recieved from server
-        //! \param regQty - quintity of coils expected
+        //! \param nCoils - quintity of coils expected
         //! \return Values of coils as array
         //!
-        static QVector<bool> getCoilsFromBuffer(const QByteArray& buffer, uint16_t regQty);
+        static QVector<bool> getCoilsFromBuffer(const QByteArray& buffer, uint16_t nCoils);
 
         //!
         //! \brief Process application data unit revieved from server and return protocol data unit
         //! \param adu - application data unit readed revieved from server
         //! \return Protocol data unit
         //!
-        ProtocolDataUnit getPduFromAdu_(const QByteArray &adu);
+        ProtocolDataUnit getPduFromAdu_(const QByteArray& adu);
 
         //!
         //! \brief Process register data readed from server and return readed values as array
@@ -309,7 +309,7 @@ class Device
         //! \param regQty - quantity of coils expected
         //! \return Array of register values
         //!
-        static QVector<uint16_t> getRegistersFromBuffer(const QByteArray& buffer, uint16_t regQty);
+        static QVector<uint16_t> getRegistersFromBuffer(const QByteArray& buffer, uint16_t nRegs);
 
         //!
         //! \brief Return last error message and clear it.

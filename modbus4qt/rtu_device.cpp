@@ -77,6 +77,7 @@ RTUDevice::RTUDevice(const QString& portName,
                      const QSerialPort::DataBits& dataBits,
                      const QSerialPort::StopBits& stopBits,
                      const QSerialPort::Parity& parity) :
+    Device(),
     portName_(portName),
     baudRate_(baudRate),
     dataBits_(dataBits),
@@ -143,7 +144,7 @@ RTUDevice::crc16(const QByteArray& buf)
     // The code of this function was taken from libmodbus
 
     uint16_t buffer_length = buf.size();
-    uint8_t* buffer = (quint8*)buf.constData();
+    uint8_t* buffer = (uint8_t*)buf.constData();
 
     uint8_t crc_hi = 0xFF; /* high CRC byte initialized */
     uint8_t crc_lo = 0xFF; /* low CRC byte initialized */
@@ -208,7 +209,7 @@ RTUDevice::extractPDU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& 
 
     adu.crc = aduCRC.word;
 
-    quint16 recievedCRC = net2host(adu.crc);
+    uint16_t recievedCRC = net2host(adu.crc);
 
     qDebug() << QString("recievied crc: %1").arg(recievedCRC, 4, 16);
 
@@ -216,7 +217,7 @@ RTUDevice::extractPDU(const QByteArray& buf, ProtocolDataUnit& pdu, ErrorCodes& 
     // At first we should delete last 2 bytes, which is the CRC
     //
     tempBuf.resize(tempBuf.size() - 2);
-    quint16 calculatedCRC = crc16(tempBuf);
+    uint16_t calculatedCRC = crc16(tempBuf);
 
     qDebug() << QString("calculated crc: %1").arg(calculatedCRC, 4, 16);
 
@@ -321,10 +322,10 @@ RTUDevice::prepareADU_(const ProtocolDataUnit &pdu, int pduSize)
 
     result[0] = unitID_;
 
-    result.insert(1, (char*)&pdu, pduSize);
+    result.insert(1, (const char*)&pdu, pduSize);
 
-    quint16 crc = host2net(crc16(result));
-    result.append((char*)&crc, 2);
+    uint16_t crc = host2net(crc16(result));
+    result.append((const char*)&crc, 2);
 
     qDebug() << "ADU: " << result.toHex();
     qDebug() << "ADU size: " << result.size();
