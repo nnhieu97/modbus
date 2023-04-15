@@ -119,9 +119,10 @@ MainWindow::addCoils()
 
     if (addCellsDialog.exec() == QDialog::Accepted)
     {
-        int startAddress = addCellsDialog.startAddress();
+        const int startAddress = addCellsDialog.startAddress();
+        const int cellsQuantity = addCellsDialog.cellsQuantity();
 
-        for (int i = 0; i < addCellsDialog.cellsQuantity(); ++i)
+        for (int i = 0; i < cellsQuantity; ++i)
         {
             if (!serverInternalData_->coils()->contains(startAddress + i))
             {
