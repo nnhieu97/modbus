@@ -101,10 +101,12 @@ void
 MainWindow::about()
 {
     QMessageBox msgBox;
+
     msgBox.setWindowTitle(tr("About"));
     msgBox.setText(ApplicationName);
     msgBox.setInformativeText(QString("Copyright \nhttp://www.") + OrganizationDomain);
     msgBox.setStandardButtons(QMessageBox::Ok);
+
     msgBox.exec();
 }
 
@@ -117,9 +119,14 @@ MainWindow::addCoils()
 
     if (addCellsDialog.exec() == QDialog::Accepted)
     {
+        int startAddress = addCellsDialog.startAddress();
+
         for (int i = 0; i < addCellsDialog.cellsQuantity(); ++i)
         {
-            coilsTableModel_->insertRow(i);
+            if (!serverInternalData_->coils()->contains(startAddress + i))
+            {
+                coilsTableModel_->insertRow(startAddress + i);
+            }
         }
     }
 }

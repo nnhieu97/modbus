@@ -10,19 +10,21 @@ class CoilsTableModel : public QAbstractTableModel
     public:
         explicit CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent = nullptr);
 
-        virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+        virtual bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
-        int columnCount(const QModelIndex&) const override;
+        virtual int columnCount(const QModelIndex&) const override;
 
-        QVariant data(const QModelIndex& index, int role) const override;
+        virtual QVariant data(const QModelIndex& index, int role) const override;
 
-        QVariant headerData(int section, Qt::Orientation, int role) const override;
+        virtual QVariant headerData(int section, Qt::Orientation, int role) const override;
 
-        Qt::ItemFlags flags(const QModelIndex& index) const override;
+        virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-        int rowCount(const QModelIndex& parent) const override;
+        virtual bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
-        bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+        virtual int rowCount(const QModelIndex& parent) const override;
+
+        virtual bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     protected:
 
