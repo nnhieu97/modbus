@@ -592,7 +592,7 @@ Client::writeCoils(uint16_t regStart, const QVector<bool>& values)
 
     // Values
     //
-    Device::putCoilsIntoBuffer(values, requestPDU.data + 5);
+    Device::putCoilsIntoBuffer(values);
 
     // PDU size: 6 bytes + bytes needed for values to write
     //

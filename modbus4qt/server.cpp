@@ -287,12 +287,12 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
             {
                 coilsVec.append(baseCoils[i]);
             }
-            int size = coilsVec.size() / 8;
-            if (size != 0) size += 1;
-            else{;}
-            uint8_t* buffer = new uint8_t[size];
-            modbus4qt::Device::putCoilsIntoBuffer(coilsVec, buffer);
-            delete [] buffer;
+//            int size = coilsVec.size() / 8;
+//            if (size != 0) size += 1;
+//            else{;}
+//            uint8_t* buffer = new uint8_t[size];
+            const QByteArray buffer = Device::putCoilsIntoBuffer(coilsVec);
+            response.append(buffer);
         }
         break;
         case FNC::READ_DESCRETE_INPUTS:
@@ -304,12 +304,9 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
                 {
                     coilsVec.append(baseDescreteInputs[i]);
                 }
-                int size = coilsVec.size() / 8;
-                if (size != 0) size += 1;
-                else{;}
-                uint8_t* buffer = new uint8_t[size];
-                modbus4qt::Device::putCoilsIntoBuffer(coilsVec, buffer);
-                delete [] buffer;
+                QByteArray buffer = Device::putCoilsIntoBuffer(coilsVec);
+                response.append(buffer);
+
             }
         break;
 

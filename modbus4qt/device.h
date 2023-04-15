@@ -322,7 +322,7 @@ class Device
         //! \param buffer - buffer with coils
         //! \param data - values to put into buffer
         //!
-        static void putCoilsIntoBuffer(const QVector<bool>& data, uint8_t* buffer);
+        static QByteArray putCoilsIntoBuffer(const QVector<bool>& data);
 
         //!
         //! \brief Puts registers array into data buffer suitable for pdu
