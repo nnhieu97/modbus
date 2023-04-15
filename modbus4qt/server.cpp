@@ -254,7 +254,6 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
 
     // regs
     //
-    const uint8_t =
     response.append(host2net(qty));
     switch (requestPDU.functionCode)
     {
