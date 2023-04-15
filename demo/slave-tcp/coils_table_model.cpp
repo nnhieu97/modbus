@@ -13,7 +13,7 @@ CoilsTableModel::CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent
 int
 CoilsTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 2;
+    return 3;
 };
 
 //------------------------------------------------------------------------------
@@ -26,31 +26,47 @@ CoilsTableModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
+    if (index.row() >= coilsData_->size())
+    {
+        return QVariant();
+    }
+
     switch (role)
     {
         case Qt::TextAlignmentRole :
         {
-            return int(Qt::AlignRight | Qt::AlignVCenter);
+            return int(Qt::AlignCenter | Qt::AlignVCenter);
         }
         break;
 
         case Qt::DisplayRole :
         {
-            QMap<quint16, bool>::const_iterator iMap = coilsData_->constBegin();
+//            int i = 0;
 
-            for (int i = 0; i < index.row() && iMap != coilsData_->constEnd(); ++i, ++iMap)
-            {
+//            for (QMap<quint16, bool>::const_iterator iMap = coilsData_->constBegin(); iMap != coilsData_->constEnd(); ++iMap)
+//            {
+//                if (i != index.row())
+//                {
+//                    ++i;
+//                    continue;
+//                }
+
                 switch (index.column())
                 {
                     case 0 :
-                        return iMap.key();
+                        return index.row();
                     break;
 
                     case 1 :
-                        return iMap.value();
+                        return (coilsData_->begin() + index.row()).key();
+                    break;
+
+                    case 2 :
+                        return (coilsData_->begin() + index.row()).value();
                     break;
                 }
-            }
+//                ++i;
+//            }
         }
         break;
         case Qt::EditRole :
@@ -75,9 +91,12 @@ CoilsTableModel::headerData(int section, Qt::Orientation orientation, int role) 
             switch (section)
             {
                 case 0 :
-                    return QVariant(tr("Address"));
+                    return QVariant(tr("#"));
                 break;
                 case 1 :
+                    return QVariant(tr("Address"));
+                break;
+                case 2 :
                     return QVariant(tr("Value"));
                 break;
             }
@@ -128,7 +147,7 @@ CoilsTableModel::insertRows(int position, int rows, const QModelIndex& /*parent*
 
     for (int i = position; i < position + rows; ++i)
     {
-        coilsData_->insert(i + position, false);
+        coilsData_->insert(i + position - 1, false);
     }
 
     endInsertRows();
@@ -138,7 +157,8 @@ CoilsTableModel::insertRows(int position, int rows, const QModelIndex& /*parent*
 
 //------------------------------------------------------------------------------
 
-int CoilsTableModel::rowCount(const QModelIndex& /*parent*/) const
+int
+CoilsTableModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return coilsData_->count();
 }

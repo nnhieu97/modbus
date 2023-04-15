@@ -93,7 +93,9 @@ class ServerInternalData : public QObject
         //!
         void addInputRegisters(quint16 startIndex, quint16 endIndex);
 
-        const QMap<quint16, bool>& coils();
+        QMap<quint16, bool>* coils();
+
+        const QMap<quint16, bool>& constCoils() const;
 
         const QMap<quint16, bool>& descreteInputs() const;
 

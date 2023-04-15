@@ -124,9 +124,9 @@ MainWindow::addCoils()
 
         for (int i = 0; i < cellsQuantity; ++i)
         {
-            if (!serverInternalData_->coils()->contains(startAddress + i))
+            if (!serverInternalData_->constCoils().contains(startAddress + i))
             {
-                coilsTableModel_->insertRow(startAddress + i);
+                coilsTableModel_->insertRow(serverInternalData_->constCoils().count());
             }
         }
     }
