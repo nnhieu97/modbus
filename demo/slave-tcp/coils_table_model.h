@@ -4,11 +4,15 @@
 #include <QAbstractTableModel>
 #include <QMap>
 
+#include "modbus4qt/server_internal_data.h"
+
 class CoilsTableModel : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        explicit CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent = nullptr);
+        explicit CoilsTableModel(modbus4qt::ServerInternalData* serverInternalData, QObject *parent = nullptr);
+
+        void addCoil(quint16 address);
 
         bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
@@ -26,9 +30,16 @@ class CoilsTableModel : public QAbstractTableModel
 
         bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
+    public slots:
+
+        void beforeCoilsAdded(quint16);
+
+        void onCoilsAdded(quint16);
+
     protected:
 
-        QMap<quint16, bool>* coilsData_;
+        modbus4qt::ServerInternalData* serverData_;
+
 };
 
 #endif // COILSTABLEMODEL_H

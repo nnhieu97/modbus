@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Create table models for server data
     //
-    coilsTableModel_ = new CoilsTableModel(serverInternalData_->coils());
+    coilsTableModel_ = new CoilsTableModel(serverInternalData_);
 
     // Create layout for coils & registers
     //
@@ -122,12 +122,10 @@ MainWindow::addCoils()
         const int startAddress = addCellsDialog.startAddress();
         const int cellsQuantity = addCellsDialog.cellsQuantity();
 
-        for (int i = 0; i < cellsQuantity; ++i)
+        for (int i = startAddress; i < startAddress + cellsQuantity; ++i)
         {
-            if (!serverInternalData_->constCoils().contains(startAddress + i))
-            {
-                coilsTableModel_->insertRow(serverInternalData_->constCoils().count());
-            }
+            coilsTableModel_->addCoil(i);
+            //serverInternalData_->addCoil(i);
         }
     }
 }

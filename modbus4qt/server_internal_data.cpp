@@ -18,7 +18,10 @@ ServerInternalData::addCoil(quint16 index)
         return;
     }
 
+    emit beforeCoilAdded(index);
+
     coils_[index] = false;
+
     emit coilAdded(index);
 }
 
@@ -108,7 +111,7 @@ ServerInternalData::addInputRegisters(quint16 startIndex, quint16 endIndex)
 
 //-----------------------------------------------------------------------------
 
-QMap<quint16, bool>*
+Coils*
 modbus4qt::ServerInternalData::coils()
 {
     return &coils_;
@@ -116,15 +119,14 @@ modbus4qt::ServerInternalData::coils()
 
 //-----------------------------------------------------------------------------
 
-const QMap<quint16, bool>&
-ServerInternalData::constCoils() const
+const Coils& ServerInternalData::constCoils() const
 {
     return coils_;
 }
 
 //-----------------------------------------------------------------------------
 
-const QMap<quint16, bool>&
+const Coils&
 ServerInternalData::descreteInputs() const
 {
     return descreteInputs_;
