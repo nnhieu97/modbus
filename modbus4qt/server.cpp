@@ -108,7 +108,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
             case FNC::READ_COILS:
             case FNC::WRITE_SINGLE_COIL:
             case FNC::WRITE_MULTIPLE_COILS:
-                if (internalData_->coils().isEmpty())
+                if (internalData_->coils()->isEmpty())
                 {
                     response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
                     return sendDataToClient_(response);
@@ -154,7 +154,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
     {
         case FNC::READ_COILS:
         {
-            const QMap<quint16, bool> baseCoils = internalData_->coils();
+            const QMap<quint16, bool> baseCoils = internalData_->constCoils();
             //first case
              if(!(baseCoils.contains(startAddress)))
              {
@@ -280,8 +280,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
 
         case FNC::READ_COILS:
         {
-            response.append(host2net(qty));
-            const QMap<quint16, bool> baseCoils = internalData_->coils();
+            const QMap<quint16, bool> baseCoils = internalData_->constCoils();
             QVector<bool> coilsVec;
             for (uint16_t i = startAddress; i < startAddress + qty; ++i)
             {

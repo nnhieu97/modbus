@@ -7,6 +7,8 @@
 
 namespace modbus4qt {
 
+typedef  QMap<quint16, bool> Coils;
+
 //!
 //! \brief The ServerInternalData class is a data storage for modbus server object.
 //!
@@ -93,9 +95,11 @@ class ServerInternalData : public QObject
         //!
         void addInputRegisters(quint16 startIndex, quint16 endIndex);
 
-        const QMap<quint16, bool>& coils();
+        Coils* coils();
 
-        const QMap<quint16, bool>& descreteInputs() const;
+        const Coils& constCoils() const;
+
+        const Coils& descreteInputs() const;
 
         const QMap<quint16, quint16>& holdingRegisters() const;
 
@@ -103,18 +107,20 @@ class ServerInternalData : public QObject
 
     signals:
 
+        void beforeCoilAdded(quint16 coilAddress);
+
         void coilAdded(quint16 coilAddress);
 
     protected:
 
         //! \brief Values of coils in server memory
         //!
-        QMap<quint16, bool> coils_;
+        Coils coils_;
 
         //!
         //! \brief Values of descrete inputs in server memory
         //!
-        QMap<quint16, bool> descreteInputs_;
+        Coils descreteInputs_;
 
         //!
         //! \brief Values of holding registers in server memory

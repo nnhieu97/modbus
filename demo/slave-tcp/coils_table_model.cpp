@@ -1,11 +1,51 @@
+#include <QDebug>
+
 #include "coils_table_model.h"
 
 //------------------------------------------------------------------------------
 
-CoilsTableModel::CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent)
+CoilsTableModel::CoilsTableModel(modbus4qt::ServerInternalData* serverInternalData, QObject *parent)
     : QAbstractTableModel{parent},
-      coilsData_(coilsData)
+      serverData_{serverInternalData}
 {
+    connect(serverData_, SIGNAL(coilAdded(quint16)), this, SLOT(onCoilsAdded(quint16)));
+}
+
+//------------------------------------------------------------------------------
+
+void
+CoilsTableModel::addCoil(quint16 address)
+{
+    if (!serverData_->coils()->contains(address))
+    {
+        const auto keys = serverData_->coils()->keys();
+
+        int i = 0;
+
+        for (auto key : keys)
+        {
+            i++;
+
+            if (address < key)
+            {
+                continue;
+            }
+            else
+            {
+                i--;
+                break;
+            }
+        }
+
+        beginInsertRows(QModelIndex(), i, i);
+        serverData_->addCoil(address);
+        endInsertRows();
+    }
+    else
+    {
+        // warn address skipped
+        qDebug() << "skipped " << address;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -13,7 +53,7 @@ CoilsTableModel::CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent
 int
 CoilsTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 2;
+    return 3;
 };
 
 //------------------------------------------------------------------------------
@@ -23,6 +63,13 @@ CoilsTableModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
     {
+        qDebug() << "idx is invalid";
+        return QVariant();
+    }
+
+    if (index.row() >= serverData_->coils()->size())
+    {
+        qDebug() << "idx > size";
         return QVariant();
     }
 
@@ -30,27 +77,26 @@ CoilsTableModel::data(const QModelIndex& index, int role) const
     {
         case Qt::TextAlignmentRole :
         {
-            return int(Qt::AlignRight | Qt::AlignVCenter);
+            return int(Qt::AlignCenter | Qt::AlignVCenter);
         }
         break;
 
         case Qt::DisplayRole :
         {
-            QMap<quint16, bool>::const_iterator iMap = coilsData_->constBegin();
-
-            for (int i = 0; i < index.row() && iMap != coilsData_->constEnd(); ++i, ++iMap)
-            {
                 switch (index.column())
                 {
                     case 0 :
-                        return iMap.key();
+                        return index.row();
                     break;
 
                     case 1 :
-                        return iMap.value();
+                        return (serverData_->coils()->begin() + index.row()).key();
+                    break;
+
+                    case 2 :
+                        return (serverData_->coils()->begin() + index.row()).value();
                     break;
                 }
-            }
         }
         break;
         case Qt::EditRole :
@@ -75,9 +121,12 @@ CoilsTableModel::headerData(int section, Qt::Orientation orientation, int role) 
             switch (section)
             {
                 case 0 :
-                    return QVariant(tr("Address"));
+                    return QVariant(tr("#"));
                 break;
                 case 1 :
+                    return QVariant(tr("Address"));
+                break;
+                case 2 :
                     return QVariant(tr("Value"));
                 break;
             }
@@ -107,14 +156,14 @@ CoilsTableModel::flags(const QModelIndex& index) const
 bool
 CoilsTableModel::removeRows(int position, int rows, const QModelIndex& /*parent*/)
 {
-    beginRemoveRows(QModelIndex(), position, position + rows - 1);
+//    beginRemoveRows(QModelIndex(), position, position + rows - 1);
 
-    for (int row = 0; row < rows; ++row)
-    {
-//        stringList.removeAt(position);
-    }
+//    for (int row = 0; row < rows; ++row)
+//    {
+////        stringList.removeAt(position);
+//    }
 
-    endRemoveRows();
+//    endRemoveRows();
 
     return true;
 }
@@ -124,23 +173,24 @@ CoilsTableModel::removeRows(int position, int rows, const QModelIndex& /*parent*
 bool
 CoilsTableModel::insertRows(int position, int rows, const QModelIndex& /*parent*/)
 {
-    beginInsertRows(QModelIndex(), position, position + rows - 1);
+//    beginInsertRows(QModelIndex(), position, position + rows - 1);
 
-    for (int i = position; i < position + rows; ++i)
-    {
-        coilsData_->insert(i + position, false);
-    }
+//    for (int i = position; i < position + rows; ++i)
+//    {
+//        //serverData_->addCoil();
+//    }
 
-    endInsertRows();
+//    endInsertRows();
 
     return true;
 }
 
 //------------------------------------------------------------------------------
 
-int CoilsTableModel::rowCount(const QModelIndex& /*parent*/) const
+int
+CoilsTableModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    return coilsData_->count();
+    return serverData_->coils()->count();
 }
 
 //------------------------------------------------------------------------------
@@ -149,6 +199,23 @@ bool
 CoilsTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
 
+}
+
+//------------------------------------------------------------------------------
+
+void
+CoilsTableModel::beforeCoilsAdded(quint16)
+{
+}
+
+//------------------------------------------------------------------------------
+
+void
+CoilsTableModel::onCoilsAdded(quint16)
+{
+    emit dataChanged(QModelIndex(), QModelIndex());
+//    beginResetModel();
+//    endResetModel();
 }
 
 //------------------------------------------------------------------------------

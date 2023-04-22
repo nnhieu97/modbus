@@ -1,5 +1,3 @@
-slave-tcp.pro
-
 #*****************************************************************************
 # modbus4qt Library
 # Author: Leonid Kolesnik, l.kolesnik@m-i.ru

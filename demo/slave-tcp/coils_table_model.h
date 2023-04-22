@@ -4,31 +4,42 @@
 #include <QAbstractTableModel>
 #include <QMap>
 
+#include "modbus4qt/server_internal_data.h"
+
 class CoilsTableModel : public QAbstractTableModel
 {
         Q_OBJECT
     public:
-        explicit CoilsTableModel(QMap<quint16, bool>* coilsData, QObject *parent = nullptr);
+        explicit CoilsTableModel(modbus4qt::ServerInternalData* serverInternalData, QObject *parent = nullptr);
 
-        virtual bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
+        void addCoil(quint16 address);
 
-        virtual int columnCount(const QModelIndex&) const override;
+        bool insertRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
-        virtual QVariant data(const QModelIndex& index, int role) const override;
+        int columnCount(const QModelIndex&) const override;
 
-        virtual QVariant headerData(int section, Qt::Orientation, int role) const override;
+        QVariant data(const QModelIndex& index, int role) const override;
 
-        virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
+        QVariant headerData(int section, Qt::Orientation, int role) const override;
 
-        virtual bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
+        Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-        virtual int rowCount(const QModelIndex& parent) const override;
+        bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
-        virtual bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+        int rowCount(const QModelIndex& parent) const override;
+
+        bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+    public slots:
+
+        void beforeCoilsAdded(quint16);
+
+        void onCoilsAdded(quint16);
 
     protected:
 
-        QMap<quint16, bool>* coilsData_;
+        modbus4qt::ServerInternalData* serverData_;
+
 };
 
 #endif // COILSTABLEMODEL_H
