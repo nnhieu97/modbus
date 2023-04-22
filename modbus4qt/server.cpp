@@ -254,11 +254,11 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
 
     // regs
     //
-    response.append(host2net(qty));
     switch (requestPDU.functionCode)
     {
         case FNC::READ_HOLDING_REGISTERS:
         {
+            response.append(host2net(qty * 2));
            const QMap<quint16, quint16> baseHoldingRegisters = internalData_->holdingRegisters();
            for ( uint16_t i = startAddress; i < startAddress + qty; ++i)
            {
@@ -269,6 +269,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
 
         case FNC::READ_INPUT_REGISTERS:
         {
+            response.append(host2net(qty * 2));
             const QMap<quint16, quint16> baseInputRegisters = internalData_->inputRegisters();
             for ( uint16_t i = startAddress; i < startAddress + qty; ++i)
             {
@@ -285,22 +286,26 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
             {
                 coilsVec.append(baseCoils[i]);
             }
-            const int size = coilsVec.size();
-            uint8_t* buffer = new uint8_t[size];
-            modbus4qt::Device::putCoilsIntoBuffer(coilsVec, buffer);
+//            int size = coilsVec.size() / 8;
+//            if (size != 0) size += 1;
+//            else{;}
+//            uint8_t* buffer = new uint8_t[size];
+            const QByteArray buffer = Device::putCoilsIntoBuffer(coilsVec);
+            response.append(buffer);
         }
         break;
         case FNC::READ_DESCRETE_INPUTS:
             {
+                response.append(host2net(qty));
                 const QMap<quint16, bool> baseDescreteInputs = internalData_->descreteInputs();
                 QVector<bool> coilsVec;
                 for (uint16_t i = startAddress; i < startAddress + qty; ++i)
                 {
                     coilsVec.append(baseDescreteInputs[i]);
                 }
-                const int size = coilsVec.size();
-                uint8_t* buffer = new uint8_t[size];
-                modbus4qt::Device::putCoilsIntoBuffer(coilsVec, buffer);
+                QByteArray buffer = Device::putCoilsIntoBuffer(coilsVec);
+                response.append(buffer);
+
             }
         break;
 

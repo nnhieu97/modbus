@@ -162,38 +162,43 @@ Device::lastErrorMessage()
 
 //-----------------------------------------------------------------------------
 
-void
-Device::putCoilsIntoBuffer(const QVector<bool>& data, uint8_t* buffer)
+QByteArray
+Device::putCoilsIntoBuffer(const QVector<bool>& data)
 {
     uint8_t bitMask = 1;
-    uint8_t* ptr = buffer;
 
-    int regQty = data.size();
+    int regQty = data.size() / 8;
+    if (regQty != 0)
+    {
+        regQty += 1;
+    }
+
+    uint8_t* buffer = new uint8_t[regQty];
 
     // Clear the buffer
     //
-    for (int i = 0; i < (regQty + 7) / 8; ++i)
+    for (unsigned long i = 0; i < sizeof(buffer); ++i)
     {
-        ptr[i] = 0x00;
+        buffer[i] = 0x00;
     }
 
     // And fill values
     //
-    for(int i = 0; i < regQty; ++i)
+    for(int i = 0; i < data.size(); ++i)
     {
-        if (data[i] != false)
+        if (data[i])
         {
-            *ptr |= bitMask;
+            *buffer |= bitMask;
         }
         else
         {
-            *ptr &= ~bitMask;
+            *buffer &= ~bitMask;
         }
 
         if (bitMask == 0x80)
         {
             bitMask = 1;
-            ++ptr;
+            ++buffer;
         }
         else
         {
@@ -205,6 +210,7 @@ Device::putCoilsIntoBuffer(const QVector<bool>& data, uint8_t* buffer)
             break;
         }
     }
+    return QByteArray((const char*) buffer, sizeof(buffer));
 }
 
 //-----------------------------------------------------------------------------
