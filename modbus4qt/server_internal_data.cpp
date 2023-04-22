@@ -117,6 +117,26 @@ modbus4qt::ServerInternalData::coils()
     return &coils_;
 }
 
+Coils*
+modbus4qt::ServerInternalData::descreteInputs()
+{
+    return &descreteInputs_;
+}
+
+QMap<quint16, quint16>*
+modbus4qt::ServerInternalData::holdingRegisters()
+{
+    return &holdingRegisters_;
+}
+
+QMap<quint16, quint16>*
+modbus4qt::ServerInternalData::inputRegisters()
+{
+    return &inputRegisters_;
+}
+
+
+
 //-----------------------------------------------------------------------------
 
 const Coils& ServerInternalData::constCoils() const
@@ -127,21 +147,23 @@ const Coils& ServerInternalData::constCoils() const
 //-----------------------------------------------------------------------------
 
 const Coils&
-ServerInternalData::descreteInputs() const
+ServerInternalData::constDescreteInputs() const
 {
     return descreteInputs_;
 }
 
+
+
 //-----------------------------------------------------------------------------
 
-const QMap<quint16, quint16>& ServerInternalData::holdingRegisters() const
+const QMap<quint16, quint16>& ServerInternalData::constHoldingRegisters() const
 {
     return holdingRegisters_;
 }
 
 //-----------------------------------------------------------------------------
 
-const QMap<quint16, quint16>& ServerInternalData::inputRegisters() const
+const QMap<quint16, quint16>& ServerInternalData::constInputRegisters() const
 {
     return inputRegisters_;
 }

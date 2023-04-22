@@ -97,13 +97,19 @@ class ServerInternalData : public QObject
 
         Coils* coils();
 
+        Coils* descreteInputs();
+
+        QMap<quint16, quint16>* holdingRegisters();
+
+        QMap<quint16, quint16>* inputRegisters();
+
         const Coils& constCoils() const;
 
-        const Coils& descreteInputs() const;
+        const Coils& constDescreteInputs() const;
 
-        const QMap<quint16, quint16>& holdingRegisters() const;
+        const QMap<quint16, quint16>& constHoldingRegisters() const;
 
-        const QMap<quint16, quint16>& inputRegisters() const;
+        const QMap<quint16, quint16>& constInputRegisters() const;
 
     signals:
 
