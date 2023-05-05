@@ -55,6 +55,13 @@ class MainWindow : public QMainWindow
 
         void addCoils();
 
+        void addHoldingRegisters();
+
+        void addDiscreteInputs();
+
+        void addInputRegisters();
+
+
     private: // fields
 
         QAction* exitAction_;

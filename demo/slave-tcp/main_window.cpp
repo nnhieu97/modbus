@@ -133,6 +133,69 @@ MainWindow::addCoils()
 //-----------------------------------------------------------------------------
 
 void
+MainWindow::addDiscreteInputs()
+{
+    AddCellsDialog addCellsDialog;
+
+    if (addCellsDialog.exec() == QDialog::Accepted)
+    {
+        const int startAddress = addCellsDialog.startAddress();
+        const int cellsQuantity = addCellsDialog.cellsQuantity();
+
+        for (int i = startAddress; i < startAddress + cellsQuantity; ++i)
+        {
+            coilsTableModel_->addCoil(i);
+            //Заменить addCoils на метод класса
+            //serverInternalData_->addCoil(i);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
+MainWindow::addHoldingRegisters()
+{
+    AddCellsDialog addCellsDialog;
+
+    if (addCellsDialog.exec() == QDialog::Accepted)
+    {
+        const int startAddress = addCellsDialog.startAddress();
+        const int cellsQuantity = addCellsDialog.cellsQuantity();
+
+        for (int i = startAddress; i < startAddress + cellsQuantity; ++i)
+        {
+            coilsTableModel_->addCoil(i);
+            //Заменить addCoils на метод класса
+            //serverInternalData_->addCoil(i);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
+MainWindow::addInputRegisters()
+{
+    AddCellsDialog addCellsDialog;
+
+    if (addCellsDialog.exec() == QDialog::Accepted)
+    {
+        const int startAddress = addCellsDialog.startAddress();
+        const int cellsQuantity = addCellsDialog.cellsQuantity();
+
+        for (int i = startAddress; i < startAddress + cellsQuantity; ++i)
+        {
+            coilsTableModel_->addCoil(i);
+            //Заменить addCoils на метод класса
+            //serverInternalData_->addCoil(i);
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+void
 MainWindow::createActions_()
 {
     aboutAction_ = new QAction(tr("&About..."), this);
@@ -177,6 +240,7 @@ MainWindow::createCoilsGroupBox_()
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     QPushButton* addButton = new QPushButton();
     addButton->setText(tr("Add..."));
+
     connect(addButton, SIGNAL(clicked()), this, SLOT(addCoils()));
 
     buttonLayout->addWidget(addButton);
@@ -206,6 +270,8 @@ MainWindow::createDiscreteInputsGroupBox_()
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     QPushButton* addButton = new QPushButton();
     addButton->setText(tr("Add..."));
+    connect(addButton, SIGNAL(clicked()), this, SLOT(addDiscreteInputs()));
+
     buttonLayout->addWidget(addButton);
     buttonLayout->addStretch();
 
@@ -233,6 +299,8 @@ MainWindow::createHoldingRegistersGroupBox_()
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     QPushButton* addButton = new QPushButton();
     addButton->setText(tr("Add..."));
+    connect(addButton, SIGNAL(clicked()), this, SLOT(addHoldingRegisters()));
+
     buttonLayout->addWidget(addButton);
     buttonLayout->addStretch();
 
@@ -260,6 +328,8 @@ MainWindow::createInputRegistersGroupBox_()
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     QPushButton* addButton = new QPushButton();
     addButton->setText(tr("Add..."));
+    connect(addButton, SIGNAL(clicked()), this, SLOT(addInputRegisters()));
+
     buttonLayout->addWidget(addButton);
     buttonLayout->addStretch();
 
