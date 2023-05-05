@@ -9,6 +9,8 @@ class DescreteInputsTableModel : public ITableModel
         Q_OBJECT
     public:
 
+        DescreteInputsTableModel(modbus4qt::ServerInternalData* serverInternalData) : ITableModel(serverInternalData){}
+
         void addCoil(quint16 address);
 
         QVariant data(const QModelIndex& index, int role) const override;

@@ -4,10 +4,12 @@
 #include <QMap>
 
 
-class InputRegistersTabelModel : ITableModel
+class HoldingRegistersTableModel : ITableModel
 {
     Q_OBJECT
 public:
+
+    HoldingRegistersTableModel(modbus4qt::ServerInternalData* serverInternalData) : ITableModel(serverInternalData){}
 
     void addRegisters(quint16 address);
 

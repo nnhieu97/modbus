@@ -26,7 +26,7 @@ InputRegistersTabelModel::addRegisters(quint16 address)
         }
 
         beginInsertRows(QModelIndex(), i, i);
-        serverData_->addInputRegisters(address);
+        serverData_->addInputRegister(address);
         endInsertRows();
     }
     else
@@ -107,20 +107,7 @@ InputRegistersTabelModel::setData(const QModelIndex& index, const QVariant& valu
 
 //------------------------------------------------------------------------------
 
-void
-InputRegistersTabelModel::beforeCoilsAdded(quint16)
-{
-}
 
-//------------------------------------------------------------------------------
-
-void
-InputRegistersTabelModel::onCoilsAdded(quint16)
-{
-    emit dataChanged(QModelIndex(), QModelIndex());
-//    beginResetModel();
-//    endResetModel();
-}
 
 //------------------------------------------------------------------------------
 // EOF

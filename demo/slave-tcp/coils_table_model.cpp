@@ -92,11 +92,6 @@ CoilsTableModel::data(const QModelIndex& index, int role) const
 }
 
 
-bool
-CoilsTableModel::removeRows(int position, int rows, const QModelIndex& /*parent*/)
-{
-    return true;
-}
 
 
 int
@@ -115,20 +110,7 @@ CoilsTableModel::setData(const QModelIndex& index, const QVariant& value, int ro
 
 //------------------------------------------------------------------------------
 
-void
-CoilsTableModel::beforeCoilsAdded(quint16)
-{
-}
 
-//------------------------------------------------------------------------------
-
-void
-CoilsTableModel::onCoilsAdded(quint16)
-{
-    emit dataChanged(QModelIndex(), QModelIndex());
-//    beginResetModel();
-//    endResetModel();
-}
 
 //------------------------------------------------------------------------------
 // EOF

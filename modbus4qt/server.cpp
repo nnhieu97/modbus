@@ -115,21 +115,21 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
                 }
             break;
             case FNC::READ_DESCRETE_INPUTS:
-                if (internalData_->descreteInputs().isEmpty())
+                if (internalData_->constDescreteInputs().isEmpty())
                 {
                     response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
                     return sendDataToClient_(response);
                 }
             break;
             case FNC::READ_HOLDING_REGISTERS:
-                if (internalData_->holdingRegisters().isEmpty())
+                if (internalData_->constHoldingRegisters().isEmpty())
                 {
                     response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
                     return sendDataToClient_(response);
                 }
             break;
             case FNC::READ_INPUT_REGISTERS:
-                if (internalData_->inputRegisters().isEmpty())
+                if (internalData_->constInputRegisters().isEmpty())
                 {
                     response.append((const char*)(Device::Exceptions::ILLEGAL_FUNCTION));
                     return sendDataToClient_(response);
@@ -179,7 +179,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
 
         case FNC::READ_DESCRETE_INPUTS:
         {
-            const QMap<quint16, bool> baseDescreteInputs = internalData_->descreteInputs();
+            const QMap<quint16, bool> baseDescreteInputs = internalData_->constDescreteInputs();
             //first case
              if(!(baseDescreteInputs.contains(startAddress)))
              {
@@ -203,7 +203,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
 
         case FNC::READ_HOLDING_REGISTERS:
         {
-            const QMap<quint16, quint16> baseHoldingRegisters = internalData_->holdingRegisters();
+            const QMap<quint16, quint16> baseHoldingRegisters = internalData_->constHoldingRegisters();
             if(!(baseHoldingRegisters.contains(startAddress)))
             {
                 response.append((const char*)(Device::Exceptions::ILLEGAL_DATA_ADDRESS));
@@ -226,7 +226,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
 
         case FNC::READ_INPUT_REGISTERS:
         {
-            const QMap<quint16, quint16> baseInputRegisters = internalData_->inputRegisters();
+            const QMap<quint16, quint16> baseInputRegisters = internalData_->constInputRegisters();
             if(!(baseInputRegisters.contains(startAddress)))
             {
                 response.append((const char*)(Device::Exceptions::ILLEGAL_DATA_VALUE));
@@ -259,7 +259,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
         case FNC::READ_HOLDING_REGISTERS:
         {
             response.append(host2net(qty * 2));
-           const QMap<quint16, quint16> baseHoldingRegisters = internalData_->holdingRegisters();
+           const QMap<quint16, quint16> baseHoldingRegisters = internalData_->constHoldingRegisters();
            for ( uint16_t i = startAddress; i < startAddress + qty; ++i)
            {
                response.append(host2net(baseHoldingRegisters[i]));
@@ -270,7 +270,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
         case FNC::READ_INPUT_REGISTERS:
         {
             response.append(host2net(qty * 2));
-            const QMap<quint16, quint16> baseInputRegisters = internalData_->inputRegisters();
+            const QMap<quint16, quint16> baseInputRegisters = internalData_->constInputRegisters();
             for ( uint16_t i = startAddress; i < startAddress + qty; ++i)
             {
                 response.append(host2net(baseInputRegisters[i]));
@@ -297,7 +297,7 @@ Server::modbusServerTransaction(const Device::ProtocolDataUnit& requestPDU, int 
         case FNC::READ_DESCRETE_INPUTS:
             {
                 response.append(host2net(qty));
-                const QMap<quint16, bool> baseDescreteInputs = internalData_->descreteInputs();
+                const QMap<quint16, bool> baseDescreteInputs = internalData_->constDescreteInputs();
                 QVector<bool> coilsVec;
                 for (uint16_t i = startAddress; i < startAddress + qty; ++i)
                 {

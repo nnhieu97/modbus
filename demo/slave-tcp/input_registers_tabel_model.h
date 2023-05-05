@@ -9,6 +9,8 @@ class InputRegistersTabelModel : ITableModel
     Q_OBJECT
 public:
 
+    InputRegistersTabelModel(modbus4qt::ServerInternalData* serverInternalData) : ITableModel(serverInternalData){}
+
     void addRegisters(quint16 address);
 
     QVariant data(const QModelIndex& index, int role) const override;

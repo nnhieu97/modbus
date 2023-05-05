@@ -9,13 +9,15 @@ class CoilsTableModel : public ITableModel
         Q_OBJECT
     public:
 
-        void addCoil(quint16 address);
+    CoilsTableModel(modbus4qt::ServerInternalData* serverInternalData) : ITableModel(serverInternalData){}
 
-        QVariant data(const QModelIndex& index, int role) const override;
+    void addCoil(quint16 address);
 
-        int rowCount(const QModelIndex& parent) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 
-        bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+    int rowCount(const QModelIndex& parent) const override;
+
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
 
 };

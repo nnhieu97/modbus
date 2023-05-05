@@ -1,7 +1,7 @@
 #include "abstract_tabel_model.h"
 
 
-ITableModel::ITableModel (modbus4qt::ServerInternalData* serverInternalData, QObject *parent = nullptr)
+ITableModel::ITableModel (modbus4qt::ServerInternalData* serverInternalData, QObject *parent)
                         : QAbstractTableModel{parent},
                         serverData_{serverInternalData}
 {
@@ -9,7 +9,7 @@ ITableModel::ITableModel (modbus4qt::ServerInternalData* serverInternalData, QOb
 }
 
 bool
-ITableModel::insertRows(int position, int rows, const QModelIndex &parent = QModelIndex())
+ITableModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
     return true;
 }
@@ -21,7 +21,7 @@ int ITableModel::columnCount(const QModelIndex& /*parent*/) const
 }
 
 QVariant
-ITableModel::headerData(int section, Qt::Orientation, int role) const
+ITableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole)
     {
@@ -58,9 +58,24 @@ ITableModel::flags(const QModelIndex& index) const
     return flags;
 }
 
-bool ITableModel::removeRows(int position, int rows, const int &parent)
+bool ITableModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
     return true;
+}
+
+void
+ITableModel::beforeCellsAdded(quint16)
+{
+}
+
+//------------------------------------------------------------------------------
+
+void
+ITableModel::onCellsAdded(quint16)
+{
+    emit dataChanged(QModelIndex(), QModelIndex());
+//    beginResetModel();
+//    endResetModel();
 }
 
 

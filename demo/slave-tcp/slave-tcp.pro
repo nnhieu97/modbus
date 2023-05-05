@@ -33,7 +33,6 @@ MOC_DIR = $${MOC_DIR}/demo/slave-tcp
 OBJECTS_DIR = $${OBJECTS_DIR}/demo/slave-tcp
 
 SOURCES += \
-    InputRegistersTableModel.cpp \
     abstract_table_model.cpp \
     add_cells_dialog.cpp \
     coils_table_model.cpp \
@@ -44,7 +43,6 @@ SOURCES += \
     main_window.cpp
 
 HEADERS  += \
-    InputRegistersTableModel.h \
     abstract_tabel_model.h \
     add_cells_dialog.h \
     coils_table_model.h \

@@ -1,10 +1,9 @@
 #include "holding_registers_model_tabel.h"
 
-#include "input_registers_tabel_model.h"
 #include <QDebug>
 
 void
-InputRegistersTabelModel::addCoil(quint16 address)
+HoldingRegistersTableModel::addRegisters(quint16 address)
 {
     if (!serverData_->inputRegisters()->contains(address))
     {
@@ -28,7 +27,7 @@ InputRegistersTabelModel::addCoil(quint16 address)
         }
 
         beginInsertRows(QModelIndex(), i, i);
-        serverData_->addInputRegisters(address);
+        serverData_->addInputRegister(address);
         endInsertRows();
     }
     else
@@ -41,7 +40,7 @@ InputRegistersTabelModel::addCoil(quint16 address)
 
 
 QVariant
-InputRegistersTabelModel::data(const QModelIndex& index, int role) const
+HoldingRegistersTableModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
     {
@@ -94,7 +93,7 @@ InputRegistersTabelModel::data(const QModelIndex& index, int role) const
 
 
 int
-InputRegistersTabelModel::rowCount(const QModelIndex& /*parent*/) const
+HoldingRegistersTableModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return serverData_->inputRegisters()->count();
 }
@@ -102,27 +101,13 @@ InputRegistersTabelModel::rowCount(const QModelIndex& /*parent*/) const
 //------------------------------------------------------------------------------
 
 bool
-InputRegistersTabelModel::setData(const QModelIndex& index, const QVariant& value, int role)
+HoldingRegistersTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
 
 }
 
 //------------------------------------------------------------------------------
 
-void
-InputRegistersTabelModel::beforeCoilsAdded(quint16)
-{
-}
-
-//------------------------------------------------------------------------------
-
-void
-InputRegistersTabelModel::onCoilsAdded(quint16)
-{
-    emit dataChanged(QModelIndex(), QModelIndex());
-//    beginResetModel();
-//    endResetModel();
-}
 
 //------------------------------------------------------------------------------
 // EOF

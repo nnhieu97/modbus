@@ -28,7 +28,7 @@ DescreteInputsTableModel::addCoil(quint16 address)
         }
 
         beginInsertRows(QModelIndex(), i, i);
-        serverData_->addDescreteInputs(address);
+        serverData_->addDescreteInput(address);
         endInsertRows();
     }
     else
@@ -92,12 +92,6 @@ DescreteInputsTableModel::data(const QModelIndex& index, int role) const
 }
 
 
-bool
-DescreteInputsTableModel::removeRows(int position, int rows, const QModelIndex& /*parent*/)
-{
-    return true;
-}
-
 
 int
 DescreteInputsTableModel::rowCount(const QModelIndex& /*parent*/) const
@@ -115,20 +109,7 @@ DescreteInputsTableModel::setData(const QModelIndex& index, const QVariant& valu
 
 //------------------------------------------------------------------------------
 
-void
-DescreteInputsTableModel::beforeCoilsAdded(quint16)
-{
-}
 
-//------------------------------------------------------------------------------
-
-void
-DescreteInputsTableModel::onCoilsAdded(quint16)
-{
-    emit dataChanged(QModelIndex(), QModelIndex());
-//    beginResetModel();
-//    endResetModel();
-}
 
 //------------------------------------------------------------------------------
 // EOF
