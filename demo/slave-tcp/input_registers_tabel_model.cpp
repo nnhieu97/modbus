@@ -1,14 +1,12 @@
-#include "coils_table_model.h"
+#include "input_registers_tabel_model.h"
 #include <QDebug>
 
-
-
 void
-CoilsTableModel::addCoil(quint16 address)
+InputRegistersTabelModel::addRegisters(quint16 address)
 {
-    if (!serverData_->coils()->contains(address))
+    if (!serverData_->inputRegisters()->contains(address))
     {
-        const auto keys = serverData_->coils()->keys();
+        const auto keys = serverData_->inputRegisters()->keys();
 
         int i = 0;
 
@@ -28,7 +26,7 @@ CoilsTableModel::addCoil(quint16 address)
         }
 
         beginInsertRows(QModelIndex(), i, i);
-        serverData_->addCoil(address);
+        serverData_->addInputRegisters(address);
         endInsertRows();
     }
     else
@@ -41,7 +39,7 @@ CoilsTableModel::addCoil(quint16 address)
 
 
 QVariant
-CoilsTableModel::data(const QModelIndex& index, int role) const
+InputRegistersTabelModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
     {
@@ -49,7 +47,7 @@ CoilsTableModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
-    if (index.row() >= serverData_->coils()->size())
+    if (index.row() >= serverData_->inputRegisters()->size())
     {
         qDebug() << "idx > size";
         return QVariant();
@@ -72,11 +70,11 @@ CoilsTableModel::data(const QModelIndex& index, int role) const
                     break;
 
                     case 1 :
-                        return (serverData_->coils()->begin() + index.row()).key();
+                        return (serverData_->inputRegisters()->begin() + index.row()).key();
                     break;
 
                     case 2 :
-                        return (serverData_->coils()->begin() + index.row()).value();
+                        return (serverData_->inputRegisters()->begin() + index.row()).value();
                     break;
                 }
         }
@@ -92,23 +90,17 @@ CoilsTableModel::data(const QModelIndex& index, int role) const
 }
 
 
-bool
-CoilsTableModel::removeRows(int position, int rows, const QModelIndex& /*parent*/)
-{
-    return true;
-}
-
 
 int
-CoilsTableModel::rowCount(const QModelIndex& /*parent*/) const
+InputRegistersTabelModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    return serverData_->coils()->count();
+    return serverData_->inputRegisters()->count();
 }
 
 //------------------------------------------------------------------------------
 
 bool
-CoilsTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
+InputRegistersTabelModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
 
 }
@@ -116,14 +108,14 @@ CoilsTableModel::setData(const QModelIndex& index, const QVariant& value, int ro
 //------------------------------------------------------------------------------
 
 void
-CoilsTableModel::beforeCoilsAdded(quint16)
+InputRegistersTabelModel::beforeCoilsAdded(quint16)
 {
 }
 
 //------------------------------------------------------------------------------
 
 void
-CoilsTableModel::onCoilsAdded(quint16)
+InputRegistersTabelModel::onCoilsAdded(quint16)
 {
     emit dataChanged(QModelIndex(), QModelIndex());
 //    beginResetModel();
@@ -132,3 +124,5 @@ CoilsTableModel::onCoilsAdded(quint16)
 
 //------------------------------------------------------------------------------
 // EOF
+
+
