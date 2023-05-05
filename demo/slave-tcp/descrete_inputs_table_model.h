@@ -4,7 +4,7 @@
 
 #include "abstract_tabel_model.h"
 
-class CoilsTableModel : public ITableModel
+class DescreteInputsTableModel : public ITableModel
 {
         Q_OBJECT
     public:
@@ -19,4 +19,3 @@ class CoilsTableModel : public ITableModel
 
 
 };
-

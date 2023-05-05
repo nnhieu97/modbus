@@ -33,14 +33,22 @@ MOC_DIR = $${MOC_DIR}/demo/slave-tcp
 OBJECTS_DIR = $${OBJECTS_DIR}/demo/slave-tcp
 
 SOURCES += \
+    abstract_table_model.cpp \
     add_cells_dialog.cpp \
     coils_table_model.cpp \
+    descrete_inputs_table_model.cpp \
+    holding_registers_model_tabel.cpp \
+    input_registers_tabel_model.cpp \
     main.cpp \
     main_window.cpp
 
 HEADERS  += \
+    abstract_tabel_model.h \
     add_cells_dialog.h \
     coils_table_model.h \
+    descrete_inputs_table_model.h \
+    holding_registers_model_tabel.h \
+    input_registers_tabel_model.h \
     main.h \
     main_window.h
 
